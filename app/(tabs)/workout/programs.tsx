@@ -11,94 +11,7 @@ import { Star, Calendar, TrendingUp, Dumbbell, Award } from 'lucide-react-native
 import { useRouter } from 'expo-router';
 import { Colors } from '@/constants/colors';
 import { useUserProfile } from '@/hooks/user-profile-store';
-
-interface Program {
-  id: string;
-  name: string;
-  description: string;
-  duration: string;
-  daysPerWeek: number;
-  difficulty: 'beginner' | 'intermediate' | 'advanced';
-  goal: string;
-  rating: number;
-  enrolled: number;
-  tags: string[];
-}
-
-const PROGRAMS: Program[] = [
-  {
-    id: 'ppl',
-    name: 'Push Pull Legs',
-    description: 'Classic 6-day split focusing on muscle growth. Separate push, pull, and leg days for optimal recovery and volume.',
-    duration: '12 weeks',
-    daysPerWeek: 6,
-    difficulty: 'intermediate',
-    goal: 'Muscle Growth',
-    rating: 4.8,
-    enrolled: 12543,
-    tags: ['Hypertrophy', 'Volume', 'Advanced'],
-  },
-  {
-    id: 'fullbody',
-    name: 'Full Body Strength',
-    description: 'Perfect for beginners. Train your entire body 3x per week with compound movements.',
-    duration: '8 weeks',
-    daysPerWeek: 3,
-    difficulty: 'beginner',
-    goal: 'Strength',
-    rating: 4.9,
-    enrolled: 28340,
-    tags: ['Beginner-Friendly', 'Strength', 'Time-Efficient'],
-  },
-  {
-    id: 'upperlower',
-    name: 'Upper Lower Split',
-    description: 'Balanced 4-day program alternating upper and lower body. Great for intermediate lifters.',
-    duration: '10 weeks',
-    daysPerWeek: 4,
-    difficulty: 'intermediate',
-    goal: 'Balanced Development',
-    rating: 4.7,
-    enrolled: 15892,
-    tags: ['Balanced', 'Progressive Overload', 'Intermediate'],
-  },
-  {
-    id: 'powerbuilding',
-    name: 'Powerbuilding Program',
-    description: 'Combine powerlifting strength work with bodybuilding hypertrophy training.',
-    duration: '12 weeks',
-    daysPerWeek: 5,
-    difficulty: 'advanced',
-    goal: 'Strength & Size',
-    rating: 4.6,
-    enrolled: 8765,
-    tags: ['Strength', 'Hypertrophy', 'Advanced'],
-  },
-  {
-    id: 'athlete',
-    name: 'Athletic Performance',
-    description: 'Build explosive power, speed, and agility with sport-specific training.',
-    duration: '8 weeks',
-    daysPerWeek: 4,
-    difficulty: 'intermediate',
-    goal: 'Athletic Performance',
-    rating: 4.5,
-    enrolled: 6234,
-    tags: ['Power', 'Speed', 'Functional'],
-  },
-  {
-    id: 'bodyweight',
-    name: 'Bodyweight Master',
-    description: 'No equipment needed. Master calisthenics and build impressive strength using only your body.',
-    duration: '10 weeks',
-    daysPerWeek: 5,
-    difficulty: 'beginner',
-    goal: 'Bodyweight Mastery',
-    rating: 4.7,
-    enrolled: 19283,
-    tags: ['No Equipment', 'Calisthenics', 'Flexibility'],
-  },
-];
+import { PREDEFINED_PROGRAMS } from '@/mocks/workout-programs';
 
 export default function ProgramsScreen() {
   const router = useRouter();
@@ -117,109 +30,18 @@ export default function ProgramsScreen() {
     }
   };
 
-  const handleEnroll = (program: Program) => {
-    const mockPlan = {
+  const handleEnroll = async (program: typeof PREDEFINED_PROGRAMS[0]) => {
+    const workoutPlan = {
       id: `program-${program.id}-${Date.now()}`,
       createdAt: new Date().toISOString(),
-      goals: [program.goal],
-      equipment: [],
-      daysPerWeek: program.daysPerWeek,
-      plan: [
-        {
-          day: 'Day 1',
-          exercises: [
-            {
-              name: 'Barbell Bench Press',
-              sets: 4,
-              reps: '8-10',
-              notes: 'Compound chest movement',
-              restPeriod: '90-120 seconds',
-              muscleGroups: ['chest', 'triceps'],
-            },
-            {
-              name: 'Incline Dumbbell Press',
-              sets: 3,
-              reps: '10-12',
-              notes: 'Upper chest focus',
-              restPeriod: '60-90 seconds',
-              muscleGroups: ['chest'],
-            },
-            {
-              name: 'Cable Flyes',
-              sets: 3,
-              reps: '12-15',
-              notes: 'Chest isolation',
-              restPeriod: '60 seconds',
-              muscleGroups: ['chest'],
-            },
-          ],
-        },
-        {
-          day: 'Day 2',
-          exercises: [
-            {
-              name: 'Barbell Back Squat',
-              sets: 4,
-              reps: '8-10',
-              notes: 'Compound leg movement',
-              restPeriod: '2-3 minutes',
-              muscleGroups: ['quads', 'glutes'],
-            },
-            {
-              name: 'Romanian Deadlift',
-              sets: 3,
-              reps: '10-12',
-              notes: 'Hamstring focus',
-              restPeriod: '90 seconds',
-              muscleGroups: ['hamstrings', 'glutes'],
-            },
-            {
-              name: 'Leg Press',
-              sets: 3,
-              reps: '12-15',
-              notes: 'Quad focus',
-              restPeriod: '60-90 seconds',
-              muscleGroups: ['quads'],
-            },
-          ],
-        },
-        {
-          day: 'Day 3',
-          exercises: [
-            {
-              name: 'Pull-Ups',
-              sets: 4,
-              reps: '8-10',
-              notes: 'Compound back movement',
-              restPeriod: '90-120 seconds',
-              muscleGroups: ['back', 'biceps'],
-            },
-            {
-              name: 'Barbell Rows',
-              sets: 4,
-              reps: '10-12',
-              notes: 'Back thickness',
-              restPeriod: '60-90 seconds',
-              muscleGroups: ['back'],
-            },
-            {
-              name: 'Face Pulls',
-              sets: 3,
-              reps: '15-20',
-              notes: 'Rear delts and upper back',
-              restPeriod: '60 seconds',
-              muscleGroups: ['shoulders', 'back'],
-            },
-          ],
-        },
-      ],
+      ...program.workoutPlan,
     };
 
-    addWorkoutPlan(mockPlan);
+    await addWorkoutPlan(workoutPlan);
     
     Alert.alert(
       'Program Enrolled!',
-      `You've successfully enrolled in ${program.name}. Check the "My Program" tab to start your workouts.`,
+      `You've successfully enrolled in ${program.name}. Check the workout tab to start your training!`,
       [
         {
           text: 'Start Training',
@@ -231,7 +53,13 @@ export default function ProgramsScreen() {
 
   return (
     <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
-      {PROGRAMS.map(program => (
+      <View style={styles.header}>
+        <Text style={styles.headerTitle}>Evidence-Based Programs</Text>
+        <Text style={styles.headerSubtitle}>
+          Choose from scientifically-backed workout routines designed for different goals and experience levels.
+        </Text>
+      </View>
+      {PREDEFINED_PROGRAMS.map(program => (
         <View key={program.id} style={styles.programCard}>
           <View style={styles.programHeader}>
             <View style={styles.programHeaderTop}>
@@ -254,7 +82,7 @@ export default function ProgramsScreen() {
                   { color: getDifficultyColor(program.difficulty) },
                 ]}
               >
-                {program.difficulty.charAt(0).toUpperCase() + program.difficulty.slice(1)}
+                {program.experienceLevel}
               </Text>
             </View>
           </View>
@@ -272,7 +100,7 @@ export default function ProgramsScreen() {
             </View>
             <View style={styles.metaItem}>
               <TrendingUp color={Colors.mediumGrey} size={16} />
-              <Text style={styles.metaText}>{program.goal}</Text>
+              <Text style={styles.metaText}>{program.primaryGoal}</Text>
             </View>
           </View>
 
@@ -309,6 +137,21 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: Colors.lightGrey,
+  },
+  header: {
+    padding: 20,
+    paddingBottom: 12,
+  },
+  headerTitle: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: Colors.darkGrey,
+    marginBottom: 8,
+  },
+  headerSubtitle: {
+    fontSize: 14,
+    color: Colors.mediumGrey,
+    lineHeight: 20,
   },
   programCard: {
     backgroundColor: Colors.white,
