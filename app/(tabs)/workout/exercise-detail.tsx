@@ -1,19 +1,23 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
   StyleSheet,
   ScrollView,
   TouchableOpacity,
+  Image,
 } from 'react-native';
 import { useLocalSearchParams } from 'expo-router';
-import { Play, CheckCircle } from 'lucide-react-native';
+import { Play, CheckCircle, Pause, Bookmark, Share2 } from 'lucide-react-native';
 import { Colors } from '@/constants/colors';
-import { EXERCISES, MUSCLE_GROUP_COLORS } from '@/mocks/exercises';
+import { EXERCISES } from '@/mocks/exercises';
+import { MuscleHeatmapView } from '@/components/MuscleHeatmapView';
 
 export default function ExerciseDetailScreen() {
   const params = useLocalSearchParams();
   const exercise = EXERCISES.find(ex => ex.id === params.id);
+  const [isAnimationPlaying, setIsAnimationPlaying] = useState(true);
+  const [isFavorite, setIsFavorite] = useState(false);
 
   if (!exercise) {
     return (
@@ -23,23 +27,55 @@ export default function ExerciseDetailScreen() {
     );
   }
 
+  const exerciseGifUrl = `https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/${exercise.id.replace(/-/g, '_')}/0.gif`;
+
   return (
     <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
-      <View 
-        style={[
-          styles.header,
-          { backgroundColor: MUSCLE_GROUP_COLORS[exercise.muscleGroup] + '20' },
-        ]}
-      >
-        <View style={styles.headerContent}>
-          <Text style={styles.title}>{exercise.name}</Text>
-          <View style={styles.headerBadges}>
-            <View style={styles.badge}>
-              <Text style={styles.badgeText}>{exercise.difficulty}</Text>
-            </View>
-            <View style={styles.badge}>
-              <Text style={styles.badgeText}>{exercise.equipment}</Text>
-            </View>
+      <View style={styles.animationContainer}>
+        <Image
+          source={{ uri: exerciseGifUrl }}
+          style={styles.exerciseAnimation}
+          resizeMode="contain"
+        />
+        <TouchableOpacity
+          style={styles.playPauseButton}
+          onPress={() => setIsAnimationPlaying(!isAnimationPlaying)}
+        >
+          {isAnimationPlaying ? (
+            <Pause color={Colors.white} size={24} fill={Colors.white} />
+          ) : (
+            <Play color={Colors.white} size={24} fill={Colors.white} />
+          )}
+        </TouchableOpacity>
+      </View>
+
+      <View style={styles.actionButtons}>
+        <TouchableOpacity style={styles.actionButton}>
+          <Share2 color={Colors.darkGrey} size={20} />
+          <Text style={styles.actionButtonText}>Share Exercise</Text>
+        </TouchableOpacity>
+        
+        <TouchableOpacity 
+          style={styles.actionButton}
+          onPress={() => setIsFavorite(!isFavorite)}
+        >
+          <Bookmark 
+            color={isFavorite ? Colors.primary : Colors.darkGrey} 
+            size={20}
+            fill={isFavorite ? Colors.primary : 'transparent'}
+          />
+          <Text style={styles.actionButtonText}>Add to Favorites</Text>
+        </TouchableOpacity>
+      </View>
+
+      <View style={styles.titleSection}>
+        <Text style={styles.title}>{exercise.name}</Text>
+        <View style={styles.headerBadges}>
+          <View style={styles.badge}>
+            <Text style={styles.badgeText}>{exercise.difficulty}</Text>
+          </View>
+          <View style={styles.badge}>
+            <Text style={styles.badgeText}>{exercise.equipment}</Text>
           </View>
         </View>
       </View>
@@ -49,43 +85,11 @@ export default function ExerciseDetailScreen() {
         <Text style={styles.description}>{exercise.description}</Text>
       </View>
 
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Targeted Muscles</Text>
-        <View style={styles.muscleChips}>
-          <View 
-            style={[
-              styles.muscleChip,
-              { backgroundColor: MUSCLE_GROUP_COLORS[exercise.muscleGroup] + '30' },
-            ]}
-          >
-            <Text 
-              style={[
-                styles.muscleChipText,
-                { color: MUSCLE_GROUP_COLORS[exercise.muscleGroup] },
-              ]}
-            >
-              {exercise.muscleGroup.charAt(0).toUpperCase() + exercise.muscleGroup.slice(1)} (Primary)
-            </Text>
-          </View>
-          {exercise.secondaryMuscles?.map(muscle => (
-            <View 
-              key={muscle}
-              style={[
-                styles.muscleChip,
-                { backgroundColor: MUSCLE_GROUP_COLORS[muscle] + '20' },
-              ]}
-            >
-              <Text 
-                style={[
-                  styles.muscleChipText,
-                  { color: MUSCLE_GROUP_COLORS[muscle] },
-                ]}
-              >
-                {muscle.charAt(0).toUpperCase() + muscle.slice(1)}
-              </Text>
-            </View>
-          ))}
-        </View>
+      <View style={styles.heatmapSection}>
+        <MuscleHeatmapView
+          primaryMuscle={exercise.muscleGroup}
+          secondaryMuscles={exercise.secondaryMuscles}
+        />
       </View>
 
       <View style={styles.section}>
@@ -142,16 +146,63 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: Colors.lightGrey,
   },
-  header: {
-    padding: 24,
+  animationContainer: {
+    backgroundColor: Colors.white,
+    height: 300,
+    position: 'relative',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
-  headerContent: {
+  exerciseAnimation: {
+    width: '100%',
+    height: '100%',
+  },
+  playPauseButton: {
+    position: 'absolute',
+    bottom: 16,
+    right: 16,
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: 'rgba(0, 0, 0, 0.7)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  actionButtons: {
+    flexDirection: 'row',
+    backgroundColor: Colors.white,
+    paddingVertical: 16,
+    paddingHorizontal: 20,
     gap: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: Colors.lightGrey,
+  },
+  actionButton: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+    borderRadius: 8,
+    backgroundColor: Colors.lightGrey,
+  },
+  actionButtonText: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: Colors.darkGrey,
+  },
+  titleSection: {
+    backgroundColor: Colors.white,
+    padding: 20,
+    marginBottom: 12,
   },
   title: {
-    fontSize: 28,
+    fontSize: 24,
     fontWeight: 'bold',
     color: Colors.darkGrey,
+    marginBottom: 12,
   },
   headerBadges: {
     flexDirection: 'row',
@@ -161,7 +212,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 16,
-    backgroundColor: Colors.white,
+    backgroundColor: Colors.lightGrey,
   },
   badgeText: {
     fontSize: 13,
@@ -185,19 +236,8 @@ const styles = StyleSheet.create({
     color: Colors.mediumGrey,
     lineHeight: 24,
   },
-  muscleChips: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 8,
-  },
-  muscleChip: {
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    borderRadius: 16,
-  },
-  muscleChipText: {
-    fontSize: 14,
-    fontWeight: '600',
+  heatmapSection: {
+    marginBottom: 12,
   },
   instructionItem: {
     flexDirection: 'row',
