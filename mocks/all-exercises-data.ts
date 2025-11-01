@@ -893,7 +893,7 @@ export function parseExerciseData(): FullExerciseData[] {
     if (!line.trim()) continue;
 
     const parts = line.split('|');
-    if (parts.length !== 4) continue;
+    if (parts.length !== 5) continue;
 
     const [name, primaryMuscle, secondaryMuscles, equipment, difficulty] = parts;
     
