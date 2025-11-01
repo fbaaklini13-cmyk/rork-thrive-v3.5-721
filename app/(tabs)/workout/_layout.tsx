@@ -69,6 +69,19 @@ export default function WorkoutLayout() {
           },
         }} 
       />
+      <Stack.Screen 
+        name="exercise-library" 
+        options={{ 
+          title: "Exercise Library",
+          headerStyle: {
+            backgroundColor: Colors.primary,
+          },
+          headerTintColor: "#fff",
+          headerTitleStyle: {
+            fontWeight: "bold",
+          },
+        }} 
+      />
     </Stack>
   );
 }
