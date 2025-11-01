@@ -6,6 +6,7 @@ import {
   ScrollView,
   TouchableOpacity,
   Image,
+  Dimensions,
 } from 'react-native';
 import { useLocalSearchParams } from 'expo-router';
 import { Play, CheckCircle, Pause, Bookmark, Share2 } from 'lucide-react-native';
@@ -13,11 +14,15 @@ import { Colors } from '@/constants/colors';
 import { EXERCISES } from '@/mocks/exercises';
 import { MuscleHeatmapView } from '@/components/MuscleHeatmapView';
 
+const { width } = Dimensions.get('window');
+
 export default function ExerciseDetailScreen() {
   const params = useLocalSearchParams();
-  const exercise = EXERCISES.find(ex => ex.id === params.id);
+  const exerciseId = params.exerciseId || params.id;
+  const exercise = EXERCISES.find(ex => ex.id === exerciseId);
   const [isAnimationPlaying, setIsAnimationPlaying] = useState(true);
   const [isFavorite, setIsFavorite] = useState(false);
+  const [activeTab, setActiveTab] = useState<'animation' | 'heatmap'>('animation');
 
   if (!exercise) {
     return (
@@ -31,22 +36,52 @@ export default function ExerciseDetailScreen() {
 
   return (
     <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
-      <View style={styles.animationContainer}>
-        <Image
-          source={{ uri: exerciseGifUrl }}
-          style={styles.exerciseAnimation}
-          resizeMode="contain"
-        />
-        <TouchableOpacity
-          style={styles.playPauseButton}
-          onPress={() => setIsAnimationPlaying(!isAnimationPlaying)}
-        >
-          {isAnimationPlaying ? (
-            <Pause color={Colors.white} size={24} fill={Colors.white} />
-          ) : (
-            <Play color={Colors.white} size={24} fill={Colors.white} />
-          )}
-        </TouchableOpacity>
+      <View style={styles.visualSection}>
+        <View style={styles.tabBar}>
+          <TouchableOpacity
+            style={[styles.tab, activeTab === 'animation' && styles.activeTab]}
+            onPress={() => setActiveTab('animation')}
+          >
+            <Text style={[styles.tabText, activeTab === 'animation' && styles.activeTabText]}>
+              Animation
+            </Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.tab, activeTab === 'heatmap' && styles.activeTab]}
+            onPress={() => setActiveTab('heatmap')}
+          >
+            <Text style={[styles.tabText, activeTab === 'heatmap' && styles.activeTabText]}>
+              Muscle Map
+            </Text>
+          </TouchableOpacity>
+        </View>
+
+        {activeTab === 'animation' ? (
+          <View style={styles.animationContainer}>
+            <Image
+              source={{ uri: exerciseGifUrl }}
+              style={styles.exerciseAnimation}
+              resizeMode="contain"
+            />
+            <TouchableOpacity
+              style={styles.playPauseButton}
+              onPress={() => setIsAnimationPlaying(!isAnimationPlaying)}
+            >
+              {isAnimationPlaying ? (
+                <Pause color={Colors.white} size={24} fill={Colors.white} />
+              ) : (
+                <Play color={Colors.white} size={24} fill={Colors.white} />
+              )}
+            </TouchableOpacity>
+          </View>
+        ) : (
+          <View style={styles.heatmapContainer}>
+            <MuscleHeatmapView
+              primaryMuscle={exercise.muscleGroup}
+              secondaryMuscles={exercise.secondaryMuscles}
+            />
+          </View>
+        )}
       </View>
 
       <View style={styles.actionButtons}>
@@ -83,13 +118,6 @@ export default function ExerciseDetailScreen() {
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Description</Text>
         <Text style={styles.description}>{exercise.description}</Text>
-      </View>
-
-      <View style={styles.heatmapSection}>
-        <MuscleHeatmapView
-          primaryMuscle={exercise.muscleGroup}
-          secondaryMuscles={exercise.secondaryMuscles}
-        />
       </View>
 
       <View style={styles.section}>
@@ -146,12 +174,42 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: Colors.lightGrey,
   },
-  animationContainer: {
+  visualSection: {
     backgroundColor: Colors.white,
+    marginBottom: 12,
+  },
+  tabBar: {
+    flexDirection: 'row',
+    borderBottomWidth: 1,
+    borderBottomColor: Colors.lightGrey,
+  },
+  tab: {
+    flex: 1,
+    paddingVertical: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  activeTab: {
+    borderBottomWidth: 2,
+    borderBottomColor: Colors.primary,
+  },
+  tabText: {
+    fontSize: 15,
+    fontWeight: '600',
+    color: Colors.mediumGrey,
+  },
+  activeTabText: {
+    color: Colors.primary,
+  },
+  animationContainer: {
     height: 300,
     position: 'relative',
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  heatmapContainer: {
+    minHeight: 400,
+    padding: 20,
   },
   exerciseAnimation: {
     width: '100%',
@@ -236,9 +294,7 @@ const styles = StyleSheet.create({
     color: Colors.mediumGrey,
     lineHeight: 24,
   },
-  heatmapSection: {
-    marginBottom: 12,
-  },
+
   instructionItem: {
     flexDirection: 'row',
     marginBottom: 16,
