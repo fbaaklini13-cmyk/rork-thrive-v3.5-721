@@ -19,8 +19,10 @@ import {
   Play,
   X,
   Plus,
+  BookOpen,
+  LibraryBig,
 } from 'lucide-react-native';
-import { Stack } from 'expo-router';
+import { Stack, useRouter } from 'expo-router';
 import { useUserProfile } from '@/hooks/user-profile-store';
 import { Colors } from '@/constants/colors';
 import { AIService } from '@/services/ai-service';
@@ -37,6 +39,7 @@ import ProgramProgressBar from '@/components/ProgramProgressBar';
 
 
 export default function WorkoutScreen() {
+  const router = useRouter();
   const { workoutPlans, workoutLogs, profile, addWorkoutPlan, replaceExerciseInPlan, achievements } = useUserProfile();
   const [showAIGenerator, setShowAIGenerator] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
@@ -146,6 +149,24 @@ export default function WorkoutScreen() {
             </ScrollView>
           </View>
         )}
+
+        <View style={styles.quickAccessRow}>
+          <TouchableOpacity
+            style={styles.quickAccessButton}
+            onPress={() => router.push('/workout/programs')}
+          >
+            <BookOpen color={Colors.white} size={20} />
+            <Text style={styles.quickAccessText}>Programs</Text>
+          </TouchableOpacity>
+          
+          <TouchableOpacity
+            style={styles.quickAccessButton}
+            onPress={() => router.push('/workout/exercise-library')}
+          >
+            <LibraryBig color={Colors.white} size={20} />
+            <Text style={styles.quickAccessText}>Exercise Library</Text>
+          </TouchableOpacity>
+        </View>
 
         {latestPlan && (
           <View style={{ marginHorizontal: 20, marginBottom: 12 }}>
@@ -389,6 +410,32 @@ const styles = StyleSheet.create({
   achievementsRow: {
     paddingHorizontal: 20,
     marginBottom: 12,
+  },
+  quickAccessRow: {
+    flexDirection: 'row',
+    gap: 12,
+    paddingHorizontal: 20,
+    marginBottom: 16,
+  },
+  quickAccessButton: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    backgroundColor: Colors.primary,
+    paddingVertical: 14,
+    borderRadius: 12,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  quickAccessText: {
+    color: Colors.white,
+    fontSize: 15,
+    fontWeight: '600',
   },
   createButton: {
     flexDirection: 'row',
