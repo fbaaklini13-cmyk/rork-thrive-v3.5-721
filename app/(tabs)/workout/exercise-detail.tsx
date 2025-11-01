@@ -8,7 +8,7 @@ import {
   Image,
 } from 'react-native';
 import { useLocalSearchParams } from 'expo-router';
-import { Play, Pause, Bookmark, Share2 } from 'lucide-react-native';
+import { Play, Pause, Bookmark, Share2, Dumbbell } from 'lucide-react-native';
 import { Colors } from '@/constants/colors';
 import { ALL_EXERCISES } from '@/mocks/full-exercise-library';
 import { MuscleHeatmapView } from '@/components/MuscleHeatmapView';
@@ -22,6 +22,7 @@ export default function ExerciseDetailScreen() {
   const [isAnimationPlaying, setIsAnimationPlaying] = useState(true);
   const [isFavorite, setIsFavorite] = useState(false);
   const [activeTab, setActiveTab] = useState<'animation' | 'heatmap'>('animation');
+  const [imageError, setImageError] = useState(false);
 
   if (!exercise) {
     return (
@@ -31,8 +32,10 @@ export default function ExerciseDetailScreen() {
     );
   }
 
-  // Try to load exercise animation/gif
-  const exerciseGifUrl = `https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/${exercise.id.replace(/-/g, '_')}/0.gif`;
+  // Exercise animation/gif URL
+  // Using the exercise ID to fetch the gif from the free-exercise-db repository
+  const formattedId = exercise.id.replace(/-/g, '_');
+  const exerciseGifUrl = `https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/${formattedId}/0.gif`;
 
   return (
     <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
@@ -58,11 +61,20 @@ export default function ExerciseDetailScreen() {
 
         {activeTab === 'animation' ? (
           <View style={styles.animationContainer}>
-            <Image
-              source={{ uri: exerciseGifUrl }}
-              style={styles.exerciseAnimation}
-              resizeMode="contain"
-            />
+            {!imageError ? (
+              <Image
+                source={{ uri: exerciseGifUrl }}
+                style={styles.exerciseAnimation}
+                resizeMode="contain"
+                onError={() => setImageError(true)}
+              />
+            ) : (
+              <View style={styles.placeholderContainer}>
+                <Dumbbell size={64} color={Colors.mediumGrey} />
+                <Text style={styles.placeholderText}>Animation not available</Text>
+                <Text style={styles.placeholderSubtext}>Exercise: {exercise.name}</Text>
+              </View>
+            )}
             <TouchableOpacity
               style={styles.playPauseButton}
               onPress={() => setIsAnimationPlaying(!isAnimationPlaying)}
@@ -189,6 +201,25 @@ const styles = StyleSheet.create({
   exerciseAnimation: {
     width: '100%',
     height: '100%',
+  },
+  placeholderContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 40,
+  },
+  placeholderText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: Colors.mediumGrey,
+    marginTop: 16,
+    textAlign: 'center',
+  },
+  placeholderSubtext: {
+    fontSize: 14,
+    color: Colors.mediumGrey,
+    marginTop: 8,
+    textAlign: 'center',
   },
   playPauseButton: {
     position: 'absolute',
