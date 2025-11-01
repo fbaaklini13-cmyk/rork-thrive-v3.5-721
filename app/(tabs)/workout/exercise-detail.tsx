@@ -6,20 +6,19 @@ import {
   ScrollView,
   TouchableOpacity,
   Image,
-  Dimensions,
 } from 'react-native';
 import { useLocalSearchParams } from 'expo-router';
-import { Play, CheckCircle, Pause, Bookmark, Share2 } from 'lucide-react-native';
+import { Play, Pause, Bookmark, Share2 } from 'lucide-react-native';
 import { Colors } from '@/constants/colors';
-import { EXERCISES } from '@/mocks/exercises';
+import { ALL_EXERCISES } from '@/mocks/full-exercise-library';
 import { MuscleHeatmapView } from '@/components/MuscleHeatmapView';
 
-const { width } = Dimensions.get('window');
+
 
 export default function ExerciseDetailScreen() {
   const params = useLocalSearchParams();
   const exerciseId = params.exerciseId || params.id;
-  const exercise = EXERCISES.find(ex => ex.id === exerciseId);
+  const exercise = ALL_EXERCISES.find(ex => ex.id === exerciseId);
   const [isAnimationPlaying, setIsAnimationPlaying] = useState(true);
   const [isFavorite, setIsFavorite] = useState(false);
   const [activeTab, setActiveTab] = useState<'animation' | 'heatmap'>('animation');
@@ -32,6 +31,7 @@ export default function ExerciseDetailScreen() {
     );
   }
 
+  // Try to load exercise animation/gif
   const exerciseGifUrl = `https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/${exercise.id.replace(/-/g, '_')}/0.gif`;
 
   return (
@@ -77,8 +77,8 @@ export default function ExerciseDetailScreen() {
         ) : (
           <View style={styles.heatmapContainer}>
             <MuscleHeatmapView
-              primaryMuscle={exercise.muscleGroup}
-              secondaryMuscles={exercise.secondaryMuscles}
+              primaryMuscle={exercise.primaryMuscle}
+              secondaryMuscles={exercise.secondaryMuscles || []}
             />
           </View>
         )}
@@ -116,55 +116,30 @@ export default function ExerciseDetailScreen() {
       </View>
 
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Description</Text>
-        <Text style={styles.description}>{exercise.description}</Text>
-      </View>
-
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>How To Perform</Text>
-        {exercise.instructions.map((instruction, index) => (
-          <View key={index} style={styles.instructionItem}>
-            <View style={styles.instructionNumber}>
-              <Text style={styles.instructionNumberText}>{index + 1}</Text>
-            </View>
-            <Text style={styles.instructionText}>{instruction}</Text>
+        <Text style={styles.sectionTitle}>Muscle Groups</Text>
+        <View style={styles.muscleInfo}>
+          <Text style={styles.muscleLabel}>Primary: </Text>
+          <Text style={styles.muscleValue}>{exercise.primaryMuscle}</Text>
+        </View>
+        {exercise.secondaryMuscles && exercise.secondaryMuscles.length > 0 && (
+          <View style={styles.muscleInfo}>
+            <Text style={styles.muscleLabel}>Secondary: </Text>
+            <Text style={styles.muscleValue}>{exercise.secondaryMuscles.join(', ')}</Text>
           </View>
-        ))}
+        )}
       </View>
-
-      {exercise.tips && exercise.tips.length > 0 && (
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Pro Tips</Text>
-          {exercise.tips.map((tip, index) => (
-            <View key={index} style={styles.tipItem}>
-              <CheckCircle color={Colors.success} size={20} />
-              <Text style={styles.tipText}>{tip}</Text>
-            </View>
-          ))}
-        </View>
-      )}
 
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Training Goals</Text>
-        <View style={styles.goalsContainer}>
-          {exercise.goals.map(goal => (
-            <View key={goal} style={styles.goalChip}>
-              <Text style={styles.goalText}>
-                {goal.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')}
-              </Text>
-            </View>
-          ))}
+        <Text style={styles.sectionTitle}>Exercise Information</Text>
+        <View style={styles.infoRow}>
+          <Text style={styles.infoLabel}>Equipment:</Text>
+          <Text style={styles.infoValue}>{exercise.equipment}</Text>
+        </View>
+        <View style={styles.infoRow}>
+          <Text style={styles.infoLabel}>Difficulty:</Text>
+          <Text style={styles.infoValue}>{exercise.difficulty}</Text>
         </View>
       </View>
-
-      {exercise.videoUrl && (
-        <View style={styles.section}>
-          <TouchableOpacity style={styles.videoButton}>
-            <Play color={Colors.white} size={24} />
-            <Text style={styles.videoButtonText}>Watch Demo Video</Text>
-          </TouchableOpacity>
-        </View>
-      )}
     </ScrollView>
   );
 }
@@ -366,5 +341,36 @@ const styles = StyleSheet.create({
     color: Colors.mediumGrey,
     textAlign: 'center',
     marginTop: 40,
+  },
+  muscleInfo: {
+    flexDirection: 'row',
+    marginBottom: 8,
+    alignItems: 'center',
+  },
+  muscleLabel: {
+    fontSize: 15,
+    fontWeight: '600',
+    color: Colors.darkGrey,
+  },
+  muscleValue: {
+    fontSize: 15,
+    color: Colors.mediumGrey,
+    textTransform: 'capitalize' as const,
+  },
+  infoRow: {
+    flexDirection: 'row',
+    marginBottom: 12,
+    alignItems: 'center',
+  },
+  infoLabel: {
+    fontSize: 15,
+    fontWeight: '600',
+    color: Colors.darkGrey,
+    marginRight: 8,
+  },
+  infoValue: {
+    fontSize: 15,
+    color: Colors.mediumGrey,
+    textTransform: 'capitalize' as const,
   },
 });
