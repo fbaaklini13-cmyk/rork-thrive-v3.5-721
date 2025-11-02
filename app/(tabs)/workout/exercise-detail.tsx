@@ -10,7 +10,7 @@ import { useLocalSearchParams } from 'expo-router';
 import { Bookmark, Share2, Dumbbell } from 'lucide-react-native';
 import { Colors } from '@/constants/colors';
 import { ALL_EXERCISES } from '@/mocks/full-exercise-library';
-import { MuscleHeatmapDetail } from '@/components/MuscleHeatmapDetail';
+import { AnatomicalMuscleMap } from '@/components/AnatomicalMuscleMap';
 
 
 
@@ -62,12 +62,12 @@ export default function ExerciseDetailScreen() {
             </View>
           </View>
         ) : (
-          <View style={styles.heatmapContainer}>
-            <MuscleHeatmapDetail
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.heatmapContainer}>
+            <AnatomicalMuscleMap
               primaryMuscle={exercise.primaryMuscle}
               secondaryMuscles={exercise.secondaryMuscles || []}
             />
-          </View>
+          </ScrollView>
         )}
       </View>
 
@@ -170,8 +170,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   heatmapContainer: {
-    minHeight: 400,
-    padding: 20,
+    minHeight: 500,
+    paddingHorizontal: 20,
   },
   exerciseAnimation: {
     width: '100%',
