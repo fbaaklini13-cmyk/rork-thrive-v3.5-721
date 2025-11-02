@@ -1,7 +1,7 @@
 import React from 'react';
-import { View, Text, StyleSheet, Image } from 'react-native';
+import { View, Text, StyleSheet } from 'react-native';
 import { Colors } from '@/constants/colors';
-import { getMuscleGroupIcon, getMuscleGroupColor } from '@/constants/muscle-groups';
+import { shouldShowOnFront, shouldShowOnBack, getMuscleColor } from '@/constants/muscle-mapping';
 
 interface MuscleHeatmapViewProps {
   primaryMuscle: string;
@@ -10,7 +10,29 @@ interface MuscleHeatmapViewProps {
 
 export function MuscleHeatmapView({ primaryMuscle, secondaryMuscles = [] }: MuscleHeatmapViewProps) {
   const allMuscles = [primaryMuscle, ...secondaryMuscles].filter(Boolean);
-  const uniqueMuscles = Array.from(new Set(allMuscles.map(m => m.toLowerCase())));
+  const uniqueMuscles = Array.from(new Set(allMuscles));
+
+  // Helper to render muscle regions
+  const renderMuscleRegion = (muscle: string, isPrimary: boolean) => {
+    const color = getMuscleColor(muscle, isPrimary);
+    const opacity = isPrimary ? 0.8 : 0.4;
+    
+    return (
+      <View
+        style={[
+          styles.muscleRegion,
+          {
+            backgroundColor: color,
+            opacity: opacity,
+          },
+        ]}
+      />
+    );
+  };
+
+  // Group muscles by body region
+  const frontMuscles = uniqueMuscles.filter(m => shouldShowOnFront(m));
+  const backMuscles = uniqueMuscles.filter(m => shouldShowOnBack(m));
 
   return (
     <View style={styles.container}>
@@ -18,78 +40,77 @@ export function MuscleHeatmapView({ primaryMuscle, secondaryMuscles = [] }: Musc
       
       <View style={styles.heatmapContainer}>
         <View style={styles.bodyViews}>
+          {/* Front View */}
           <View style={styles.bodyView}>
-            <Text style={styles.bodyViewLabel}>Front</Text>
+            <Text style={styles.bodyViewLabel}>Front View</Text>
             <View style={styles.bodyImageContainer}>
-              {uniqueMuscles.map((muscle, index) => {
-                const icon = getMuscleGroupIcon(muscle);
-                const isPrimary = muscle.toLowerCase() === primaryMuscle.toLowerCase();
+              {/* Base body outline */}
+              <View style={styles.bodyOutline}>
+                {/* Render front muscles */}
+                {frontMuscles.map((muscle, index) => {
+                  const isPrimary = muscle.toLowerCase() === primaryMuscle.toLowerCase();
+                  return (
+                    <View key={`front-${muscle}-${index}`} style={styles.muscleLayer}>
+                      {renderMuscleRegion(muscle, isPrimary)}
+                    </View>
+                  );
+                })}
                 
-                if (!icon) return null;
-                
-                const shouldShowFront = 
-                  muscle.includes('chest') ||
-                  muscle.includes('bicep') ||
-                  muscle.includes('abs') ||
-                  muscle.includes('quad') ||
-                  muscle.includes('shoulder');
-                
-                if (!shouldShowFront) return null;
-                
-                return (
-                  <Image
-                    key={`${muscle}-${index}`}
-                    source={{ uri: icon }}
-                    style={[
-                      styles.muscleOverlay,
-                      { opacity: isPrimary ? 1 : 0.6 },
-                    ]}
-                    resizeMode="contain"
-                  />
-                );
-              })}
+                {/* Front body parts labels */}
+                <View style={styles.bodyLabels}>
+                  {frontMuscles.map((muscle, index) => {
+                    const isPrimary = muscle.toLowerCase() === primaryMuscle.toLowerCase();
+                    return (
+                      <View key={`label-front-${index}`} style={styles.muscleLabel}>
+                        <View style={[styles.muscleDot, { backgroundColor: getMuscleColor(muscle, isPrimary) }]} />
+                        <Text style={styles.muscleLabelText}>{muscle}</Text>
+                      </View>
+                    );
+                  })}
+                </View>
+              </View>
             </View>
           </View>
 
+          {/* Back View */}
           <View style={styles.bodyView}>
-            <Text style={styles.bodyViewLabel}>Back</Text>
+            <Text style={styles.bodyViewLabel}>Back View</Text>
             <View style={styles.bodyImageContainer}>
-              {uniqueMuscles.map((muscle, index) => {
-                const icon = getMuscleGroupIcon(muscle);
-                const isPrimary = muscle.toLowerCase() === primaryMuscle.toLowerCase();
+              {/* Base body outline */}
+              <View style={styles.bodyOutline}>
+                {/* Render back muscles */}
+                {backMuscles.map((muscle, index) => {
+                  const isPrimary = muscle.toLowerCase() === primaryMuscle.toLowerCase();
+                  return (
+                    <View key={`back-${muscle}-${index}`} style={styles.muscleLayer}>
+                      {renderMuscleRegion(muscle, isPrimary)}
+                    </View>
+                  );
+                })}
                 
-                if (!icon) return null;
-                
-                const shouldShowBack = 
-                  muscle.includes('back') ||
-                  muscle.includes('tricep') ||
-                  muscle.includes('hamstring') ||
-                  muscle.includes('glute') ||
-                  muscle.includes('calf');
-                
-                if (!shouldShowBack) return null;
-                
-                return (
-                  <Image
-                    key={`${muscle}-${index}`}
-                    source={{ uri: icon }}
-                    style={[
-                      styles.muscleOverlay,
-                      { opacity: isPrimary ? 1 : 0.6 },
-                    ]}
-                    resizeMode="contain"
-                  />
-                );
-              })}
+                {/* Back body parts labels */}
+                <View style={styles.bodyLabels}>
+                  {backMuscles.map((muscle, index) => {
+                    const isPrimary = muscle.toLowerCase() === primaryMuscle.toLowerCase();
+                    return (
+                      <View key={`label-back-${index}`} style={styles.muscleLabel}>
+                        <View style={[styles.muscleDot, { backgroundColor: getMuscleColor(muscle, isPrimary) }]} />
+                        <Text style={styles.muscleLabelText}>{muscle}</Text>
+                      </View>
+                    );
+                  })}
+                </View>
+              </View>
             </View>
           </View>
         </View>
       </View>
 
+      {/* Legend */}
       <View style={styles.legend}>
         <View style={styles.legendRow}>
           <View style={styles.legendItem}>
-            <View style={[styles.legendDot, { backgroundColor: getMuscleGroupColor(primaryMuscle), opacity: 1 }]} />
+            <View style={[styles.legendDot, { backgroundColor: getMuscleColor(primaryMuscle, true), opacity: 0.8 }]} />
             <Text style={styles.legendText}>Primary: {primaryMuscle}</Text>
           </View>
         </View>
@@ -97,7 +118,7 @@ export function MuscleHeatmapView({ primaryMuscle, secondaryMuscles = [] }: Musc
         {secondaryMuscles.length > 0 && (
           <View style={styles.legendRow}>
             <View style={styles.legendItem}>
-              <View style={[styles.legendDot, { backgroundColor: Colors.mediumGrey, opacity: 0.6 }]} />
+              <View style={[styles.legendDot, { backgroundColor: Colors.mediumGrey, opacity: 0.4 }]} />
               <Text style={styles.legendText}>
                 Secondary: {secondaryMuscles.join(', ')}
               </Text>
@@ -140,21 +161,54 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   bodyImageContainer: {
-    width: 120,
-    height: 280,
+    width: 140,
+    height: 300,
     position: 'relative',
     backgroundColor: Colors.lightGrey,
     borderRadius: 12,
     overflow: 'hidden',
   },
-  muscleOverlay: {
+  bodyOutline: {
+    flex: 1,
+    position: 'relative',
+  },
+  muscleLayer: {
     position: 'absolute',
     top: 0,
     left: 0,
     right: 0,
     bottom: 0,
-    width: '100%',
-    height: '100%',
+  },
+  muscleRegion: {
+    position: 'absolute',
+    borderRadius: 8,
+  },
+  bodyLabels: {
+    position: 'absolute',
+    bottom: 8,
+    left: 8,
+    right: 8,
+    gap: 4,
+  },
+  muscleLabel: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+    paddingVertical: 4,
+    paddingHorizontal: 8,
+    borderRadius: 12,
+  },
+  muscleDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+  },
+  muscleLabelText: {
+    fontSize: 11,
+    fontWeight: '600',
+    color: Colors.darkGrey,
+    textTransform: 'capitalize',
   },
   legend: {
     gap: 8,
