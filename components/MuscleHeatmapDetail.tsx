@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet, ScrollView } from 'react-native';
+import { View, Text, StyleSheet } from 'react-native';
 import { Colors } from '@/constants/colors';
 import { shouldShowOnFront, shouldShowOnBack, getMuscleColor } from '@/constants/muscle-mapping';
 
@@ -241,11 +241,8 @@ export function MuscleHeatmapDetail({ primaryMuscle, secondaryMuscles = [] }: Mu
   };
 
   return (
-    <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
-      <Text style={styles.title}>Muscle Heat Map</Text>
-      <Text style={styles.subtitle}>
-        Highlighted areas show which muscles are engaged during this exercise
-      </Text>
+    <View style={styles.container}>
+      <Text style={styles.title}>Muscles Worked</Text>
       
       <View style={styles.diagramsContainer}>
         {frontMuscles.length > 0 && renderBodyDiagram(frontMuscles, 'front')}
@@ -255,42 +252,29 @@ export function MuscleHeatmapDetail({ primaryMuscle, secondaryMuscles = [] }: Mu
       {/* Summary */}
       <View style={styles.summary}>
         <View style={styles.summaryItem}>
-          <Text style={styles.summaryLabel}>Primary Muscle:</Text>
+          <Text style={styles.summaryLabel}>Primary:</Text>
           <Text style={styles.summaryValue}>{primaryMuscle}</Text>
         </View>
-        {secondaryMuscles.length > 0 && (
-          <View style={styles.summaryItem}>
-            <Text style={styles.summaryLabel}>Secondary Muscles:</Text>
-            <Text style={styles.summaryValue}>{secondaryMuscles.join(', ')}</Text>
-          </View>
-        )}
       </View>
-    </ScrollView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.white,
   },
   title: {
-    fontSize: 22,
-    fontWeight: 'bold',
+    fontSize: 18,
+    fontWeight: '600',
     color: Colors.darkGrey,
-    marginBottom: 8,
-    paddingHorizontal: 20,
-    paddingTop: 20,
-  },
-  subtitle: {
-    fontSize: 14,
-    color: Colors.mediumGrey,
     marginBottom: 24,
-    paddingHorizontal: 20,
   },
   diagramsContainer: {
-    gap: 32,
-    paddingHorizontal: 20,
+    flexDirection: 'row',
+    gap: 24,
+    justifyContent: 'center',
+    marginBottom: 24,
   },
   bodyContainer: {
     alignItems: 'center',
@@ -512,23 +496,21 @@ const styles = StyleSheet.create({
     borderRadius: 8,
   },
   summary: {
-    marginTop: 24,
-    marginBottom: 32,
-    paddingHorizontal: 20,
-    gap: 16,
+    marginTop: 16,
   },
   summaryItem: {
-    gap: 4,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
   },
   summaryLabel: {
-    fontSize: 14,
+    fontSize: 15,
     fontWeight: '600',
-    color: Colors.mediumGrey,
+    color: Colors.darkGrey,
   },
   summaryValue: {
-    fontSize: 16,
-    fontWeight: '500',
-    color: Colors.darkGrey,
+    fontSize: 15,
+    color: Colors.mediumGrey,
     textTransform: 'capitalize',
   },
 });

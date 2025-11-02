@@ -5,13 +5,12 @@ import {
   StyleSheet,
   ScrollView,
   TouchableOpacity,
-  Image,
 } from 'react-native';
 import { useLocalSearchParams } from 'expo-router';
-import { Play, Pause, Bookmark, Share2, Dumbbell } from 'lucide-react-native';
+import { Bookmark, Share2, Dumbbell } from 'lucide-react-native';
 import { Colors } from '@/constants/colors';
 import { ALL_EXERCISES } from '@/mocks/full-exercise-library';
-import { MuscleHeatmapView } from '@/components/MuscleHeatmapView';
+import { MuscleHeatmapDetail } from '@/components/MuscleHeatmapDetail';
 
 
 
@@ -19,10 +18,8 @@ export default function ExerciseDetailScreen() {
   const params = useLocalSearchParams();
   const exerciseId = params.exerciseId || params.id;
   const exercise = ALL_EXERCISES.find(ex => ex.id === exerciseId);
-  const [isAnimationPlaying, setIsAnimationPlaying] = useState(true);
   const [isFavorite, setIsFavorite] = useState(false);
   const [activeTab, setActiveTab] = useState<'animation' | 'heatmap'>('animation');
-  const [imageError, setImageError] = useState(false);
 
   if (!exercise) {
     return (
@@ -32,10 +29,7 @@ export default function ExerciseDetailScreen() {
     );
   }
 
-  // Exercise animation/gif URL
-  // Using the exercise ID to fetch the gif from the free-exercise-db repository
-  const formattedId = exercise.id.replace(/-/g, '_');
-  const exerciseGifUrl = `https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/${formattedId}/0.gif`;
+
 
   return (
     <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
@@ -61,34 +55,15 @@ export default function ExerciseDetailScreen() {
 
         {activeTab === 'animation' ? (
           <View style={styles.animationContainer}>
-            {!imageError ? (
-              <Image
-                source={{ uri: exerciseGifUrl }}
-                style={styles.exerciseAnimation}
-                resizeMode="contain"
-                onError={() => setImageError(true)}
-              />
-            ) : (
-              <View style={styles.placeholderContainer}>
-                <Dumbbell size={64} color={Colors.mediumGrey} />
-                <Text style={styles.placeholderText}>Animation not available</Text>
-                <Text style={styles.placeholderSubtext}>Exercise: {exercise.name}</Text>
-              </View>
-            )}
-            <TouchableOpacity
-              style={styles.playPauseButton}
-              onPress={() => setIsAnimationPlaying(!isAnimationPlaying)}
-            >
-              {isAnimationPlaying ? (
-                <Pause color={Colors.white} size={24} fill={Colors.white} />
-              ) : (
-                <Play color={Colors.white} size={24} fill={Colors.white} />
-              )}
-            </TouchableOpacity>
+            <View style={styles.placeholderContainer}>
+              <Dumbbell size={64} color={Colors.mediumGrey} />
+              <Text style={styles.placeholderText}>Animation not available</Text>
+              <Text style={styles.placeholderSubtext}>Exercise: {exercise.name}</Text>
+            </View>
           </View>
         ) : (
           <View style={styles.heatmapContainer}>
-            <MuscleHeatmapView
+            <MuscleHeatmapDetail
               primaryMuscle={exercise.primaryMuscle}
               secondaryMuscles={exercise.secondaryMuscles || []}
             />
