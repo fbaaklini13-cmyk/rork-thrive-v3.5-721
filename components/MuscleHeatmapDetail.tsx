@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet, ScrollView } from 'react-native';
 import { Colors } from '@/constants/colors';
 import { shouldShowOnFront, shouldShowOnBack, getMuscleColor } from '@/constants/muscle-mapping';
 
@@ -10,13 +10,23 @@ interface MuscleHeatmapDetailProps {
 
 export function MuscleHeatmapDetail({ primaryMuscle, secondaryMuscles = [] }: MuscleHeatmapDetailProps) {
   const allMuscles = [primaryMuscle, ...secondaryMuscles].filter(Boolean);
-  const uniqueMuscles = Array.from(new Set(allMuscles));
+  const uniqueMuscles = Array.from(new Set(allMuscles.map(m => m.toLowerCase())));
 
-  // Group muscles by body region
   const frontMuscles = uniqueMuscles.filter(m => shouldShowOnFront(m));
   const backMuscles = uniqueMuscles.filter(m => shouldShowOnBack(m));
 
+  const isMuscleActive = (muscleType: string, muscleList: string[]) => {
+    return muscleList.some(m => m.toLowerCase().includes(muscleType.toLowerCase()));
+  };
+
+  const getMuscleOpacity = (muscleType: string, muscleList: string[]) => {
+    const isPrimary = primaryMuscle.toLowerCase().includes(muscleType.toLowerCase());
+    return isPrimary ? 0.9 : 0.6;
+  };
+
   const renderBodyDiagram = (muscles: string[], viewType: 'front' | 'back') => {
+    if (muscles.length === 0) return null;
+
     return (
       <View style={styles.bodyContainer}>
         <Text style={styles.viewLabel}>{viewType === 'front' ? 'Front View' : 'Back View'}</Text>
@@ -25,209 +35,315 @@ export function MuscleHeatmapDetail({ primaryMuscle, secondaryMuscles = [] }: Mu
           {/* Head */}
           <View style={[styles.bodyPart, styles.head]} />
           
-          {/* Upper Body */}
-          <View style={styles.upperBody}>
-            {viewType === 'front' && (
-              <>
-                {/* Chest/Pecs */}
-                {muscles.some(m => m.toLowerCase().includes('chest') || m.toLowerCase().includes('pec')) && (
-                  <View style={[
-                    styles.chest,
-                    {
-                      backgroundColor: getMuscleColor('chest', muscles[0].toLowerCase().includes('chest')),
-                      opacity: muscles[0].toLowerCase().includes('chest') ? 0.9 : 0.5,
-                    }
-                  ]} />
-                )}
-                
-                {/* Shoulders */}
-                {muscles.some(m => m.toLowerCase().includes('shoulder') || m.toLowerCase().includes('delt')) && (
-                  <>
-                    <View style={[
-                      styles.leftShoulder,
-                      {
-                        backgroundColor: getMuscleColor('shoulders', muscles[0].toLowerCase().includes('shoulder')),
-                        opacity: muscles[0].toLowerCase().includes('shoulder') ? 0.9 : 0.5,
-                      }
-                    ]} />
-                    <View style={[
-                      styles.rightShoulder,
-                      {
-                        backgroundColor: getMuscleColor('shoulders', muscles[0].toLowerCase().includes('shoulder')),
-                        opacity: muscles[0].toLowerCase().includes('shoulder') ? 0.9 : 0.5,
-                      }
-                    ]} />
-                  </>
-                )}
-                
-                {/* Abs */}
-                {muscles.some(m => m.toLowerCase().includes('ab') || m.toLowerCase().includes('core')) && (
-                  <View style={[
-                    styles.abs,
-                    {
-                      backgroundColor: getMuscleColor('abdominals', muscles[0].toLowerCase().includes('ab')),
-                      opacity: muscles[0].toLowerCase().includes('ab') ? 0.9 : 0.5,
-                    }
-                  ]} />
-                )}
-              </>
-            )}
-            
-            {viewType === 'back' && (
-              <>
-                {/* Back muscles */}
-                {muscles.some(m => m.toLowerCase().includes('back') || m.toLowerCase().includes('lat')) && (
-                  <View style={[
-                    styles.back,
-                    {
-                      backgroundColor: getMuscleColor('back', muscles[0].toLowerCase().includes('back')),
-                      opacity: muscles[0].toLowerCase().includes('back') ? 0.9 : 0.5,
-                    }
-                  ]} />
-                )}
-                
-                {/* Traps */}
-                {muscles.some(m => m.toLowerCase().includes('trap')) && (
-                  <View style={[
-                    styles.traps,
-                    {
-                      backgroundColor: getMuscleColor('traps', muscles[0].toLowerCase().includes('trap')),
-                      opacity: muscles[0].toLowerCase().includes('trap') ? 0.9 : 0.5,
-                    }
-                  ]} />
-                )}
-              </>
-            )}
-          </View>
+          {/* Neck */}
+          {isMuscleActive('neck', muscles) && (
+            <View style={[
+              styles.neck,
+              {
+                backgroundColor: getMuscleColor('neck', primaryMuscle.toLowerCase().includes('neck')),
+                opacity: getMuscleOpacity('neck', muscles),
+              }
+            ]} />
+          )}
           
-          {/* Arms */}
-          <View style={styles.arms}>
-            {viewType === 'front' && muscles.some(m => m.toLowerCase().includes('bicep')) && (
-              <>
-                <View style={[
-                  styles.leftBicep,
-                  {
-                    backgroundColor: getMuscleColor('biceps', muscles[0].toLowerCase().includes('bicep')),
-                    opacity: muscles[0].toLowerCase().includes('bicep') ? 0.9 : 0.5,
-                  }
-                ]} />
-                <View style={[
-                  styles.rightBicep,
-                  {
-                    backgroundColor: getMuscleColor('biceps', muscles[0].toLowerCase().includes('bicep')),
-                    opacity: muscles[0].toLowerCase().includes('bicep') ? 0.9 : 0.5,
-                  }
-                ]} />
-              </>
-            )}
-            
-            {viewType === 'back' && muscles.some(m => m.toLowerCase().includes('tricep')) && (
-              <>
-                <View style={[
-                  styles.leftTricep,
-                  {
-                    backgroundColor: getMuscleColor('triceps', muscles[0].toLowerCase().includes('tricep')),
-                    opacity: muscles[0].toLowerCase().includes('tricep') ? 0.9 : 0.5,
-                  }
-                ]} />
-                <View style={[
-                  styles.rightTricep,
-                  {
-                    backgroundColor: getMuscleColor('triceps', muscles[0].toLowerCase().includes('tricep')),
-                    opacity: muscles[0].toLowerCase().includes('tricep') ? 0.9 : 0.5,
-                  }
-                ]} />
-              </>
-            )}
-          </View>
-          
-          {/* Legs */}
-          <View style={styles.legs}>
-            {viewType === 'front' && muscles.some(m => m.toLowerCase().includes('quad')) && (
-              <>
-                <View style={[
-                  styles.leftQuad,
-                  {
-                    backgroundColor: getMuscleColor('quadriceps', muscles[0].toLowerCase().includes('quad')),
-                    opacity: muscles[0].toLowerCase().includes('quad') ? 0.9 : 0.5,
-                  }
-                ]} />
-                <View style={[
-                  styles.rightQuad,
-                  {
-                    backgroundColor: getMuscleColor('quadriceps', muscles[0].toLowerCase().includes('quad')),
-                    opacity: muscles[0].toLowerCase().includes('quad') ? 0.9 : 0.5,
-                  }
-                ]} />
-              </>
-            )}
-            
-            {viewType === 'back' && (
-              <>
-                {muscles.some(m => m.toLowerCase().includes('glute')) && (
+          {viewType === 'front' && (
+            <>
+              {/* Shoulders - Front */}
+              {isMuscleActive('shoulder', muscles) && (
+                <>
                   <View style={[
-                    styles.glutes,
+                    styles.frontLeftShoulder,
                     {
-                      backgroundColor: getMuscleColor('glutes', muscles[0].toLowerCase().includes('glute')),
-                      opacity: muscles[0].toLowerCase().includes('glute') ? 0.9 : 0.5,
+                      backgroundColor: getMuscleColor('shoulders', primaryMuscle.toLowerCase().includes('shoulder')),
+                      opacity: getMuscleOpacity('shoulder', muscles),
                     }
                   ]} />
-                )}
-                
-                {muscles.some(m => m.toLowerCase().includes('hamstring')) && (
-                  <>
-                    <View style={[
-                      styles.leftHamstring,
-                      {
-                        backgroundColor: getMuscleColor('hamstrings', muscles[0].toLowerCase().includes('hamstring')),
-                        opacity: muscles[0].toLowerCase().includes('hamstring') ? 0.9 : 0.5,
-                      }
-                    ]} />
-                    <View style={[
-                      styles.rightHamstring,
-                      {
-                        backgroundColor: getMuscleColor('hamstrings', muscles[0].toLowerCase().includes('hamstring')),
-                        opacity: muscles[0].toLowerCase().includes('hamstring') ? 0.9 : 0.5,
-                      }
-                    ]} />
-                  </>
-                )}
-              </>
-            )}
-            
-            {/* Calves (visible from both sides) */}
-            {muscles.some(m => m.toLowerCase().includes('calf')) && (
-              <>
+                  <View style={[
+                    styles.frontRightShoulder,
+                    {
+                      backgroundColor: getMuscleColor('shoulders', primaryMuscle.toLowerCase().includes('shoulder')),
+                      opacity: getMuscleOpacity('shoulder', muscles),
+                    }
+                  ]} />
+                </>
+              )}
+              
+              {/* Chest/Pecs */}
+              {isMuscleActive('chest', muscles) && (
                 <View style={[
-                  styles.leftCalf,
+                  styles.chest,
                   {
-                    backgroundColor: getMuscleColor('calves', muscles[0].toLowerCase().includes('calf')),
-                    opacity: muscles[0].toLowerCase().includes('calf') ? 0.9 : 0.5,
+                    backgroundColor: getMuscleColor('chest', primaryMuscle.toLowerCase().includes('chest')),
+                    opacity: getMuscleOpacity('chest', muscles),
                   }
                 ]} />
+              )}
+              
+              {/* Abs */}
+              {isMuscleActive('ab', muscles) && (
                 <View style={[
-                  styles.rightCalf,
+                  styles.abs,
                   {
-                    backgroundColor: getMuscleColor('calves', muscles[0].toLowerCase().includes('calf')),
-                    opacity: muscles[0].toLowerCase().includes('calf') ? 0.9 : 0.5,
+                    backgroundColor: getMuscleColor('abdominals', primaryMuscle.toLowerCase().includes('ab')),
+                    opacity: getMuscleOpacity('ab', muscles),
                   }
                 ]} />
-              </>
-            )}
-          </View>
+              )}
+              
+              {/* Biceps */}
+              {isMuscleActive('bicep', muscles) && (
+                <>
+                  <View style={[
+                    styles.leftBicep,
+                    {
+                      backgroundColor: getMuscleColor('biceps', primaryMuscle.toLowerCase().includes('bicep')),
+                      opacity: getMuscleOpacity('bicep', muscles),
+                    }
+                  ]} />
+                  <View style={[
+                    styles.rightBicep,
+                    {
+                      backgroundColor: getMuscleColor('biceps', primaryMuscle.toLowerCase().includes('bicep')),
+                      opacity: getMuscleOpacity('bicep', muscles),
+                    }
+                  ]} />
+                </>
+              )}
+              
+              {/* Forearms - Front */}
+              {isMuscleActive('forearm', muscles) && (
+                <>
+                  <View style={[
+                    styles.leftForearm,
+                    {
+                      backgroundColor: getMuscleColor('forearms', primaryMuscle.toLowerCase().includes('forearm')),
+                      opacity: getMuscleOpacity('forearm', muscles),
+                    }
+                  ]} />
+                  <View style={[
+                    styles.rightForearm,
+                    {
+                      backgroundColor: getMuscleColor('forearms', primaryMuscle.toLowerCase().includes('forearm')),
+                      opacity: getMuscleOpacity('forearm', muscles),
+                    }
+                  ]} />
+                </>
+              )}
+              
+              {/* Quadriceps */}
+              {isMuscleActive('quad', muscles) && (
+                <>
+                  <View style={[
+                    styles.leftQuad,
+                    {
+                      backgroundColor: getMuscleColor('quadriceps', primaryMuscle.toLowerCase().includes('quad')),
+                      opacity: getMuscleOpacity('quad', muscles),
+                    }
+                  ]} />
+                  <View style={[
+                    styles.rightQuad,
+                    {
+                      backgroundColor: getMuscleColor('quadriceps', primaryMuscle.toLowerCase().includes('quad')),
+                      opacity: getMuscleOpacity('quad', muscles),
+                    }
+                  ]} />
+                </>
+              )}
+              
+              {/* Adductors */}
+              {isMuscleActive('adductor', muscles) && (
+                <View style={[
+                  styles.adductors,
+                  {
+                    backgroundColor: getMuscleColor('adductors', primaryMuscle.toLowerCase().includes('adductor')),
+                    opacity: getMuscleOpacity('adductor', muscles),
+                  }
+                ]} />
+              )}
+              
+              {/* Calves - Front */}
+              {isMuscleActive('calf', muscles) || isMuscleActive('calves', muscles) && (
+                <>
+                  <View style={[
+                    styles.frontLeftCalf,
+                    {
+                      backgroundColor: getMuscleColor('calves', primaryMuscle.toLowerCase().includes('calf')),
+                      opacity: getMuscleOpacity('calf', muscles),
+                    }
+                  ]} />
+                  <View style={[
+                    styles.frontRightCalf,
+                    {
+                      backgroundColor: getMuscleColor('calves', primaryMuscle.toLowerCase().includes('calf')),
+                      opacity: getMuscleOpacity('calf', muscles),
+                    }
+                  ]} />
+                </>
+              )}
+            </>
+          )}
+          
+          {viewType === 'back' && (
+            <>
+              {/* Shoulders - Back */}
+              {isMuscleActive('shoulder', muscles) && (
+                <>
+                  <View style={[
+                    styles.backLeftShoulder,
+                    {
+                      backgroundColor: getMuscleColor('shoulders', primaryMuscle.toLowerCase().includes('shoulder')),
+                      opacity: getMuscleOpacity('shoulder', muscles),
+                    }
+                  ]} />
+                  <View style={[
+                    styles.backRightShoulder,
+                    {
+                      backgroundColor: getMuscleColor('shoulders', primaryMuscle.toLowerCase().includes('shoulder')),
+                      opacity: getMuscleOpacity('shoulder', muscles),
+                    }
+                  ]} />
+                </>
+              )}
+              
+              {/* Traps */}
+              {isMuscleActive('trap', muscles) && (
+                <View style={[
+                  styles.traps,
+                  {
+                    backgroundColor: getMuscleColor('traps', primaryMuscle.toLowerCase().includes('trap')),
+                    opacity: getMuscleOpacity('trap', muscles),
+                  }
+                ]} />
+              )}
+              
+              {/* Upper/Middle Back & Lats */}
+              {(isMuscleActive('back', muscles) || isMuscleActive('lat', muscles)) && (
+                <View style={[
+                  styles.back,
+                  {
+                    backgroundColor: getMuscleColor('middle back', 
+                      primaryMuscle.toLowerCase().includes('back') || primaryMuscle.toLowerCase().includes('lat')),
+                    opacity: getMuscleOpacity('back', muscles),
+                  }
+                ]} />
+              )}
+              
+              {/* Lower Back */}
+              {isMuscleActive('lower back', muscles) && (
+                <View style={[
+                  styles.lowerBack,
+                  {
+                    backgroundColor: getMuscleColor('lower back', primaryMuscle.toLowerCase().includes('lower back')),
+                    opacity: getMuscleOpacity('lower back', muscles),
+                  }
+                ]} />
+              )}
+              
+              {/* Triceps */}
+              {isMuscleActive('tricep', muscles) && (
+                <>
+                  <View style={[
+                    styles.leftTricep,
+                    {
+                      backgroundColor: getMuscleColor('triceps', primaryMuscle.toLowerCase().includes('tricep')),
+                      opacity: getMuscleOpacity('tricep', muscles),
+                    }
+                  ]} />
+                  <View style={[
+                    styles.rightTricep,
+                    {
+                      backgroundColor: getMuscleColor('triceps', primaryMuscle.toLowerCase().includes('tricep')),
+                      opacity: getMuscleOpacity('tricep', muscles),
+                    }
+                  ]} />
+                </>
+              )}
+              
+              {/* Forearms - Back */}
+              {isMuscleActive('forearm', muscles) && (
+                <>
+                  <View style={[
+                    styles.leftForearmBack,
+                    {
+                      backgroundColor: getMuscleColor('forearms', primaryMuscle.toLowerCase().includes('forearm')),
+                      opacity: getMuscleOpacity('forearm', muscles),
+                    }
+                  ]} />
+                  <View style={[
+                    styles.rightForearmBack,
+                    {
+                      backgroundColor: getMuscleColor('forearms', primaryMuscle.toLowerCase().includes('forearm')),
+                      opacity: getMuscleOpacity('forearm', muscles),
+                    }
+                  ]} />
+                </>
+              )}
+              
+              {/* Glutes */}
+              {isMuscleActive('glute', muscles) && (
+                <View style={[
+                  styles.glutes,
+                  {
+                    backgroundColor: getMuscleColor('glutes', primaryMuscle.toLowerCase().includes('glute')),
+                    opacity: getMuscleOpacity('glute', muscles),
+                  }
+                ]} />
+              )}
+              
+              {/* Hamstrings */}
+              {isMuscleActive('hamstring', muscles) && (
+                <>
+                  <View style={[
+                    styles.leftHamstring,
+                    {
+                      backgroundColor: getMuscleColor('hamstrings', primaryMuscle.toLowerCase().includes('hamstring')),
+                      opacity: getMuscleOpacity('hamstring', muscles),
+                    }
+                  ]} />
+                  <View style={[
+                    styles.rightHamstring,
+                    {
+                      backgroundColor: getMuscleColor('hamstrings', primaryMuscle.toLowerCase().includes('hamstring')),
+                      opacity: getMuscleOpacity('hamstring', muscles),
+                    }
+                  ]} />
+                </>
+              )}
+              
+              {/* Calves - Back */}
+              {(isMuscleActive('calf', muscles) || isMuscleActive('calves', muscles)) && (
+                <>
+                  <View style={[
+                    styles.backLeftCalf,
+                    {
+                      backgroundColor: getMuscleColor('calves', primaryMuscle.toLowerCase().includes('calf')),
+                      opacity: getMuscleOpacity('calf', muscles),
+                    }
+                  ]} />
+                  <View style={[
+                    styles.backRightCalf,
+                    {
+                      backgroundColor: getMuscleColor('calves', primaryMuscle.toLowerCase().includes('calf')),
+                      opacity: getMuscleOpacity('calf', muscles),
+                    }
+                  ]} />
+                </>
+              )}
+            </>
+          )}
         </View>
         
         {/* Muscle labels for this view */}
         <View style={styles.muscleList}>
           {muscles.map((muscle, index) => {
-            const isPrimary = muscle.toLowerCase() === primaryMuscle.toLowerCase();
+            const isPrimary = primaryMuscle.toLowerCase() === muscle;
             return (
-              <View key={index} style={styles.muscleItem}>
+              <View key={`${muscle}-${index}`} style={styles.muscleItem}>
                 <View style={[
                   styles.muscleDot,
                   {
                     backgroundColor: getMuscleColor(muscle, isPrimary),
-                    opacity: isPrimary ? 0.9 : 0.5,
+                    opacity: isPrimary ? 0.9 : 0.6,
                   }
                 ]} />
                 <Text style={styles.muscleText}>{muscle}</Text>
@@ -241,13 +357,15 @@ export function MuscleHeatmapDetail({ primaryMuscle, secondaryMuscles = [] }: Mu
   };
 
   return (
-    <View style={styles.container}>
+    <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
       <Text style={styles.title}>Muscles Worked</Text>
       
-      <View style={styles.diagramsContainer}>
-        {frontMuscles.length > 0 && renderBodyDiagram(frontMuscles, 'front')}
-        {backMuscles.length > 0 && renderBodyDiagram(backMuscles, 'back')}
-      </View>
+      <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.diagramsScrollContainer}>
+        <View style={styles.diagramsContainer}>
+          {frontMuscles.length > 0 && renderBodyDiagram(frontMuscles, 'front')}
+          {backMuscles.length > 0 && renderBodyDiagram(backMuscles, 'back')}
+        </View>
+      </ScrollView>
       
       {/* Summary */}
       <View style={styles.summary}>
@@ -255,8 +373,14 @@ export function MuscleHeatmapDetail({ primaryMuscle, secondaryMuscles = [] }: Mu
           <Text style={styles.summaryLabel}>Primary:</Text>
           <Text style={styles.summaryValue}>{primaryMuscle}</Text>
         </View>
+        {secondaryMuscles.length > 0 && (
+          <View style={styles.summaryItem}>
+            <Text style={styles.summaryLabel}>Secondary:</Text>
+            <Text style={styles.summaryValue}>{secondaryMuscles.join(', ')}</Text>
+          </View>
+        )}
       </View>
-    </View>
+    </ScrollView>
   );
 }
 
@@ -270,14 +394,17 @@ const styles = StyleSheet.create({
     color: Colors.darkGrey,
     marginBottom: 24,
   },
+  diagramsScrollContainer: {
+    marginBottom: 24,
+  },
   diagramsContainer: {
     flexDirection: 'row',
-    gap: 24,
-    justifyContent: 'center',
-    marginBottom: 24,
+    gap: 32,
+    paddingHorizontal: 8,
   },
   bodyContainer: {
     alignItems: 'center',
+    minWidth: 180,
   },
   viewLabel: {
     fontSize: 16,
@@ -286,229 +413,326 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   bodyDiagram: {
-    width: 150,
-    height: 350,
-    backgroundColor: Colors.lightGrey,
-    borderRadius: 75,
+    width: 160,
+    height: 380,
+    backgroundColor: '#F5F5F5',
+    borderRadius: 80,
     position: 'relative',
     overflow: 'hidden',
+    borderWidth: 2,
+    borderColor: '#E0E0E0',
   },
   bodyPart: {
     position: 'absolute',
   },
+  
+  // Head
   head: {
-    top: 10,
+    top: 12,
     left: '50%',
-    marginLeft: -20,
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: '#E0E0E0',
+    marginLeft: -22,
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: '#E8E8E8',
   },
-  upperBody: {
-    position: 'absolute',
-    top: 50,
-    left: 20,
-    right: 20,
-    height: 120,
+  
+  // Neck
+  neck: {
+    top: 54,
+    left: '50%',
+    marginLeft: -12,
+    width: 24,
+    height: 20,
+    borderRadius: 6,
   },
-  chest: {
-    position: 'absolute',
-    top: 10,
-    left: 20,
-    right: 20,
-    height: 60,
-    borderRadius: 12,
-  },
-  leftShoulder: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    width: 30,
-    height: 40,
-    borderRadius: 15,
-  },
-  rightShoulder: {
-    position: 'absolute',
-    top: 0,
-    right: 0,
-    width: 30,
-    height: 40,
-    borderRadius: 15,
-  },
-  abs: {
-    position: 'absolute',
+  
+  // FRONT VIEW POSITIONING
+  // Shoulders - Front
+  frontLeftShoulder: {
     top: 70,
-    left: 30,
-    right: 30,
-    height: 50,
-    borderRadius: 8,
+    left: 12,
+    width: 32,
+    height: 42,
+    borderRadius: 16,
   },
-  back: {
-    position: 'absolute',
-    top: 10,
-    left: 15,
-    right: 15,
-    height: 100,
+  frontRightShoulder: {
+    top: 70,
+    right: 12,
+    width: 32,
+    height: 42,
+    borderRadius: 16,
+  },
+  
+  // Chest
+  chest: {
+    top: 85,
+    left: 42,
+    right: 42,
+    height: 65,
+    borderRadius: 14,
+  },
+  
+  // Abs
+  abs: {
+    top: 150,
+    left: 50,
+    right: 50,
+    height: 70,
     borderRadius: 12,
   },
-  traps: {
-    position: 'absolute',
-    top: 0,
-    left: 25,
-    right: 25,
-    height: 30,
-    borderRadius: 8,
-  },
-  arms: {
-    position: 'absolute',
-    top: 60,
-    left: 0,
-    right: 0,
-  },
+  
+  // Biceps
   leftBicep: {
-    position: 'absolute',
-    top: 0,
-    left: 5,
-    width: 20,
-    height: 50,
-    borderRadius: 10,
+    top: 110,
+    left: 6,
+    width: 22,
+    height: 56,
+    borderRadius: 11,
   },
   rightBicep: {
-    position: 'absolute',
-    top: 0,
-    right: 5,
-    width: 20,
-    height: 50,
-    borderRadius: 10,
+    top: 110,
+    right: 6,
+    width: 22,
+    height: 56,
+    borderRadius: 11,
   },
-  leftTricep: {
-    position: 'absolute',
-    top: 0,
-    left: 5,
-    width: 20,
-    height: 50,
-    borderRadius: 10,
+  
+  // Forearms - Front
+  leftForearm: {
+    top: 166,
+    left: 8,
+    width: 18,
+    height: 54,
+    borderRadius: 9,
   },
-  rightTricep: {
-    position: 'absolute',
-    top: 0,
-    right: 5,
-    width: 20,
-    height: 50,
-    borderRadius: 10,
+  rightForearm: {
+    top: 166,
+    right: 8,
+    width: 18,
+    height: 54,
+    borderRadius: 9,
   },
-  legs: {
-    position: 'absolute',
-    top: 170,
-    left: 20,
-    right: 20,
-    height: 170,
-  },
+  
+  // Quadriceps
   leftQuad: {
-    position: 'absolute',
-    top: 0,
-    left: 5,
-    width: 40,
-    height: 100,
-    borderRadius: 20,
+    top: 220,
+    left: 42,
+    width: 32,
+    height: 90,
+    borderRadius: 16,
   },
   rightQuad: {
-    position: 'absolute',
-    top: 0,
-    right: 5,
-    width: 40,
-    height: 100,
-    borderRadius: 20,
+    top: 220,
+    right: 42,
+    width: 32,
+    height: 90,
+    borderRadius: 16,
   },
+  
+  // Adductors
+  adductors: {
+    top: 240,
+    left: '50%',
+    marginLeft: -10,
+    width: 20,
+    height: 60,
+    borderRadius: 10,
+  },
+  
+  // Calves - Front
+  frontLeftCalf: {
+    bottom: 12,
+    left: 44,
+    width: 26,
+    height: 70,
+    borderRadius: 13,
+  },
+  frontRightCalf: {
+    bottom: 12,
+    right: 44,
+    width: 26,
+    height: 70,
+    borderRadius: 13,
+  },
+  
+  // BACK VIEW POSITIONING
+  // Shoulders - Back
+  backLeftShoulder: {
+    top: 70,
+    left: 12,
+    width: 32,
+    height: 42,
+    borderRadius: 16,
+  },
+  backRightShoulder: {
+    top: 70,
+    right: 12,
+    width: 32,
+    height: 42,
+    borderRadius: 16,
+  },
+  
+  // Traps
+  traps: {
+    top: 60,
+    left: 44,
+    right: 44,
+    height: 40,
+    borderRadius: 10,
+  },
+  
+  // Back & Lats
+  back: {
+    top: 100,
+    left: 30,
+    right: 30,
+    height: 95,
+    borderRadius: 14,
+  },
+  
+  // Lower Back
+  lowerBack: {
+    top: 195,
+    left: 48,
+    right: 48,
+    height: 38,
+    borderRadius: 10,
+  },
+  
+  // Triceps
+  leftTricep: {
+    top: 110,
+    left: 6,
+    width: 22,
+    height: 56,
+    borderRadius: 11,
+  },
+  rightTricep: {
+    top: 110,
+    right: 6,
+    width: 22,
+    height: 56,
+    borderRadius: 11,
+  },
+  
+  // Forearms - Back
+  leftForearmBack: {
+    top: 166,
+    left: 8,
+    width: 18,
+    height: 54,
+    borderRadius: 9,
+  },
+  rightForearmBack: {
+    top: 166,
+    right: 8,
+    width: 18,
+    height: 54,
+    borderRadius: 9,
+  },
+  
+  // Glutes
   glutes: {
-    position: 'absolute',
-    top: 0,
-    left: 10,
-    right: 10,
+    top: 233,
+    left: 44,
+    right: 44,
     height: 50,
-    borderRadius: 12,
+    borderRadius: 14,
   },
+  
+  // Hamstrings
   leftHamstring: {
-    position: 'absolute',
-    top: 50,
-    left: 5,
-    width: 40,
-    height: 80,
-    borderRadius: 20,
+    top: 283,
+    left: 44,
+    width: 30,
+    height: 74,
+    borderRadius: 15,
   },
   rightHamstring: {
-    position: 'absolute',
-    top: 50,
-    right: 5,
-    width: 40,
-    height: 80,
-    borderRadius: 20,
-  },
-  leftCalf: {
-    position: 'absolute',
-    bottom: 0,
-    left: 10,
+    top: 283,
+    right: 44,
     width: 30,
-    height: 60,
+    height: 74,
     borderRadius: 15,
   },
-  rightCalf: {
-    position: 'absolute',
-    bottom: 0,
-    right: 10,
-    width: 30,
-    height: 60,
-    borderRadius: 15,
+  
+  // Calves - Back
+  backLeftCalf: {
+    bottom: 12,
+    left: 46,
+    width: 24,
+    height: 68,
+    borderRadius: 12,
   },
+  backRightCalf: {
+    bottom: 12,
+    right: 46,
+    width: 24,
+    height: 68,
+    borderRadius: 12,
+  },
+  
+  // Muscle list
   muscleList: {
-    marginTop: 16,
-    gap: 8,
-    width: '100%',
+    marginTop: 20,
+    gap: 10,
+    width: 180,
   },
   muscleItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 12,
+    gap: 10,
     padding: 12,
-    backgroundColor: Colors.lightGrey,
-    borderRadius: 12,
+    backgroundColor: '#FAFAFA',
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: '#ECECEC',
   },
   muscleDot: {
-    width: 12,
-    height: 12,
-    borderRadius: 6,
+    width: 14,
+    height: 14,
+    borderRadius: 7,
   },
   muscleText: {
     flex: 1,
-    fontSize: 14,
+    fontSize: 13,
     fontWeight: '500',
     color: Colors.darkGrey,
     textTransform: 'capitalize',
   },
   primaryBadge: {
-    fontSize: 11,
-    fontWeight: '600',
+    fontSize: 10,
+    fontWeight: '700',
     color: Colors.primary,
-    backgroundColor: Colors.primary + '20',
+    backgroundColor: Colors.primary + '15',
     paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 8,
+    paddingVertical: 3,
+    borderRadius: 6,
+    overflow: 'hidden',
   },
+  
+  // Summary
   summary: {
-    marginTop: 16,
+    marginTop: 24,
+    padding: 16,
+    backgroundColor: '#FAFAFA',
+    borderRadius: 12,
+    gap: 12,
   },
   summaryItem: {
     flexDirection: 'row',
-    alignItems: 'center',
+    alignItems: 'flex-start',
     gap: 8,
   },
   summaryLabel: {
     fontSize: 15,
-    fontWeight: '600',
+    fontWeight: '700',
     color: Colors.darkGrey,
+    minWidth: 90,
   },
   summaryValue: {
+    flex: 1,
     fontSize: 15,
     color: Colors.mediumGrey,
     textTransform: 'capitalize',
