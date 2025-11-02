@@ -99,7 +99,7 @@ export default function ExerciseLibraryScreen() {
           <Text style={[styles.filterPillText, !selectedDifficulty && styles.filterPillTextActive]}>All Levels</Text>
         </TouchableOpacity>
 
-        {['beginner', 'intermediate', 'advanced', 'expert'].map(diff => (
+        {['beginner', 'intermediate', 'expert'].map(diff => (
           <TouchableOpacity
             key={diff}
             style={[
