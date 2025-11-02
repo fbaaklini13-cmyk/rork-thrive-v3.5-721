@@ -2,9 +2,9 @@ import { View, Text, StyleSheet, ScrollView, TextInput, TouchableOpacity, FlatLi
 import { useState, useMemo } from 'react';
 import { Colors } from '@/constants/colors';
 import { Dumbbell, Search } from 'lucide-react-native';
-import { ALL_EXERCISES, MUSCLE_GROUPS } from '@/mocks/full-exercise-library';
+import { ALL_EXERCISES } from '@/mocks/full-exercise-library';
 import { router } from 'expo-router';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { MuscleGroupGrid } from '@/components/MuscleGroupGrid';
 
 export default function ExerciseLibraryScreen() {
   const [searchQuery, setSearchQuery] = useState('');
@@ -84,13 +84,19 @@ export default function ExerciseLibraryScreen() {
         />
       </View>
 
-      {/* Filter Pills */}
+      {/* Muscle Group Grid */}
+      <MuscleGroupGrid
+        selectedMuscle={selectedMuscle}
+        onSelectMuscle={setSelectedMuscle}
+      />
+
+      {/* Difficulty Filter Pills */}
       <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.filterContainer}>
         <TouchableOpacity
-          style={[styles.filterPill, !selectedMuscle && !selectedDifficulty && styles.filterPillActive]}
-          onPress={() => { setSelectedMuscle(null); setSelectedDifficulty(null); }}
+          style={[styles.filterPill, !selectedDifficulty && styles.filterPillActive]}
+          onPress={() => setSelectedDifficulty(null)}
         >
-          <Text style={[styles.filterPillText, !selectedMuscle && !selectedDifficulty && styles.filterPillTextActive]}>All</Text>
+          <Text style={[styles.filterPillText, !selectedDifficulty && styles.filterPillTextActive]}>All Levels</Text>
         </TouchableOpacity>
 
         {['beginner', 'intermediate', 'advanced', 'expert'].map(diff => (
@@ -107,26 +113,6 @@ export default function ExerciseLibraryScreen() {
               styles.filterPillText,
               selectedDifficulty === diff && styles.filterPillTextActive
             ]}>{diff.charAt(0).toUpperCase() + diff.slice(1)}</Text>
-          </TouchableOpacity>
-        ))}
-      </ScrollView>
-
-      {/* Muscle Group Filters */}
-      <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.muscleFilterContainer}>
-        {MUSCLE_GROUPS.map(muscle => (
-          <TouchableOpacity
-            key={muscle}
-            style={[
-              styles.musclePill,
-              selectedMuscle === muscle && styles.musclePillActive,
-              selectedMuscle === muscle && { backgroundColor: getMuscleColor(muscle) }
-            ]}
-            onPress={() => setSelectedMuscle(selectedMuscle === muscle ? null : muscle)}
-          >
-            <Text style={[
-              styles.musclePillText,
-              selectedMuscle === muscle && styles.musclePillTextActive
-            ]}>{muscle}</Text>
           </TouchableOpacity>
         ))}
       </ScrollView>
@@ -203,7 +189,7 @@ const styles = StyleSheet.create({
   },
   filterContainer: {
     paddingHorizontal: 16,
-    paddingBottom: 8,
+    paddingBottom: 12,
     maxHeight: 50,
   },
   filterPill: {
@@ -227,32 +213,7 @@ const styles = StyleSheet.create({
   filterPillTextActive: {
     color: '#fff',
   },
-  muscleFilterContainer: {
-    paddingHorizontal: 16,
-    paddingBottom: 12,
-    maxHeight: 50,
-  },
-  musclePill: {
-    paddingHorizontal: 14,
-    paddingVertical: 6,
-    borderRadius: 16,
-    backgroundColor: '#fff',
-    marginRight: 8,
-    borderWidth: 1,
-    borderColor: '#ddd',
-  },
-  musclePillActive: {
-    borderColor: 'transparent',
-  },
-  musclePillText: {
-    fontSize: 13,
-    color: '#666',
-    fontWeight: '500',
-    textTransform: 'capitalize',
-  },
-  musclePillTextActive: {
-    color: '#fff',
-  },
+
   resultsHeader: {
     paddingHorizontal: 16,
     paddingVertical: 8,
