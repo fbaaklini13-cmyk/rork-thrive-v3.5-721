@@ -76,8 +76,25 @@ export const [UserProfileProvider, useUserProfile] = createContextHook(() => {
         AsyncStorage.getItem(userStorageKey + STORAGE_KEYS.ACHIEVEMENTS),
       ]);
 
+      const safeJSONParse = <T>(data: string | null, fallback: T, key: string): T => {
+        if (!data) return fallback;
+        try {
+          const parsed = JSON.parse(data);
+          return parsed;
+        } catch (error) {
+          console.error(`Failed to parse ${key}:`, error);
+          console.error(`Data value:`, data?.substring(0, 100));
+          return fallback;
+        }
+      };
+
       if (profileData) {
-        const parsedProfile = JSON.parse(profileData);
+        const parsedProfile = safeJSONParse<UserProfile>(profileData, {
+          aiEnabled: false,
+          onboardingCompleted: false,
+          isPremium: false,
+        }, 'profile');
+        
         if (parsedProfile.isPremium && parsedProfile.premiumExpiresAt) {
           const expiryDate = new Date(parsedProfile.premiumExpiresAt);
           if (expiryDate < new Date()) {
@@ -95,16 +112,16 @@ export const [UserProfileProvider, useUserProfile] = createContextHook(() => {
         });
       }
       
-      setNutritionEntries(nutritionData ? JSON.parse(nutritionData) : []);
-      setWorkoutPlans(workoutData ? JSON.parse(workoutData) : []);
-      setChatHistory(chatData ? JSON.parse(chatData) : []);
-      setWorkoutLogs(logsData ? JSON.parse(logsData) : []);
-      setWeeklyCheckIns(checkInsData ? JSON.parse(checkInsData) : []);
-      setBodyScans(scansData ? JSON.parse(scansData) : []);
-      setSavedRecipes(recipesData ? JSON.parse(recipesData) : []);
-      setBodyMeasurements(measurementsData ? JSON.parse(measurementsData) : []);
-      setProgressPhotos(photosData ? JSON.parse(photosData) : []);
-      setAchievements(achievementsData ? JSON.parse(achievementsData) : []);
+      setNutritionEntries(safeJSONParse(nutritionData, [], 'nutrition'));
+      setWorkoutPlans(safeJSONParse(workoutData, [], 'workouts'));
+      setChatHistory(safeJSONParse(chatData, [], 'chat'));
+      setWorkoutLogs(safeJSONParse(logsData, [], 'logs'));
+      setWeeklyCheckIns(safeJSONParse(checkInsData, [], 'checkins'));
+      setBodyScans(safeJSONParse(scansData, [], 'scans'));
+      setSavedRecipes(safeJSONParse(recipesData, [], 'recipes'));
+      setBodyMeasurements(safeJSONParse(measurementsData, [], 'measurements'));
+      setProgressPhotos(safeJSONParse(photosData, [], 'photos'));
+      setAchievements(safeJSONParse(achievementsData, [], 'achievements'));
     } catch (error) {
       console.error('Error loading user data:', error);
     }
