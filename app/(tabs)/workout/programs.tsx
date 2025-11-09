@@ -18,7 +18,7 @@ import {
   Award,
 } from 'lucide-react-native';
 import { Colors } from '@/constants/colors';
-import { PREDEFINED_PROGRAMS, type PredefinedProgram } from '@/mocks/workout-programs';
+import { COMPLETE_WORKOUT_PROGRAMS, type ExtendedProgram } from '@/mocks/all-workout-programs';
 import { useUserProfile } from '@/hooks/user-profile-store';
 
 export default function ProgramsScreen() {
@@ -26,12 +26,12 @@ export default function ProgramsScreen() {
   const { addWorkoutPlan } = useUserProfile();
   const [selectedFilter, setSelectedFilter] = useState<'all' | 'beginner' | 'intermediate' | 'advanced'>('all');
 
-  const filteredPrograms = PREDEFINED_PROGRAMS.filter(program => {
+  const filteredPrograms = COMPLETE_WORKOUT_PROGRAMS.filter(program => {
     if (selectedFilter === 'all') return true;
     return program.difficulty === selectedFilter;
   });
 
-  const handleEnroll = async (program: PredefinedProgram) => {
+  const handleEnroll = async (program: ExtendedProgram) => {
     Alert.alert(
       'Enroll in Program',
       `Start "${program.name}"? This will become your active workout plan.`,
