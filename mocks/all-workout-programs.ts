@@ -1,5 +1,6 @@
 import type { WorkoutPlan } from '@/types/user';
-import { PREDEFINED_PROGRAMS, type PredefinedProgram } from './workout-programs';
+import type { PredefinedProgram } from './workout-programs';
+import { PREDEFINED_PROGRAMS } from './workout-programs';
 
 // This file consolidates ALL workout programs from the comprehensive guide
 // Including: Strength (2-6 days), Hypertrophy (2-6 days), Endurance (2-6 days),
