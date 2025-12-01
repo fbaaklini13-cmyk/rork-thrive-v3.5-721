@@ -1,4 +1,3 @@
-import type { WorkoutPlan } from '@/types/user';
 import type { PredefinedProgram } from './workout-programs';
 import { PREDEFINED_PROGRAMS } from './workout-programs';
 
@@ -20,15 +19,6 @@ const wp = (goals: string[], equipment: string[], days: number, plan: any[]) => 
   daysPerWeek: days,
   plan
 });
-
-// Generate comprehensive program list based on the user's guide
-// This generates variations for each combination of:
-// - Training frequency (2-6 days/week)
-// - Goal (Strength, Hypertrophy, Endurance)
-// - Level (Beginner, Intermediate, Advanced)
-
-const generateProgramId = (base: string, days: number, level: string) => 
-  `${base}-${days}day-${level.toLowerCase()}`;
 
 // ====================
 // ADDITIONAL STRENGTH PROGRAMS (extending existing)

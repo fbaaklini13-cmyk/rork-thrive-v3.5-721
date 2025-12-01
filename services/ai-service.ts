@@ -1,5 +1,5 @@
 import type { ChatMessage, WorkoutPlan, UserProfile } from '@/types/user';
-import { generateObject, generateText } from '@rork/toolkit-sdk';
+import { generateObject, generateText } from '@rork-ai/toolkit-sdk';
 import { z } from 'zod';
 
 export class AIService {
