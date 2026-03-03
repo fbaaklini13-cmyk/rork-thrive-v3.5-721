@@ -36,5 +36,3 @@ export const supabase = hasValidCredentials
       },
     })
   : null as any;
-
-export const isSupabaseConfigured = () => hasValidCredentials;

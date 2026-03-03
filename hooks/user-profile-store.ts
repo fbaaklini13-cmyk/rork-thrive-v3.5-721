@@ -5,7 +5,7 @@ import { Alert, Platform } from 'react-native';
 import * as Linking from 'expo-linking';
 import type { UserProfile, NutritionEntry, WorkoutPlan, ChatMessage, WorkoutLog, WeeklyCheckIn, BodyScan, Recipe, BodyMeasurement, ProgressPhoto, Achievement } from '@/types/user';
 import type { AuthChangeEvent, Session } from '@supabase/supabase-js';
-import { supabase, isSupabaseConfigured } from '@/lib/supabase';
+import { supabase } from '@/lib/supabase';
 
 const STORAGE_KEYS = {
   PROFILE: 'user_profile',
@@ -130,12 +130,6 @@ export const [UserProfileProvider, useUserProfile] = createContextHook(() => {
   useEffect(() => {
     const loadData = async () => {
       try {
-        if (!isSupabaseConfigured()) {
-          console.warn('Supabase not configured - skipping auth check');
-          setIsLoading(false);
-          return;
-        }
-
         const { data: { session } } = await supabase.auth.getSession();
         
         if (session?.user) {
@@ -153,10 +147,6 @@ export const [UserProfileProvider, useUserProfile] = createContextHook(() => {
     };
 
     loadData();
-
-    if (!isSupabaseConfigured()) {
-      return;
-    }
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event: AuthChangeEvent, session: Session | null) => {
       console.log('Auth state changed:', event, session?.user?.id);
@@ -184,7 +174,7 @@ export const [UserProfileProvider, useUserProfile] = createContextHook(() => {
     return () => {
       subscription.unsubscribe();
     };
-  }, [userId]);
+  }, []);
 
   const updateProfile = async (updates: Partial<UserProfile>) => {
     if (!userId) return;
@@ -433,15 +423,6 @@ export const [UserProfileProvider, useUserProfile] = createContextHook(() => {
 
   const resendConfirmationEmail = async (email: string) => {
     try {
-      if (!isSupabaseConfigured()) {
-        Alert.alert(
-          'Configuration Required',
-          'Supabase credentials are not configured.',
-          [{ text: 'OK' }]
-        );
-        return false;
-      }
-
       const { error } = await supabase.auth.resend({
         type: 'signup',
         email,
@@ -468,15 +449,6 @@ export const [UserProfileProvider, useUserProfile] = createContextHook(() => {
 
   const signIn = async (email: string, password: string) => {
     try {
-      if (!isSupabaseConfigured()) {
-        Alert.alert(
-          'Configuration Required',
-          'Supabase credentials are not configured. Please add your EXPO_PUBLIC_SUPABASE_URL and EXPO_PUBLIC_SUPABASE_ANON_KEY environment variables.',
-          [{ text: 'OK' }]
-        );
-        return false;
-      }
-
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
@@ -532,15 +504,6 @@ export const [UserProfileProvider, useUserProfile] = createContextHook(() => {
 
   const signUp = async (email: string, password: string) => {
     try {
-      if (!isSupabaseConfigured()) {
-        Alert.alert(
-          'Configuration Required',
-          'Supabase credentials are not configured. Please add your EXPO_PUBLIC_SUPABASE_URL and EXPO_PUBLIC_SUPABASE_ANON_KEY environment variables.',
-          [{ text: 'OK' }]
-        );
-        return false;
-      }
-
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
@@ -614,15 +577,6 @@ export const [UserProfileProvider, useUserProfile] = createContextHook(() => {
 
   const signInWithPhone = async (phone: string, password: string) => {
     try {
-      if (!isSupabaseConfigured()) {
-        Alert.alert(
-          'Configuration Required',
-          'Supabase credentials are not configured. Please add your EXPO_PUBLIC_SUPABASE_URL and EXPO_PUBLIC_SUPABASE_ANON_KEY environment variables.',
-          [{ text: 'OK' }]
-        );
-        return false;
-      }
-
       const { data, error } = await supabase.auth.signInWithPassword({
         phone,
         password,
@@ -662,15 +616,6 @@ export const [UserProfileProvider, useUserProfile] = createContextHook(() => {
 
   const signUpWithPhone = async (phone: string, password: string) => {
     try {
-      if (!isSupabaseConfigured()) {
-        Alert.alert(
-          'Configuration Required',
-          'Supabase credentials are not configured. Please add your EXPO_PUBLIC_SUPABASE_URL and EXPO_PUBLIC_SUPABASE_ANON_KEY environment variables.',
-          [{ text: 'OK' }]
-        );
-        return false;
-      }
-
       const { data, error } = await supabase.auth.signUp({
         phone,
         password,
@@ -724,15 +669,6 @@ export const [UserProfileProvider, useUserProfile] = createContextHook(() => {
 
   const signInWithOAuth = async (provider: 'google' | 'apple') => {
     try {
-      if (!isSupabaseConfigured()) {
-        Alert.alert(
-          'Configuration Required',
-          'Supabase credentials are not configured. Please add your EXPO_PUBLIC_SUPABASE_URL and EXPO_PUBLIC_SUPABASE_ANON_KEY environment variables.',
-          [{ text: 'OK' }]
-        );
-        return false;
-      }
-
       const redirectUrl = Linking.createURL('auth/callback');
 
       console.log('Attempting OAuth sign in with provider:', provider);
