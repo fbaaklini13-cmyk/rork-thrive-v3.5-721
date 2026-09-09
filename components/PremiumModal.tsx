@@ -71,7 +71,12 @@ export default function PremiumModal({ visible, onClose, onSubscribe }: PremiumM
     >
       <View style={styles.modalOverlay}>
         <View style={styles.modalContent}>
-          <TouchableOpacity style={styles.closeButton} onPress={onClose}>
+          <TouchableOpacity
+            style={styles.closeButton}
+            onPress={onClose}
+            accessibilityRole="button"
+            accessibilityLabel="Close"
+          >
             <X size={24} color="#7F8C8D" />
           </TouchableOpacity>
 

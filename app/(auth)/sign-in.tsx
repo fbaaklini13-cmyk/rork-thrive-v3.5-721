@@ -112,6 +112,8 @@ export default function SignInScreen() {
               <TouchableOpacity
                 onPress={() => setShowPassword(!showPassword)}
                 style={styles.eyeIcon}
+                accessibilityRole="button"
+                accessibilityLabel={showPassword ? 'Hide password' : 'Show password'}
               >
                 {showPassword ? (
                   <EyeOff size={20} color={Colors.mediumGrey} />
@@ -151,6 +153,8 @@ export default function SignInScreen() {
                 style={styles.oauthButton}
                 onPress={() => onOAuthSignIn('google')}
                 disabled={loading}
+                accessibilityRole="button"
+                accessibilityLabel="Continue with Google"
               >
                 <Chrome size={24} color={Colors.darkGrey} />
               </TouchableOpacity>
@@ -158,6 +162,8 @@ export default function SignInScreen() {
                 style={styles.oauthButton}
                 onPress={() => onOAuthSignIn('apple')}
                 disabled={loading}
+                accessibilityRole="button"
+                accessibilityLabel="Continue with Apple"
               >
                 <AppleIcon size={24} color={Colors.darkGrey} />
               </TouchableOpacity>

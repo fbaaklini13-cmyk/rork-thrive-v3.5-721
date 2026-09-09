@@ -114,22 +114,28 @@ export default function ExercisesScreen() {
             placeholderTextColor={Colors.mediumGrey}
           />
           {searchQuery.length > 0 && (
-            <TouchableOpacity onPress={() => setSearchQuery('')}>
+            <TouchableOpacity
+              onPress={() => setSearchQuery('')}
+              accessibilityRole="button"
+              accessibilityLabel="Clear search"
+            >
               <X color={Colors.mediumGrey} size={20} />
             </TouchableOpacity>
           )}
         </View>
-        
+
         <TouchableOpacity
           style={[
             styles.filterButton,
             hasActiveFilters && styles.filterButtonActive,
           ]}
           onPress={() => setShowFilters(!showFilters)}
+          accessibilityRole="button"
+          accessibilityLabel={showFilters ? 'Hide filters' : 'Show filters'}
         >
-          <Filter 
-            color={hasActiveFilters ? Colors.white : Colors.darkGrey} 
-            size={20} 
+          <Filter
+            color={hasActiveFilters ? Colors.white : Colors.darkGrey}
+            size={20}
           />
         </TouchableOpacity>
       </View>

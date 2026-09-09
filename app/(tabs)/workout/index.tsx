@@ -221,6 +221,8 @@ export default function WorkoutScreen() {
                           <TouchableOpacity
                             style={styles.replaceButton}
                             onPress={() => handleReplaceExercise(latestPlan.id, dayIndex, exerciseIndex)}
+                            accessibilityRole="button"
+                            accessibilityLabel={`Replace ${exercise.name}`}
                           >
                             <Text style={styles.replaceIcon}>🔄</Text>
                           </TouchableOpacity>
@@ -316,7 +318,11 @@ export default function WorkoutScreen() {
           <View style={styles.modalCard}>
             <View style={styles.modalHeader}>
               <Text style={styles.modalTitle}>Generate Workout Plan</Text>
-              <TouchableOpacity onPress={() => setShowAIGenerator(false)}>
+              <TouchableOpacity
+                onPress={() => setShowAIGenerator(false)}
+                accessibilityRole="button"
+                accessibilityLabel="Close"
+              >
                 <X color={Colors.darkGrey} size={24} />
               </TouchableOpacity>
             </View>

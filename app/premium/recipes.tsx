@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   TextInput,
   ActivityIndicator,
+  Alert,
 } from 'react-native';
 import { Stack } from 'expo-router';
 import { ChefHat, Clock, Flame } from 'lucide-react-native';
@@ -34,9 +35,14 @@ export default function RecipesScreen() {
         ...preferences,
         dietary: profile.dietaryPreferences?.join(', '),
       });
-      setRecipe(result);
+      if (result) {
+        setRecipe(result);
+      } else {
+        Alert.alert('Error', 'Could not generate a recipe. Please try again.');
+      }
     } catch (error) {
       console.error('Failed to generate recipe:', error);
+      Alert.alert('Error', 'Could not generate a recipe. Please try again.');
     } finally {
       setLoading(false);
     }

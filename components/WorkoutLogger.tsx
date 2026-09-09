@@ -16,9 +16,15 @@ import type { Exercise, SetLog } from '@/types/user';
 import RestTimer from './RestTimer';
 import PlateCalculator from './PlateCalculator';
 
+export interface WorkoutCompletionLog {
+  dayName: string;
+  duration: number;
+  exercises: { name: string; sets: SetLog[] }[];
+}
+
 interface WorkoutLoggerProps {
   visible: boolean;
-  onClose: () => void;
+  onClose: (workoutLog?: WorkoutCompletionLog) => void;
   workoutPlanId: string;
   dayName: string;
   exercises: Exercise[];
@@ -38,6 +44,16 @@ export default function WorkoutLogger({
   const [plateCalcVisible, setPlateCalcVisible] = useState(false);
   const [selectedWeight, setSelectedWeight] = useState(0);
   const [showWarmups, setShowWarmups] = useState(true);
+  const [workoutStartTime, setWorkoutStartTime] = useState<number | null>(null);
+
+  // Track workout start time so we can report a real duration in the completion summary
+  React.useEffect(() => {
+    if (visible) {
+      setWorkoutStartTime(Date.now());
+    } else {
+      setWorkoutStartTime(null);
+    }
+  }, [visible]);
   
   // Reset state when modal is closed or workout changes
   React.useEffect(() => {
@@ -150,6 +166,16 @@ export default function WorkoutLogger({
     setPlateCalcVisible(true);
   };
 
+
+  const buildWorkoutSummary = (): WorkoutCompletionLog => ({
+    dayName,
+    duration: workoutStartTime ? (Date.now() - workoutStartTime) / 60000 : 0,
+    exercises: exercises.map(ex => ({
+      name: ex.name,
+      sets: exerciseLogs[ex.name] || [],
+    })),
+  });
+
   const handleNext = async () => {
     if (!currentExercise || !workoutPlanId) return;
     
@@ -175,7 +201,7 @@ export default function WorkoutLogger({
       Alert.alert(
         'Workout Complete!', 
         'Great job! Your workout has been logged.',
-        [{ text: 'OK', onPress: onClose }]
+        [{ text: 'OK', onPress: () => onClose(buildWorkoutSummary()) }]
       );
     }
   };
@@ -184,7 +210,7 @@ export default function WorkoutLogger({
     if (currentExerciseIndex < exercises.length - 1) {
       setCurrentExerciseIndex(currentExerciseIndex + 1);
     } else {
-      onClose();
+      onClose(buildWorkoutSummary());
     }
   };
 
@@ -253,6 +279,9 @@ export default function WorkoutLogger({
                   <TouchableOpacity
                     style={styles.checkButton}
                     onPress={() => toggleSetComplete(index)}
+                    accessibilityRole="checkbox"
+                    accessibilityState={{ checked: set.completed }}
+                    accessibilityLabel={`Mark set ${set.isWarmup ? 'W' + Math.abs(set.setNumber) : set.setNumber} as ${set.completed ? 'incomplete' : 'complete'}`}
                   >
                     {set.completed ? (
                       <CheckCircle color={Colors.primary} size={24} />
@@ -269,6 +298,8 @@ export default function WorkoutLogger({
                     <TouchableOpacity
                       style={styles.adjustButton}
                       onPress={() => updateSet(index, 'weight', Math.max(0, set.weight - 2.5))}
+                      accessibilityRole="button"
+                      accessibilityLabel="Decrease weight by 2.5 kg"
                     >
                       <Minus color={Colors.mediumGrey} size={16} />
                     </TouchableOpacity>
@@ -277,10 +308,13 @@ export default function WorkoutLogger({
                       value={set.weight.toString()}
                       onChangeText={(text) => updateSet(index, 'weight', parseFloat(text) || 0)}
                       keyboardType="decimal-pad"
+                      accessibilityLabel="Weight in kilograms"
                     />
                     <TouchableOpacity
                       style={styles.adjustButton}
                       onPress={() => updateSet(index, 'weight', set.weight + 2.5)}
+                      accessibilityRole="button"
+                      accessibilityLabel="Increase weight by 2.5 kg"
                     >
                       <Plus color={Colors.mediumGrey} size={16} />
                     </TouchableOpacity>
@@ -288,6 +322,8 @@ export default function WorkoutLogger({
                     <TouchableOpacity
                       style={styles.calcButton}
                       onPress={() => openPlateCalculator(set.weight)}
+                      accessibilityRole="button"
+                      accessibilityLabel="Open plate calculator"
                     >
                       <Calculator color={Colors.primary} size={16} />
                     </TouchableOpacity>
@@ -297,6 +333,8 @@ export default function WorkoutLogger({
                     <TouchableOpacity
                       style={styles.adjustButton}
                       onPress={() => updateSet(index, 'reps', Math.max(0, set.reps - 1))}
+                      accessibilityRole="button"
+                      accessibilityLabel="Decrease reps by 1"
                     >
                       <Minus color={Colors.mediumGrey} size={16} />
                     </TouchableOpacity>
@@ -305,10 +343,13 @@ export default function WorkoutLogger({
                       value={set.reps.toString()}
                       onChangeText={(text) => updateSet(index, 'reps', parseInt(text) || 0)}
                       keyboardType="number-pad"
+                      accessibilityLabel="Reps"
                     />
                     <TouchableOpacity
                       style={styles.adjustButton}
                       onPress={() => updateSet(index, 'reps', set.reps + 1)}
+                      accessibilityRole="button"
+                      accessibilityLabel="Increase reps by 1"
                     >
                       <Plus color={Colors.mediumGrey} size={16} />
                     </TouchableOpacity>

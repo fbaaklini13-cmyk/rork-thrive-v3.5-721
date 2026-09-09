@@ -111,8 +111,8 @@ export default function ProfileScreen() {
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Subscription</Text>
         
-        {/* Debug: Add test premium button */}
-        {!profile.isPremium && (
+        {/* Dev-only: test premium button, gated out of production builds */}
+        {__DEV__ && !profile.isPremium && (
           <TouchableOpacity 
             style={[styles.upgradeCard, { backgroundColor: Colors.secondary }]}
             onPress={async () => {
