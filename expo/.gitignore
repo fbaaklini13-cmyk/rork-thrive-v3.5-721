@@ -35,8 +35,11 @@ yarn-error.*
 # typescript
 *.tsbuildinfo
 .vercel
-.DS_Store
-.env
 
-# Exposed credential - never re-track (rotated, excluded permanently)
-client_secret_*.json
+ios/
+android/
+.env
+rork-eslint.config.js
+core
+node_modules
+.expo
