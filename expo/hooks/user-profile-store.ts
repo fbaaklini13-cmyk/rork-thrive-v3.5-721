@@ -355,6 +355,13 @@ export const [UserProfileProvider, useUserProfile] = createContextHook(() => {
 
   // Premium subscription management
   const subscribeToPremium = async () => {
+    // P0 revenue-leak guard: there is no payment provider wired up yet (no IAP / RevenueCat /
+    // Stripe anywhere in the app), so this used to grant premium for free from the production
+    // PremiumModal "Subscribe" button. Until real purchases exist, only dev builds may flip
+    // isPremium. Callers must handle this error (PremiumModal shows a "not available yet" alert).
+    if (!__DEV__) {
+      throw new Error('PAYMENTS_NOT_CONFIGURED');
+    }
     const expiryDate = new Date();
     expiryDate.setMonth(expiryDate.getMonth() + 1); // 1 month subscription
     await updateProfile({ 

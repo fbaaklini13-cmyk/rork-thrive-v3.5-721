@@ -31,7 +31,13 @@ export default function PremiumModal({ visible, onClose, onSubscribe }: PremiumM
       onSubscribe?.();
       onClose();
     } catch (error) {
-      Alert.alert('Error', 'Failed to subscribe. Please try again.');
+      const notConfigured = error instanceof Error && error.message === 'PAYMENTS_NOT_CONFIGURED';
+      Alert.alert(
+        notConfigured ? 'Coming soon' : 'Error',
+        notConfigured
+          ? 'Subscriptions are not available in this version yet. Check back soon!'
+          : 'Failed to subscribe. Please try again.'
+      );
     }
   };
 
