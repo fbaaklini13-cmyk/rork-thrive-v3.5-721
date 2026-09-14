@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import {
   View,
   Text,
@@ -9,6 +9,7 @@ import {
   Modal,
   Alert,
   ActivityIndicator,
+  Platform,
 } from 'react-native';
 import { 
   Target, 
@@ -26,7 +27,7 @@ import { Stack, useRouter } from 'expo-router';
 import { useUserProfile } from '@/hooks/user-profile-store';
 import { Colors } from '@/constants/colors';
 import { AIService } from '@/services/ai-service';
-import WorkoutLogger from '@/components/WorkoutLogger';
+import WorkoutLogger, { type WorkoutCompletionLog } from '@/components/WorkoutLogger';
 import ExerciseReplacementModal from '@/components/ExerciseReplacementModal';
 import WorkoutCompletionSummary from '@/components/WorkoutCompletionSummary';
 import MuscleHeatmap from '@/components/MuscleHeatmap';
@@ -50,7 +51,14 @@ export default function WorkoutScreen() {
   const [activeWorkout, setActiveWorkout] = useState<{ planId: string; dayIndex: number } | null>(null);
   const [showExerciseReplacement, setShowExerciseReplacement] = useState<{ planId: string; dayIndex: number; exerciseIndex: number } | null>(null);
   const [showCompletionSummary, setShowCompletionSummary] = useState(false);
-  const [lastWorkoutLog, setLastWorkoutLog] = useState<any>(null);
+  const [lastWorkoutLog, setLastWorkoutLog] = useState<WorkoutCompletionLog | null>(null);
+  const pendingSummaryTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (pendingSummaryTimer.current) clearTimeout(pendingSummaryTimer.current);
+    };
+  }, []);
   const [showExportModal, setShowExportModal] = useState(false);
 
   const latestPlan = workoutPlans[workoutPlans.length - 1];
@@ -98,12 +106,31 @@ export default function WorkoutScreen() {
     setActiveWorkout({ planId, dayIndex });
   };
 
-  const handleFinishWorkout = (workoutLog?: any) => {
-    if (workoutLog) {
-      setLastWorkoutLog(workoutLog);
-      setShowCompletionSummary(true);
-    }
+  const handleFinishWorkout = (workoutLog?: WorkoutCompletionLog | unknown) => {
+    // Only a real completion log opens the summary. The logger's close button /
+    // back gesture call onClose with a press event (or nothing), and that must
+    // not pop an empty summary.
+    const log =
+      workoutLog && typeof workoutLog === 'object' && Array.isArray((workoutLog as WorkoutCompletionLog).exercises)
+        ? (workoutLog as WorkoutCompletionLog)
+        : null;
+
+    // Close the logger first ...
     setActiveWorkout(null);
+
+    if (!log) return;
+
+    // ... and only present the summary once the logger modal (and, on iOS, the
+    // "Workout Complete!" alert) has finished animating out. Mounting a second
+    // <Modal> in the same render as the first one is being dismissed makes iOS
+    // silently drop the new presentation, which is why the summary never
+    // appeared after a workout.
+    if (pendingSummaryTimer.current) clearTimeout(pendingSummaryTimer.current);
+    pendingSummaryTimer.current = setTimeout(() => {
+      pendingSummaryTimer.current = null;
+      setLastWorkoutLog(log);
+      setShowCompletionSummary(true);
+    }, Platform.OS === 'ios' ? 600 : 150);
   };
 
   const handleReplaceExercise = (planId: string, dayIndex: number, exerciseIndex: number) => {

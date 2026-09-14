@@ -222,7 +222,7 @@ export default function WorkoutLogger({
       visible={visible}
       animationType="slide"
       transparent={true}
-      onRequestClose={onClose}
+      onRequestClose={() => onClose()}
     >
       <View style={styles.modalOverlay}>
         <View style={styles.modalContent}>
@@ -233,7 +233,11 @@ export default function WorkoutLogger({
                 Exercise {currentExerciseIndex + 1} of {exercises.length}
               </Text>
             </View>
-            <TouchableOpacity onPress={onClose}>
+            <TouchableOpacity
+              onPress={() => onClose()}
+              accessibilityRole="button"
+              accessibilityLabel="Close workout"
+            >
               <X color={Colors.darkGrey} size={24} />
             </TouchableOpacity>
           </View>
