@@ -40,3 +40,4 @@ yarn-error.*
 
 # Exposed credential - never re-track (rotated, excluded permanently)
 client_secret_*.json
+**/client_secret_*.json

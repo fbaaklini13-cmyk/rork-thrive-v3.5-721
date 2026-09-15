@@ -1,16 +1,19 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import {
   View,
   Text,
   StyleSheet,
   ScrollView,
   TouchableOpacity,
+  useWindowDimensions,
 } from 'react-native';
 import { useLocalSearchParams } from 'expo-router';
 import { Bookmark, Share2, Dumbbell } from 'lucide-react-native';
 import { Colors } from '@/constants/colors';
 import { ALL_EXERCISES } from '@/mocks/full-exercise-library';
 import { AnatomicalMuscleMap } from '@/components/AnatomicalMuscleMap';
+import ExerciseDemo from '@/components/ExerciseDemo';
+import { getExerciseEnrichment } from '@/mocks/exercise-enrichment';
 
 
 
@@ -20,6 +23,11 @@ export default function ExerciseDetailScreen() {
   const exercise = ALL_EXERCISES.find(ex => ex.id === exerciseId);
   const [isFavorite, setIsFavorite] = useState(false);
   const [activeTab, setActiveTab] = useState<'animation' | 'heatmap'>('animation');
+  const { width: windowWidth } = useWindowDimensions();
+  const enrichment = useMemo(
+    () => (typeof exerciseId === 'string' ? getExerciseEnrichment(exerciseId) : undefined),
+    [exerciseId],
+  );
 
   if (!exercise) {
     return (
@@ -55,11 +63,16 @@ export default function ExerciseDetailScreen() {
 
         {activeTab === 'animation' ? (
           <View style={styles.animationContainer}>
-            <View style={styles.placeholderContainer}>
-              <Dumbbell size={64} color={Colors.mediumGrey} />
-              <Text style={styles.placeholderText}>Animation not available</Text>
-              <Text style={styles.placeholderSubtext}>Exercise: {exercise.name}</Text>
-            </View>
+            {enrichment && enrichment.imageUrls.length > 0 ? (
+              // Start/end frames from free-exercise-db, crossfaded into a looping demo.
+              <ExerciseDemo imageUrls={enrichment.imageUrls} width={windowWidth - 32} height={240} />
+            ) : (
+              <View style={styles.placeholderContainer}>
+                <Dumbbell size={64} color={Colors.mediumGrey} />
+                <Text style={styles.placeholderText}>Animation not available</Text>
+                <Text style={styles.placeholderSubtext}>Exercise: {exercise.name}</Text>
+              </View>
+            )}
           </View>
         ) : (
           <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.heatmapContainer}>
@@ -115,6 +128,20 @@ export default function ExerciseDetailScreen() {
           </View>
         )}
       </View>
+
+      {enrichment && enrichment.instructions.length > 0 && (
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Instructions</Text>
+          {enrichment.instructions.map((step, index) => (
+            <View key={index} style={styles.instructionItem}>
+              <View style={styles.instructionNumber}>
+                <Text style={styles.instructionNumberText}>{index + 1}</Text>
+              </View>
+              <Text style={styles.instructionText}>{step}</Text>
+            </View>
+          ))}
+        </View>
+      )}
 
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Exercise Information</Text>
