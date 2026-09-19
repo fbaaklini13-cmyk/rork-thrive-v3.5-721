@@ -31,7 +31,10 @@
  * constants/colors.ts is untouched so the 30-odd existing screens keep building. New and
  * restyled screens import from here; the migration of the rest is a screen-by-screen job.
  */
-import { Platform } from 'react-native';
+import { Platform, type TextStyle } from 'react-native';
+
+// The outer `as const` would make this tuple readonly, which TextStyle rejects.
+const TABULAR = ['tabular-nums'] as NonNullable<TextStyle['fontVariant']>;
 
 export const Palette = {
   // canvas
@@ -66,7 +69,7 @@ export const Type = {
   bodyStrong: { fontSize: 16, lineHeight: 24, fontWeight: '600' as const, letterSpacing: 0 },
   caption: { fontSize: 13, lineHeight: 18, fontWeight: '500' as const, letterSpacing: 0.2 },
   eyebrow: { fontSize: 12, lineHeight: 16, fontWeight: '700' as const, letterSpacing: 1.4, textTransform: 'uppercase' as const },
-  numeral: { fontSize: 56, lineHeight: 60, fontWeight: '800' as const, letterSpacing: -2, fontVariant: ['tabular-nums'] as const },
+  numeral: { fontSize: 56, lineHeight: 60, fontWeight: '800' as const, letterSpacing: -2, fontVariant: TABULAR },
 } as const;
 
 export const Space = { xs: 4, sm: 8, md: 12, lg: 16, xl: 24, xxl: 32, xxxl: 48 } as const;

@@ -2,73 +2,27 @@ import { Tabs, useRouter, useSegments } from "expo-router";
 import { Home, Utensils, Dumbbell, User } from "lucide-react-native";
 import React, { useRef, useEffect } from "react";
 import { Animated, View, StyleSheet, Platform } from 'react-native';
-import { LinearGradient } from 'expo-linear-gradient';
 import { useUserProfile } from '@/hooks/user-profile-store';
-import { Colors } from '@/constants/colors';
+import { Palette } from '@/constants/theme';
 
 const AnimatedTabIcon = ({ icon: Icon, color, focused }: any) => {
   const scaleAnim = useRef(new Animated.Value(1)).current;
-  const rotateAnim = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
-    if (focused) {
-      Animated.parallel([
-        Animated.spring(scaleAnim, {
-          toValue: 1.2,
-          friction: 8,
-          tension: 100,
-          useNativeDriver: true,
-        }),
-        Animated.timing(rotateAnim, {
-          toValue: 1,
-          duration: 300,
-          useNativeDriver: true,
-        }),
-      ]).start();
-    } else {
-      Animated.parallel([
-        Animated.spring(scaleAnim, {
-          toValue: 1,
-          friction: 8,
-          tension: 100,
-          useNativeDriver: true,
-        }),
-        Animated.timing(rotateAnim, {
-          toValue: 0,
-          duration: 300,
-          useNativeDriver: true,
-        }),
-      ]).start();
-    }
+    Animated.spring(scaleAnim, {
+      toValue: focused ? 1.12 : 1,
+      friction: 8,
+      tension: 100,
+      useNativeDriver: true,
+    }).start();
   }, [focused]);
 
   return (
     <View style={styles.iconContainer}>
-      <Animated.View
-        style={[
-          {
-            transform: [
-              { scale: scaleAnim },
-              {
-                rotate: rotateAnim.interpolate({
-                  inputRange: [0, 1],
-                  outputRange: ['0deg', '360deg'],
-                }),
-              },
-            ],
-          },
-        ]}
-      >
+      <Animated.View style={{ transform: [{ scale: scaleAnim }] }}>
         <Icon color={color} size={24} />
       </Animated.View>
-      {focused && (
-        <LinearGradient
-          colors={[Colors.primary, Colors.secondary]}
-          style={styles.activeIndicator}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 0 }}
-        />
-      )}
+      <View style={[styles.activeIndicator, { opacity: focused ? 1 : 0 }]} />
     </View>
   );
 };
@@ -95,19 +49,20 @@ export default function TabLayout() {
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: Colors.primary,
-        tabBarInactiveTintColor: Colors.mediumGrey,
+        tabBarActiveTintColor: Palette.accent,
+        tabBarInactiveTintColor: Palette.inkMuted,
+        // The tab bar is the frame every tab sits in, so it moves to the dark
+        // system with Home. Tabs still on the light palette will show a dark bar
+        // under a light screen until their own pass -- the honest half-state.
         tabBarStyle: {
-          backgroundColor: Colors.white,
-          borderTopWidth: 0,
+          backgroundColor: Palette.canvasRaised,
+          borderTopWidth: StyleSheet.hairlineWidth,
+          borderTopColor: Palette.line,
           paddingBottom: Platform.OS === 'ios' ? 20 : 5,
           paddingTop: 8,
           height: Platform.OS === 'ios' ? 85 : 65,
-          elevation: 15,
-          shadowColor: Colors.darkGrey,
-          shadowOffset: { width: 0, height: -3 },
-          shadowOpacity: 0.1,
-          shadowRadius: 8,
+          elevation: 0,
+          shadowOpacity: 0,
         },
         tabBarLabelStyle: {
           fontSize: 11,
@@ -121,7 +76,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="home"
         options={{
-          title: "Dashboard",
+          title: "Home",
           tabBarIcon: ({ color, focused }) => (
             <AnimatedTabIcon icon={Home} color={color} focused={focused} />
           ),
@@ -164,11 +119,13 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     position: 'relative',
   },
+  // Above the icon, not below it: below is where the label sits.
   activeIndicator: {
     position: 'absolute',
-    bottom: -12,
-    width: 30,
-    height: 3,
-    borderRadius: 2,
+    top: -9,
+    width: 20,
+    height: 2,
+    borderRadius: 1,
+    backgroundColor: Palette.accent,
   },
 });

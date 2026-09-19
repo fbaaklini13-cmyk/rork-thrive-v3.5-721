@@ -1,22 +1,12 @@
 import { Stack } from "expo-router";
-import { Colors } from '@/constants/colors';
+import { Palette } from '@/constants/theme';
 
 export default function HomeLayout() {
   return (
-    <Stack>
-      <Stack.Screen 
-        name="index" 
-        options={{ 
-          title: "Dashboard",
-          headerStyle: {
-            backgroundColor: Colors.primary,
-          },
-          headerTintColor: "#fff",
-          headerTitleStyle: {
-            fontWeight: "bold",
-          },
-        }} 
-      />
+    <Stack screenOptions={{ contentStyle: { backgroundColor: Palette.canvas } }}>
+      {/* The screen draws its own greeting under the safe area; a bar on top of it
+          would be a second header. */}
+      <Stack.Screen name="index" options={{ headerShown: false, title: "Home" }} />
     </Stack>
   );
 }
