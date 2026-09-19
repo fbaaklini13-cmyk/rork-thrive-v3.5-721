@@ -15,7 +15,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Mail, Lock, Eye, EyeOff, Chrome, Apple as AppleIcon } from 'lucide-react-native';
-import { Colors } from '@/constants/colors';
+import { Palette, Radius, Space, Type } from '@/constants/theme';
 import { useUserProfile } from '@/hooks/user-profile-store';
 
 export default function SignInScreen() {
@@ -76,7 +76,7 @@ export default function SignInScreen() {
           keyboardShouldPersistTaps="handled"
         >
           <LinearGradient
-            colors={[Colors.primary, Colors.secondary]}
+            colors={[Palette.canvas, Palette.canvas]}
             style={styles.header}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 1 }}
@@ -87,11 +87,11 @@ export default function SignInScreen() {
 
           <View style={styles.formContainer}>
             <View style={styles.inputContainer}>
-              <Mail size={20} color={Colors.mediumGrey} style={styles.inputIcon} />
+              <Mail size={20} color={Palette.inkMuted} style={styles.inputIcon} />
               <TextInput
                 style={styles.input}
                 placeholder="Email address"
-                placeholderTextColor={Colors.mediumGrey}
+                placeholderTextColor={Palette.inkFaint}
                 value={emailAddress}
                 onChangeText={setEmailAddress}
                 keyboardType="email-address"
@@ -100,11 +100,11 @@ export default function SignInScreen() {
             </View>
 
             <View style={styles.inputContainer}>
-              <Lock size={20} color={Colors.mediumGrey} style={styles.inputIcon} />
+              <Lock size={20} color={Palette.inkMuted} style={styles.inputIcon} />
               <TextInput
                 style={styles.input}
                 placeholder="Password"
-                placeholderTextColor={Colors.mediumGrey}
+                placeholderTextColor={Palette.inkFaint}
                 value={password}
                 onChangeText={setPassword}
                 secureTextEntry={!showPassword}
@@ -116,9 +116,9 @@ export default function SignInScreen() {
                 accessibilityLabel={showPassword ? 'Hide password' : 'Show password'}
               >
                 {showPassword ? (
-                  <EyeOff size={20} color={Colors.mediumGrey} />
+                  <EyeOff size={20} color={Palette.inkMuted} />
                 ) : (
-                  <Eye size={20} color={Colors.mediumGrey} />
+                  <Eye size={20} color={Palette.inkMuted} />
                 )}
               </TouchableOpacity>
             </View>
@@ -129,13 +129,13 @@ export default function SignInScreen() {
               disabled={loading}
             >
               <LinearGradient
-                colors={[Colors.primary, Colors.secondary]}
+                colors={[Palette.accent, Palette.accentDeep]}
                 style={styles.signInGradient}
                 start={{ x: 0, y: 0 }}
                 end={{ x: 1, y: 0 }}
               >
                 {loading ? (
-                  <ActivityIndicator color={Colors.white} />
+                  <ActivityIndicator color={Palette.canvas} />
                 ) : (
                   <Text style={styles.signInButtonText}>Sign In</Text>
                 )}
@@ -156,7 +156,7 @@ export default function SignInScreen() {
                 accessibilityRole="button"
                 accessibilityLabel="Continue with Google"
               >
-                <Chrome size={24} color={Colors.darkGrey} />
+                <Chrome size={24} color={Palette.ink} />
               </TouchableOpacity>
               <TouchableOpacity
                 style={styles.oauthButton}
@@ -165,7 +165,7 @@ export default function SignInScreen() {
                 accessibilityRole="button"
                 accessibilityLabel="Continue with Apple"
               >
-                <AppleIcon size={24} color={Colors.darkGrey} />
+                <AppleIcon size={24} color={Palette.ink} />
               </TouchableOpacity>
             </View>
 
@@ -186,138 +186,144 @@ export default function SignInScreen() {
 }
 
 const styles = StyleSheet.create({
+  // Restyled 19 Sep 2026 to the dark system in constants/theme.ts so the intro -> auth
+  // transition is one screen family, not a jolt from a green-black canvas to a white form.
+  // Keys are unchanged so the JSX above is untouched; only values moved.
   safeArea: {
     flex: 1,
-    backgroundColor: Colors.primary,
+    backgroundColor: Palette.canvas,
   },
   container: {
     flex: 1,
-    backgroundColor: Colors.white,
+    backgroundColor: Palette.canvas,
   },
   scrollContent: {
     flexGrow: 1,
   },
   header: {
-    padding: 40,
-    paddingTop: 80,
-    paddingBottom: 50,
-    borderBottomLeftRadius: 30,
-    borderBottomRightRadius: 30,
+    paddingTop: Space.xxxl,
+    paddingBottom: Space.xl,
+    paddingHorizontal: Space.xl,
+    alignItems: 'flex-start',
   },
   title: {
-    fontSize: 32,
-    fontWeight: 'bold' as const,
-    color: Colors.white,
-    marginBottom: 8,
+    ...Type.display,
+    color: Palette.ink,
+    marginBottom: Space.sm,
   },
   subtitle: {
-    fontSize: 16,
-    color: 'rgba(255, 255, 255, 0.9)',
+    ...Type.body,
+    color: Palette.inkMuted,
   },
   formContainer: {
-    padding: 24,
     flex: 1,
+    padding: Space.xl,
+    paddingTop: Space.md,
   },
   inputContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: Colors.lightGrey,
-    borderRadius: 12,
-    paddingHorizontal: 16,
-    marginBottom: 16,
+    backgroundColor: Palette.canvasRaised,
+    borderRadius: Radius.md,
+    borderWidth: 1,
+    borderColor: Palette.line,
+    marginBottom: Space.md,
+    paddingHorizontal: Space.lg,
     height: 56,
   },
   inputIcon: {
-    marginRight: 12,
+    marginRight: Space.md,
   },
   input: {
     flex: 1,
-    fontSize: 16,
-    color: Colors.darkGrey,
+    ...Type.body,
+    color: Palette.ink,
   },
   eyeIcon: {
-    padding: 4,
+    padding: Space.xs,
   },
   signInButton: {
-    borderRadius: 12,
+    marginTop: Space.sm,
+    borderRadius: Radius.pill,
     overflow: 'hidden',
-    marginTop: 8,
+    shadowColor: Palette.accent,
+    shadowOpacity: 0.3,
+    shadowRadius: 16,
+    shadowOffset: { width: 0, height: 6 },
   },
   signInGradient: {
     paddingVertical: 16,
     alignItems: 'center',
     justifyContent: 'center',
+    minHeight: 54,
   },
   signInButtonText: {
-    fontSize: 16,
-    fontWeight: 'bold' as const,
-    color: Colors.white,
+    ...Type.bodyStrong,
+    fontWeight: '800',
+    color: Palette.canvas,
   },
   signUpPrompt: {
+    marginTop: Space.xl,
     alignItems: 'center',
-    marginTop: 32,
   },
   signUpPromptText: {
-    fontSize: 14,
-    color: Colors.mediumGrey,
+    ...Type.caption,
+    color: Palette.inkMuted,
   },
   signUpLink: {
-    color: Colors.primary,
-    fontWeight: '600' as const,
+    color: Palette.accent,
+    fontWeight: '700',
   },
   tabContainer: {
     flexDirection: 'row',
-    backgroundColor: Colors.lightGrey,
-    borderRadius: 12,
+    backgroundColor: Palette.canvasRaised,
+    borderRadius: Radius.md,
     padding: 4,
-    marginBottom: 24,
+    marginBottom: Space.lg,
   },
   tab: {
     flex: 1,
-    flexDirection: 'row',
+    paddingVertical: Space.md,
     alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: 12,
-    borderRadius: 8,
-    gap: 8,
+    borderRadius: Radius.sm,
   },
   tabActive: {
-    backgroundColor: Colors.primary,
+    backgroundColor: Palette.accentDeep,
   },
   tabText: {
-    fontSize: 14,
-    fontWeight: '600' as const,
-    color: Colors.mediumGrey,
+    ...Type.caption,
+    color: Palette.inkMuted,
   },
   tabTextActive: {
-    color: Colors.white,
+    color: Palette.ink,
   },
   dividerContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginVertical: 24,
+    marginVertical: Space.xl,
   },
   divider: {
     flex: 1,
     height: 1,
-    backgroundColor: Colors.lightGrey,
+    backgroundColor: Palette.line,
   },
   dividerText: {
-    marginHorizontal: 16,
-    fontSize: 14,
-    color: Colors.mediumGrey,
+    ...Type.caption,
+    color: Palette.inkFaint,
+    marginHorizontal: Space.md,
   },
   oauthContainer: {
     flexDirection: 'row',
     justifyContent: 'center',
-    gap: 16,
-    marginBottom: 16,
+    gap: Space.md,
   },
   oauthButton: {
     width: 56,
     height: 56,
-    borderRadius: 28,
-    backgroundColor: Colors.lightGrey,
+    borderRadius: Radius.md,
+    backgroundColor: Palette.canvasRaised,
+    borderWidth: 1,
+    borderColor: Palette.line,
     alignItems: 'center',
     justifyContent: 'center',
   },
