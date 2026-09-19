@@ -22,6 +22,8 @@ import {
   Plus,
   BookOpen,
   LibraryBig,
+  ListChecks,
+  TrendingUp,
 } from 'lucide-react-native';
 import { Stack, useRouter } from 'expo-router';
 import { useUserProfile } from '@/hooks/user-profile-store';
@@ -192,6 +194,24 @@ export default function WorkoutScreen() {
           >
             <LibraryBig color={Colors.white} size={20} />
             <Text style={styles.quickAccessText}>Exercise Library</Text>
+          </TouchableOpacity>
+        </View>
+
+        <View style={styles.quickAccessRow}>
+          <TouchableOpacity
+            style={styles.quickAccessButton}
+            onPress={() => router.push('/workout/exercises')}
+          >
+            <ListChecks color={Colors.white} size={20} />
+            <Text style={styles.quickAccessText}>Browse Exercises</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.quickAccessButton}
+            onPress={() => router.push('/workout/progress')}
+          >
+            <TrendingUp color={Colors.white} size={20} />
+            <Text style={styles.quickAccessText}>Progress</Text>
           </TouchableOpacity>
         </View>
 
