@@ -20,9 +20,11 @@ import {
   LogOut,
   Smartphone
 } from 'lucide-react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { useUserProfile } from '@/hooks/user-profile-store';
-import { Colors } from '@/constants/colors';
+import { Palette, Radius, Space, Type } from '@/constants/theme';
+import Enter from '@/components/Enter';
 import EditGoalsModal from '@/components/EditGoalsModal';
 import PremiumModal from '@/components/PremiumModal';
 
@@ -94,10 +96,12 @@ export default function ProfileScreen() {
   const dailyCalories = calculateDailyCalories();
 
   return (
+    <SafeAreaView edges={['top']} style={styles.safe}>
     <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
+      <Enter order={0}>
       <View style={styles.header}>
         <View style={styles.avatar}>
-          <User color={Colors.white} size={40} />
+          <User color={Palette.canvas} size={40} />
         </View>
         <Text style={styles.name}>{profile.name || 'User'}</Text>
         {profile.age && profile.gender && (
@@ -106,25 +110,27 @@ export default function ProfileScreen() {
           </Text>
         )}
       </View>
+      </Enter>
 
       {/* Premium Section */}
+      <Enter order={1}>
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Subscription</Text>
         
         {/* Dev-only: test premium button, gated out of production builds */}
         {__DEV__ && !profile.isPremium && (
           <TouchableOpacity 
-            style={[styles.upgradeCard, { backgroundColor: Colors.secondary }]}
+            style={[styles.upgradeCard, { backgroundColor: Palette.accent, borderColor: Palette.accent }]}
             onPress={async () => {
               await subscribeToPremium();
               Alert.alert('Success!', 'Premium activated for testing! 🎉');
             }}
           >
             <View style={styles.upgradeContent}>
-              <Crown color={Colors.white} size={32} />
+              <Crown color={Palette.canvas} size={32} />
               <View style={styles.upgradeText}>
-                <Text style={[styles.upgradeTitle, { color: Colors.white }]}>Test Premium</Text>
-                <Text style={[styles.upgradeDescription, { color: Colors.white, opacity: 0.9 }]}>
+                <Text style={[styles.upgradeTitle, { color: Palette.canvas }]}>Test Premium</Text>
+                <Text style={[styles.upgradeDescription, { color: Palette.canvas, opacity: 0.9 }]}>
                   Activate premium for testing (free)
                 </Text>
               </View>
@@ -135,7 +141,7 @@ export default function ProfileScreen() {
         {profile.isPremium ? (
           <View style={styles.premiumCard}>
             <View style={styles.premiumHeader}>
-              <Crown color={Colors.primary} size={24} />
+              <Crown color={Palette.accent} size={24} />
               <Text style={styles.premiumTitle}>Thrive Premium</Text>
             </View>
             <Text style={styles.premiumStatus}>Active Subscription</Text>
@@ -170,7 +176,7 @@ export default function ProfileScreen() {
             onPress={() => setShowPremiumModal(true)}
           >
             <View style={styles.upgradeContent}>
-              <Crown color={Colors.primary} size={32} />
+              <Crown color={Palette.accent} size={32} />
               <View style={styles.upgradeText}>
                 <Text style={styles.upgradeTitle}>Upgrade to Premium</Text>
                 <Text style={styles.upgradeDescription}>
@@ -179,17 +185,19 @@ export default function ProfileScreen() {
                 <Text style={styles.upgradePrice}>$4.99/month</Text>
               </View>
             </View>
-            <CreditCard color={Colors.mediumGrey} size={20} />
+            <CreditCard color={Palette.inkMuted} size={20} />
           </TouchableOpacity>
         )}
       </View>
+      </Enter>
 
+      <Enter order={2}>
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>AI Settings</Text>
         
         <View style={styles.settingRow}>
           <View style={styles.settingInfo}>
-            <Brain color={Colors.primary} size={24} />
+            <Brain color={Palette.accent} size={24} />
             <View style={styles.settingText}>
               <Text style={styles.settingLabel}>AI Assistant</Text>
               <Text style={styles.settingDescription}>
@@ -200,15 +208,15 @@ export default function ProfileScreen() {
           <Switch
             value={profile.aiEnabled}
             onValueChange={handleToggleAI}
-            trackColor={{ false: Colors.lightGrey, true: Colors.primary }}
-            thumbColor={Colors.white}
+            trackColor={{ false: Palette.lineStrong, true: Palette.accent }}
+            thumbColor={Palette.ink}
           />
         </View>
 
         {profile.aiEnabled && profile.onboardingCompleted && (
           <TouchableOpacity style={styles.settingRow} onPress={handleResetOnboarding}>
             <View style={styles.settingInfo}>
-              <RefreshCw color={Colors.error} size={24} />
+              <RefreshCw color={Palette.bad} size={24} />
               <View style={styles.settingText}>
                 <Text style={styles.settingLabel}>Reset Profile</Text>
                 <Text style={styles.settingDescription}>
@@ -219,15 +227,16 @@ export default function ProfileScreen() {
           </TouchableOpacity>
         )}
       </View>
+      </Enter>
 
       {profile.onboardingCompleted && (
-        <>
+        <Enter order={3}>
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Health Metrics</Text>
             
             <View style={styles.metricsGrid}>
               <View style={styles.metricCard}>
-                <Activity color={Colors.primary} size={20} />
+                <Activity color={Palette.accent} size={20} />
                 <Text style={styles.metricLabel}>BMI</Text>
                 <Text style={styles.metricValue}>
                   {bmi ? bmi.toFixed(1) : 'Not set'}
@@ -235,7 +244,7 @@ export default function ProfileScreen() {
               </View>
 
               <View style={styles.metricCard}>
-                <Target color={Colors.secondary} size={20} />
+                <Target color={Palette.accent} size={20} />
                 <Text style={styles.metricLabel}>Daily Calories</Text>
                 <Text style={styles.metricValue}>
                   {dailyCalories || 'Not set'}
@@ -308,13 +317,14 @@ export default function ProfileScreen() {
               style={styles.editButton}
               onPress={() => setShowEditGoals(true)}
             >
-              <Edit3 color={Colors.white} size={20} />
+              <Edit3 color={Palette.canvas} size={20} />
               <Text style={styles.editButtonText}>Edit Goals</Text>
             </TouchableOpacity>
           </View>
-        </>
+        </Enter>
       )}
 
+      <Enter order={4}>
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Devices & Data</Text>
         
@@ -323,7 +333,7 @@ export default function ProfileScreen() {
           onPress={() => router.push('/(tabs)/profile/devices')}
         >
           <View style={styles.settingInfo}>
-            <Smartphone color={Colors.primary} size={24} />
+            <Smartphone color={Palette.accent} size={24} />
             <View style={styles.settingText}>
               <Text style={styles.settingLabel}>Connected Devices</Text>
               <Text style={styles.settingDescription}>
@@ -333,16 +343,21 @@ export default function ProfileScreen() {
           </View>
         </TouchableOpacity>
       </View>
+      </Enter>
 
+      <Enter order={5}>
       <View style={styles.section}>
         <TouchableOpacity 
           style={styles.signOutButton}
           onPress={handleSignOut}
         >
-          <LogOut color={Colors.error} size={20} />
+          <LogOut color={Palette.bad} size={20} />
           <Text style={styles.signOutText}>Sign Out</Text>
         </TouchableOpacity>
       </View>
+      </Enter>
+
+      <View style={styles.footerSpace} />
 
       <EditGoalsModal 
         visible={showEditGoals}
@@ -354,231 +369,118 @@ export default function ProfileScreen() {
         onClose={() => setShowPremiumModal(false)}
       />
     </ScrollView>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: Colors.lightGrey,
-  },
+  safe: { flex: 1, backgroundColor: Palette.canvas },
+  container: { flex: 1, backgroundColor: Palette.canvas },
+
   header: {
     alignItems: 'center',
-    padding: 30,
-    backgroundColor: Colors.white,
-    borderBottomWidth: 1,
-    borderBottomColor: Colors.lightGrey,
+    paddingHorizontal: Space.xl,
+    paddingVertical: Space.xxl,
+    backgroundColor: Palette.canvas,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderBottomColor: Palette.line,
   },
   avatar: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    backgroundColor: Colors.primary,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 12,
+    width: 80, height: 80, borderRadius: Radius.pill,
+    backgroundColor: Palette.accent,
+    alignItems: 'center', justifyContent: 'center',
+    marginBottom: Space.md,
   },
-  name: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: Colors.darkGrey,
-    marginBottom: 4,
-  },
-  info: {
-    fontSize: 14,
-    color: Colors.mediumGrey,
-  },
+  name: { ...Type.title, color: Palette.ink },
+  info: { ...Type.caption, color: Palette.inkMuted, marginTop: Space.xs },
+
   section: {
-    backgroundColor: Colors.white,
-    marginTop: 12,
-    paddingVertical: 16,
+    backgroundColor: Palette.canvasRaised,
+    borderTopWidth: StyleSheet.hairlineWidth,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderColor: Palette.line,
+    marginTop: Space.md,
+    paddingVertical: Space.lg,
   },
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: Colors.darkGrey,
-    paddingHorizontal: 20,
-    marginBottom: 16,
-  },
+  sectionTitle: { ...Type.eyebrow, color: Palette.inkMuted, paddingHorizontal: Space.xl, marginBottom: Space.md },
+
   settingRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 20,
-    paddingVertical: 12,
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
+    paddingHorizontal: Space.xl, paddingVertical: Space.md,
   },
-  settingInfo: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    flex: 1,
-    gap: 12,
-  },
-  settingText: {
-    flex: 1,
-  },
-  settingLabel: {
-    fontSize: 16,
-    fontWeight: '500',
-    color: Colors.darkGrey,
-    marginBottom: 2,
-  },
-  settingDescription: {
-    fontSize: 13,
-    color: Colors.mediumGrey,
-  },
-  switchText: {
-    fontSize: 14,
-    color: Colors.primary,
-    fontWeight: '600',
-  },
-  metricsGrid: {
-    flexDirection: 'row',
-    paddingHorizontal: 20,
-    gap: 12,
-  },
+  settingInfo: { flexDirection: 'row', alignItems: 'center', flex: 1, gap: Space.md },
+  settingText: { flex: 1 },
+  settingLabel: { ...Type.bodyStrong, color: Palette.ink },
+  settingDescription: { ...Type.caption, color: Palette.inkMuted, marginTop: 2 },
+
+  metricsGrid: { flexDirection: 'row', paddingHorizontal: Space.xl, gap: Space.md },
   metricCard: {
-    flex: 1,
-    backgroundColor: Colors.lightGrey,
-    borderRadius: 12,
-    padding: 16,
-    alignItems: 'center',
+    flex: 1, alignItems: 'center',
+    backgroundColor: Palette.canvas,
+    borderRadius: Radius.md,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: Palette.line,
+    padding: Space.lg,
   },
-  metricLabel: {
-    fontSize: 14,
-    color: Colors.mediumGrey,
-    marginTop: 8,
-    marginBottom: 4,
-  },
-  metricValue: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: Colors.darkGrey,
-  },
-  infoGrid: {
-    paddingHorizontal: 20,
-  },
+  metricLabel: { ...Type.eyebrow, color: Palette.inkMuted, marginTop: Space.sm, marginBottom: Space.xs },
+  metricValue: { ...Type.heading, color: Palette.ink, fontVariant: Type.numeral.fontVariant },
+
+  infoGrid: { paddingHorizontal: Space.xl },
   infoItem: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    paddingVertical: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: Colors.lightGrey,
+    flexDirection: 'row', justifyContent: 'space-between', paddingVertical: Space.md,
+    borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: Palette.line,
   },
-  infoLabel: {
-    fontSize: 14,
-    color: Colors.mediumGrey,
-  },
-  infoValue: {
-    fontSize: 14,
-    fontWeight: '500',
-    color: Colors.darkGrey,
-  },
+  infoLabel: { ...Type.body, color: Palette.inkMuted },
+  infoValue: { ...Type.bodyStrong, color: Palette.ink },
+
   editButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 8,
-    backgroundColor: Colors.primary,
-    marginHorizontal: 20,
-    marginTop: 16,
-    marginBottom: 8,
-    padding: 14,
-    borderRadius: 8,
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: Space.sm,
+    backgroundColor: Palette.accent, borderRadius: Radius.pill,
+    marginHorizontal: Space.xl, marginTop: Space.lg, paddingVertical: Space.lg,
   },
-  editButtonText: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: Colors.white,
-  },
+  editButtonText: { ...Type.bodyStrong, color: Palette.canvas },
+
   premiumCard: {
-    marginHorizontal: 20,
-    padding: 16,
-    backgroundColor: Colors.lightGrey,
-    borderRadius: 12,
+    marginHorizontal: Space.xl, padding: Space.lg,
+    backgroundColor: Palette.canvas,
+    borderRadius: Radius.md,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: Palette.line,
   },
-  premiumHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    marginBottom: 8,
-  },
-  premiumTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: Colors.darkGrey,
-  },
-  premiumStatus: {
-    fontSize: 14,
-    color: Colors.primary,
-    fontWeight: '500',
-    marginBottom: 4,
-  },
-  premiumExpiry: {
-    fontSize: 13,
-    color: Colors.mediumGrey,
-    marginBottom: 12,
-  },
+  premiumHeader: { flexDirection: 'row', alignItems: 'center', gap: Space.sm, marginBottom: Space.sm },
+  premiumTitle: { ...Type.heading, color: Palette.ink },
+  premiumStatus: { ...Type.bodyStrong, color: Palette.accent, marginBottom: Space.xs },
+  premiumExpiry: { ...Type.caption, color: Palette.inkMuted, marginBottom: Space.md },
   cancelButton: {
-    paddingVertical: 8,
-    paddingHorizontal: 12,
-    borderRadius: 6,
-    borderWidth: 1,
-    borderColor: Colors.error,
     alignSelf: 'flex-start',
+    paddingVertical: Space.sm, paddingHorizontal: Space.md,
+    borderRadius: Radius.pill, borderWidth: 1, borderColor: Palette.lineStrong,
   },
-  cancelButtonText: {
-    fontSize: 14,
-    color: Colors.error,
-    fontWeight: '500',
-  },
+  // Destructive actions keep the red label. theme.ts reserves good/warn/bad for data
+  // direction; a control that cancels or signs out is neither data nor navigation state,
+  // and dropping the convention costs more than the rule saves.
+  cancelButtonText: { ...Type.caption, color: Palette.bad },
+
   upgradeCard: {
-    marginHorizontal: 20,
-    padding: 16,
-    backgroundColor: Colors.lightGrey,
-    borderRadius: 12,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
+    marginHorizontal: Space.xl, padding: Space.lg,
+    backgroundColor: Palette.canvas,
+    borderRadius: Radius.md,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: Palette.line,
   },
-  upgradeContent: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-    flex: 1,
-  },
-  upgradeText: {
-    flex: 1,
-  },
-  upgradeTitle: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: Colors.darkGrey,
-    marginBottom: 4,
-  },
-  upgradeDescription: {
-    fontSize: 13,
-    color: Colors.mediumGrey,
-    marginBottom: 4,
-  },
-  upgradePrice: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: Colors.primary,
-  },
+  upgradeContent: { flexDirection: 'row', alignItems: 'center', gap: Space.md, flex: 1 },
+  upgradeText: { flex: 1 },
+  upgradeTitle: { ...Type.bodyStrong, color: Palette.ink, marginBottom: Space.xs },
+  upgradeDescription: { ...Type.caption, color: Palette.inkMuted, marginBottom: Space.xs },
+  upgradePrice: { ...Type.bodyStrong, color: Palette.accent, fontVariant: Type.numeral.fontVariant },
+
   signOutButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 8,
-    marginHorizontal: 20,
-    paddingVertical: 14,
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: Colors.error,
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: Space.sm,
+    marginHorizontal: Space.xl, paddingVertical: Space.lg,
+    borderRadius: Radius.pill, borderWidth: 1, borderColor: Palette.lineStrong,
   },
-  signOutText: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: Colors.error,
-  },
+  signOutText: { ...Type.bodyStrong, color: Palette.bad },
+
+  footerSpace: { height: Space.xxxl },
 });

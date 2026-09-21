@@ -11,12 +11,14 @@ import {
   Image,
   Platform,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { Plus, Coffee, Sun, Moon, Cookie, Camera as CameraIcon, Image as ImageIcon } from 'lucide-react-native';
 import * as ImagePicker from 'expo-image-picker';
 import { useUserProfile } from '@/hooks/user-profile-store';
 import { AIService } from '@/services/ai-service';
 import type { NutritionEntry } from '@/types/user';
-import { Colors } from '@/constants/colors';
+import { Palette, Radius, Space, Type } from '@/constants/theme';
+import Enter from '@/components/Enter';
 
 const MEAL_TYPES = [
   { id: 'breakfast', label: 'Breakfast', icon: Coffee },
@@ -161,11 +163,13 @@ export default function NutritionScreen() {
   }, [mealDescription, pickedPhotoUri, pickedPhotoBase64, profile.aiEnabled, selectedMeal, today, addNutritionEntry, profile, calculateDailyCalories]);
 
   return (
+    <SafeAreaView edges={['top']} style={styles.safe}>
     <ScrollView style={styles.container} showsVerticalScrollIndicator={false} testID="nutritionScreen">
+      <Enter order={0}>
       <View style={styles.header}>
+        <Text style={styles.eyebrow}>Today</Text>
         <Text style={styles.dateText}>{new Date().toLocaleDateString('en-US', {
           weekday: 'long',
-          year: 'numeric',
           month: 'long',
           day: 'numeric',
         })}</Text>
@@ -183,7 +187,7 @@ export default function NutritionScreen() {
               </View>
               <View style={styles.calorieItem}>
                 <Text style={styles.calorieLabel}>Remaining</Text>
-                <Text style={[styles.calorieValue, { color: (calculateDailyCalories() || 0) - todayEntries.reduce((sum, e) => sum + (e.calories || 0), 0) >= 0 ? Colors.success : Colors.error }]}>
+                <Text style={[styles.calorieValue, { color: (calculateDailyCalories() || 0) - todayEntries.reduce((sum, e) => sum + (e.calories || 0), 0) >= 0 ? Palette.good : Palette.bad }]}>
                   {(calculateDailyCalories() || 0) - todayEntries.reduce((sum, e) => sum + (e.calories || 0), 0)}
                 </Text>
               </View>
@@ -212,15 +216,18 @@ export default function NutritionScreen() {
           </View>
         )}
       </View>
+      </Enter>
 
+      <Enter order={1}>
       <TouchableOpacity
         style={styles.addButton}
         onPress={() => setShowAddMeal(true)}
         testID="logMealButton"
       >
-        <Plus color={Colors.white} size={24} />
+        <Plus color={Palette.canvas} size={24} />
         <Text style={styles.addButtonText}>Log Meal</Text>
       </TouchableOpacity>
+      </Enter>
 
       {showAddMeal && (
         <View style={styles.addMealCard} testID="addMealCard">
@@ -238,7 +245,7 @@ export default function NutritionScreen() {
                 testID={`mealType-${type.id}`}
               >
                 <type.icon
-                  color={selectedMeal === type.id ? Colors.white : Colors.mediumGrey}
+                  color={selectedMeal === type.id ? Palette.canvas : Palette.inkMuted}
                   size={20}
                 />
                 <Text
@@ -255,11 +262,11 @@ export default function NutritionScreen() {
 
           <View style={styles.attachmentRow}>
             <TouchableOpacity style={styles.attachButton} onPress={takePhoto} testID="takePhotoButton">
-              <CameraIcon color={Colors.primary} size={18} />
+              <CameraIcon color={Palette.accent} size={18} />
               <Text style={styles.attachText}>Take Photo</Text>
             </TouchableOpacity>
             <TouchableOpacity style={styles.attachButton} onPress={pickFromLibrary} testID="uploadPhotoButton">
-              <ImageIcon color={Colors.primary} size={18} />
+              <ImageIcon color={Palette.accent} size={18} />
               <Text style={styles.attachText}>Upload Photo</Text>
             </TouchableOpacity>
           </View>
@@ -276,6 +283,7 @@ export default function NutritionScreen() {
           <TextInput
             style={styles.mealInput}
             placeholder="Describe your meal..."
+            placeholderTextColor={Palette.inkMuted}
             value={mealDescription}
             onChangeText={setMealDescription}
             multiline
@@ -304,7 +312,7 @@ export default function NutritionScreen() {
               testID="saveMealButton"
             >
               {isAnalyzing ? (
-                <ActivityIndicator color={Colors.white} />
+                <ActivityIndicator color={Palette.canvas} />
               ) : (
                 <Text style={styles.saveButtonText}>
                   {profile.aiEnabled ? 'Analyze & Save' : 'Save'}
@@ -315,8 +323,9 @@ export default function NutritionScreen() {
         </View>
       )}
 
+      <Enter order={2}>
       <View style={styles.entriesContainer}>
-        <Text style={styles.sectionTitle}>Today's Meals</Text>
+        <Text style={styles.sectionTitle}>Today&apos;s Meals</Text>
         
         {todayEntries.length === 0 ? (
           <Text style={styles.emptyText}>No meals logged today</Text>
@@ -327,7 +336,7 @@ export default function NutritionScreen() {
               <View key={entry.id} style={styles.entryCard} testID={`mealEntry-${entry.id}`}>
                 <View style={styles.entryHeader}>
                   <View style={styles.entryIcon}>
-                    <MealIcon color={Colors.secondary} size={20} />
+                    <MealIcon color={Palette.accent} size={20} />
                   </View>
                   <View style={styles.entryInfo}>
                     <Text style={styles.entryMealType}>
@@ -372,7 +381,7 @@ export default function NutritionScreen() {
                     
                     {entry.aiAnalysis.healthierAlternatives.length > 0 && (
                       <>
-                        <Text style={styles.aiAlternativesTitle}>Healthier Alternatives:</Text>
+                        <Text style={styles.aiAlternativesTitle}>Healthier alternatives</Text>
                         {entry.aiAnalysis.healthierAlternatives.map((alt, index) => (
                           <Text key={index} style={styles.aiAlternative}>
                             • {alt}
@@ -387,332 +396,165 @@ export default function NutritionScreen() {
           })
         )}
       </View>
+      </Enter>
+
+      <View style={styles.footerSpace} />
     </ScrollView>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: Colors.lightGrey,
-  },
+  safe: { flex: 1, backgroundColor: Palette.canvas },
+  container: { flex: 1, backgroundColor: Palette.canvas },
+
+  eyebrow: { ...Type.eyebrow, color: Palette.accent, marginBottom: Space.xs },
   header: {
-    padding: 20,
-    backgroundColor: Colors.white,
-    borderBottomWidth: 1,
-    borderBottomColor: Colors.lightGrey,
+    paddingHorizontal: Space.xl,
+    paddingTop: Space.lg,
+    paddingBottom: Space.xl,
+    backgroundColor: Palette.canvas,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderBottomColor: Palette.line,
   },
-  dateText: {
-    fontSize: 16,
-    color: Colors.mediumGrey,
-    marginBottom: 8,
-  },
+  dateText: { ...Type.title, color: Palette.ink, marginBottom: Space.xl },
+
   calorieInfo: {
-    backgroundColor: Colors.lightGrey,
-    padding: 16,
-    borderRadius: 12,
+    backgroundColor: Palette.canvasRaised,
+    borderRadius: Radius.lg,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: Palette.line,
+    padding: Space.lg,
   },
-  calorieRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginBottom: 12,
-  },
-  calorieItem: {
-    alignItems: 'center',
-    flex: 1,
-  },
-  calorieLabel: {
-    fontSize: 12,
-    color: Colors.mediumGrey,
-    marginBottom: 4,
-    textTransform: 'uppercase',
-    letterSpacing: 0.5,
-  },
-  calorieValue: {
-    fontSize: 18,
-    fontWeight: '700',
-    color: Colors.primary,
-  },
+  calorieRow: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: Space.md },
+  calorieItem: { alignItems: 'center', flex: 1 },
+  calorieLabel: { ...Type.eyebrow, color: Palette.inkMuted, marginBottom: Space.xs },
+  // Neutral by default. "Remaining" overrides to good/bad because that number has a
+  // direction; Target and Consumed do not, and the system reserves colour for direction.
+  calorieValue: { ...Type.heading, color: Palette.ink, fontVariant: Type.numeral.fontVariant },
+
   macroSummary: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    paddingTop: 12,
-    borderTopWidth: 1,
-    borderTopColor: Colors.white,
-    marginBottom: 8,
+    paddingTop: Space.md,
+    borderTopWidth: StyleSheet.hairlineWidth,
+    borderTopColor: Palette.line,
+    marginBottom: Space.sm,
   },
-  macroSummaryItem: {
-    alignItems: 'center',
-    flex: 1,
-  },
-  macroSummaryLabel: {
-    fontSize: 11,
-    color: Colors.mediumGrey,
-    marginBottom: 2,
-    textTransform: 'uppercase',
-    letterSpacing: 0.5,
-  },
-  macroSummaryValue: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: Colors.secondary,
-  },
-  weightGoal: {
-    fontSize: 12,
-    color: Colors.mediumGrey,
-  },
+  macroSummaryItem: { alignItems: 'center', flex: 1 },
+  macroSummaryLabel: { ...Type.eyebrow, color: Palette.inkMuted, marginBottom: 2 },
+  macroSummaryValue: { ...Type.bodyStrong, color: Palette.ink, fontVariant: Type.numeral.fontVariant },
+  weightGoal: { ...Type.caption, color: Palette.inkMuted },
+
   addButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: Colors.primary,
-    margin: 20,
-    padding: 16,
-    borderRadius: 12,
-    gap: 8,
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: Space.sm,
+    backgroundColor: Palette.accent, borderRadius: Radius.pill,
+    marginHorizontal: Space.xl, marginVertical: Space.xl, paddingVertical: Space.lg,
+    shadowColor: Palette.accent, shadowOpacity: 0.35, shadowRadius: 16, shadowOffset: { width: 0, height: 6 },
   },
-  addButtonText: {
-    color: Colors.white,
-    fontSize: 16,
-    fontWeight: '600',
-  },
+  addButtonText: { ...Type.bodyStrong, color: Palette.canvas },
+
   addMealCard: {
-    backgroundColor: Colors.white,
-    marginHorizontal: 20,
-    marginBottom: 20,
-    borderRadius: 16,
-    padding: 20,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 3,
+    backgroundColor: Palette.canvasRaised,
+    marginHorizontal: Space.xl,
+    marginBottom: Space.xl,
+    borderRadius: Radius.lg,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: Palette.line,
+    padding: Space.lg,
   },
-  cardTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: Colors.darkGrey,
-    marginBottom: 16,
-  },
-  mealTypeContainer: {
-    flexDirection: 'row',
-    gap: 10,
-    marginBottom: 16,
-  },
+  cardTitle: { ...Type.heading, color: Palette.ink, marginBottom: Space.lg },
+
+  mealTypeContainer: { flexDirection: 'row', gap: Space.sm, marginBottom: Space.lg },
   mealTypeButton: {
-    flex: 1,
-    flexDirection: 'column',
-    alignItems: 'center',
-    padding: 12,
-    borderRadius: 12,
-    backgroundColor: Colors.lightGrey,
-    gap: 4,
+    flex: 1, alignItems: 'center', gap: Space.xs,
+    paddingVertical: Space.md, borderRadius: Radius.sm,
+    backgroundColor: Palette.canvas, borderWidth: 1, borderColor: Palette.line,
   },
-  mealTypeButtonActive: {
-    backgroundColor: Colors.secondary,
-  },
-  mealTypeText: {
-    fontSize: 12,
-    color: Colors.mediumGrey,
-  },
-  mealTypeTextActive: {
-    color: Colors.white,
-    fontWeight: '600',
-  },
-  attachmentRow: {
-    flexDirection: 'row',
-    gap: 12,
-    marginBottom: 12,
-  },
+  mealTypeButtonActive: { backgroundColor: Palette.accent, borderColor: Palette.accent },
+  mealTypeText: { ...Type.caption, color: Palette.inkMuted },
+  mealTypeTextActive: { color: Palette.canvas, fontWeight: '700' },
+
+  attachmentRow: { flexDirection: 'row', gap: Space.md, marginBottom: Space.md },
   attachButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    paddingVertical: 10,
-    paddingHorizontal: 12,
-    backgroundColor: Colors.lightGrey,
-    borderRadius: 10,
-    borderWidth: 1,
-    borderColor: Colors.lightGrey,
+    flexDirection: 'row', alignItems: 'center', gap: Space.sm,
+    paddingVertical: Space.md, paddingHorizontal: Space.md,
+    borderRadius: Radius.sm, borderWidth: 1, borderColor: Palette.lineStrong,
   },
-  attachText: {
-    color: Colors.primary,
-    fontWeight: '600',
-    fontSize: 14,
-  },
-  photoPreviewContainer: {
-    marginBottom: 12,
-    alignItems: 'flex-start',
-  },
-  photoPreview: {
-    width: 160,
-    height: 160,
-    borderRadius: 12,
-  },
+  attachText: { ...Type.caption, color: Palette.accent },
+
+  photoPreviewContainer: { marginBottom: Space.md, alignItems: 'flex-start' },
+  photoPreview: { width: 160, height: 160, borderRadius: Radius.md },
   removePhotoBtn: {
-    marginTop: 8,
-    backgroundColor: Colors.lightGrey,
-    paddingVertical: 6,
-    paddingHorizontal: 10,
-    borderRadius: 8,
+    marginTop: Space.sm, paddingVertical: Space.sm, paddingHorizontal: Space.md,
+    borderRadius: Radius.sm, borderWidth: 1, borderColor: Palette.lineStrong,
   },
-  removePhotoText: {
-    color: Colors.error,
-    fontWeight: '600',
-  },
+  removePhotoText: { ...Type.caption, color: Palette.bad },
+
   mealInput: {
+    ...Type.body,
+    color: Palette.ink,
+    backgroundColor: Palette.canvas,
     borderWidth: 1,
-    borderColor: Colors.lightGrey,
-    borderRadius: 12,
-    padding: 12,
-    fontSize: 16,
-    backgroundColor: Colors.lightGrey,
+    borderColor: Palette.line,
+    borderRadius: Radius.md,
+    padding: Space.md,
     minHeight: 80,
     textAlignVertical: 'top',
-    marginBottom: 16,
+    marginBottom: Space.lg,
   },
-  addMealActions: {
-    flexDirection: 'row',
-    gap: 12,
-  },
+
+  addMealActions: { flexDirection: 'row', gap: Space.md },
   cancelButton: {
-    flex: 1,
-    padding: 14,
-    borderRadius: 12,
-    backgroundColor: Colors.lightGrey,
-    alignItems: 'center',
+    flex: 1, alignItems: 'center', paddingVertical: Space.lg,
+    borderRadius: Radius.pill, borderWidth: 1, borderColor: Palette.lineStrong,
   },
-  cancelButtonText: {
-    color: Colors.mediumGrey,
-    fontSize: 16,
-    fontWeight: '600',
-  },
+  cancelButtonText: { ...Type.bodyStrong, color: Palette.ink },
   saveButton: {
-    flex: 1,
-    padding: 14,
-    borderRadius: 12,
-    backgroundColor: Colors.primary,
-    alignItems: 'center',
+    flex: 1, alignItems: 'center', paddingVertical: Space.lg,
+    borderRadius: Radius.pill, backgroundColor: Palette.accent,
   },
-  saveButtonText: {
-    color: Colors.white,
-    fontSize: 16,
-    fontWeight: '600',
-  },
-  entriesContainer: {
-    padding: 20,
-  },
-  sectionTitle: {
-    fontSize: 20,
-    fontWeight: '600',
-    color: Colors.darkGrey,
-    marginBottom: 16,
-  },
-  emptyText: {
-    textAlign: 'center',
-    color: Colors.mediumGrey,
-    fontSize: 16,
-    marginTop: 20,
-  },
+  saveButtonText: { ...Type.bodyStrong, color: Palette.canvas },
+
+  entriesContainer: { paddingHorizontal: Space.xl, paddingBottom: Space.xl },
+  sectionTitle: { ...Type.heading, color: Palette.ink, marginBottom: Space.lg },
+  emptyText: { ...Type.body, color: Palette.inkMuted, textAlign: 'center', marginTop: Space.xl },
+
   entryCard: {
-    backgroundColor: Colors.white,
-    borderRadius: 16,
-    padding: 16,
-    marginBottom: 12,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 4,
-    elevation: 2,
+    backgroundColor: Palette.canvasRaised,
+    borderRadius: Radius.lg,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: Palette.line,
+    padding: Space.lg,
+    marginBottom: Space.md,
   },
-  entryHeader: {
-    flexDirection: 'row',
-    gap: 12,
-  },
+  entryHeader: { flexDirection: 'row', gap: Space.md },
   entryIcon: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: Colors.lightGrey,
-    alignItems: 'center',
-    justifyContent: 'center',
+    width: 40, height: 40, borderRadius: Radius.sm, backgroundColor: Palette.canvas,
+    alignItems: 'center', justifyContent: 'center',
   },
-  entryInfo: {
-    flex: 1,
-  },
-  entryMealType: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: Colors.secondary,
-    marginBottom: 2,
-  },
-  entryDescription: {
-    fontSize: 16,
-    color: Colors.darkGrey,
-    marginBottom: 4,
-  },
-  entryCalories: {
-    fontSize: 14,
-    color: Colors.mediumGrey,
-  },
-  entryPhoto: {
-    width: 120,
-    height: 120,
-    borderRadius: 10,
-    marginTop: 8,
-  },
+  entryInfo: { flex: 1 },
+  entryMealType: { ...Type.eyebrow, color: Palette.accent, marginBottom: 2 },
+  entryDescription: { ...Type.bodyStrong, color: Palette.ink, marginBottom: Space.xs },
+  entryCalories: { ...Type.caption, color: Palette.inkMuted, fontVariant: Type.numeral.fontVariant },
+  entryPhoto: { width: 120, height: 120, borderRadius: Radius.sm, marginTop: Space.sm },
+
   aiAnalysis: {
-    marginTop: 12,
-    paddingTop: 12,
-    borderTopWidth: 1,
-    borderTopColor: Colors.lightGrey,
+    marginTop: Space.md, paddingTop: Space.md,
+    borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: Palette.line,
   },
-  aiAnalysisTitle: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: Colors.primary,
-    marginBottom: 6,
-  },
-  aiAnalysisText: {
-    fontSize: 14,
-    color: Colors.mediumGrey,
-    lineHeight: 20,
-    marginBottom: 8,
-  },
-  aiAlternativesTitle: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: Colors.darkGrey,
-    marginTop: 8,
-    marginBottom: 4,
-  },
-  aiAlternative: {
-    fontSize: 14,
-    color: Colors.mediumGrey,
-    lineHeight: 20,
-    marginLeft: 8,
-  },
+  aiAnalysisTitle: { ...Type.eyebrow, color: Palette.accent, marginBottom: Space.sm },
+  aiAnalysisText: { ...Type.caption, color: Palette.inkMuted, marginBottom: Space.sm },
+  aiAlternativesTitle: { ...Type.eyebrow, color: Palette.ink, marginTop: Space.sm, marginBottom: Space.xs },
+  aiAlternative: { ...Type.caption, color: Palette.inkMuted, marginLeft: Space.sm },
+
   macrosContainer: {
-    flexDirection: 'row',
-    gap: 16,
-    marginTop: 8,
-    paddingTop: 8,
-    borderTopWidth: 1,
-    borderTopColor: Colors.lightGrey,
+    flexDirection: 'row', gap: Space.lg, marginTop: Space.sm, paddingTop: Space.sm,
+    borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: Palette.line,
   },
-  macroItem: {
-    alignItems: 'center',
-  },
-  macroLabel: {
-    fontSize: 11,
-    color: Colors.mediumGrey,
-    textTransform: 'uppercase',
-    letterSpacing: 0.5,
-  },
-  macroValue: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: Colors.primary,
-    marginTop: 2,
-  },
+  macroItem: { alignItems: 'center' },
+  macroLabel: { ...Type.eyebrow, color: Palette.inkMuted },
+  macroValue: { ...Type.bodyStrong, color: Palette.ink, marginTop: 2, fontVariant: Type.numeral.fontVariant },
+
+  footerSpace: { height: Space.xxxl },
 });

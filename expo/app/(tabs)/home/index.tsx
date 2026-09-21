@@ -58,6 +58,7 @@ import OnboardingModal from '@/components/OnboardingModal';
 import WeeklyCheckInModal from '@/components/WeeklyCheckInModal';
 import PremiumModal from '@/components/PremiumModal';
 import { Motion, Palette, Radius, Space, Type } from '@/constants/theme';
+import Enter from '@/components/Enter';
 import type { NutritionEntry, WorkoutLog } from '@/types/user';
 
 // ---------------------------------------------------------------- data
@@ -116,20 +117,6 @@ function bmiCategory(bmi: number): string {
   if (bmi < 25) return 'Normal';
   if (bmi < 30) return 'Overweight';
   return 'Obese';
-}
-
-// ---------------------------------------------------------------- motion
-
-function Enter({ children, order = 0, style }: { children: React.ReactNode; order?: number; style?: any }) {
-  const opacity = useRef(new Animated.Value(0)).current;
-  const translateY = useRef(new Animated.Value(14)).current;
-  useEffect(() => {
-    Animated.parallel([
-      Animated.timing(opacity, { toValue: 1, duration: Motion.enter, delay: order * Motion.stagger, easing: Easing.out(Easing.cubic), useNativeDriver: true }),
-      Animated.timing(translateY, { toValue: 0, duration: Motion.enter, delay: order * Motion.stagger, easing: Easing.out(Easing.cubic), useNativeDriver: true }),
-    ]).start();
-  }, []);
-  return <Animated.View style={[style, { opacity, transform: [{ translateY }] }]}>{children}</Animated.View>;
 }
 
 // ---------------------------------------------------------------- pieces
