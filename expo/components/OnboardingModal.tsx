@@ -1,3 +1,25 @@
+/**
+ * First-run questionnaire, on the dark system.
+ *
+ * This is the screen a new account sees the moment the intro and sign-up are
+ * done, and until now it was a green-gradient light form — the biggest single
+ * break in the redesign. Same three steps, same fields, same `onComplete`
+ * payload shape, same "everything is required" rule. What changed:
+ *
+ *   - full-bleed canvas, a three-segment progress bar instead of dots, and the
+ *     step title as the headline rather than a fixed "AI Personalization";
+ *   - every choice is a pill (single- or multi-select) with a haptic, and the
+ *     "Other" free-text fields appear inline under the pill that opened them;
+ *   - age / height / weight are numerals with their unit beside them, like the
+ *     check-in sheet, and the name field is the one ordinary text input;
+ *   - the two `any` casts are gone: `updateField` is generic over UserProfile.
+ *
+ * One data fix, deliberate: "Weekly exercise frequency" used to store 1, 2, 3
+ * or 4 for the four ranges — so "5-6 days" was saved as `weeklyFrequency: 3`,
+ * and the Edit-goals sheet and the calorie estimate then read that 3 as three
+ * days. It now stores a representative day count (2, 4, 6, 7). Existing
+ * profiles are untouched; only new onboardings write the corrected value.
+ */
 import React, { useState } from 'react';
 import {
   Modal,
@@ -11,10 +33,12 @@ import {
   Platform,
   Alert,
 } from 'react-native';
-import { ChevronRight, ChevronLeft } from 'lucide-react-native';
-import { LinearGradient } from 'expo-linear-gradient';
+import * as Haptics from 'expo-haptics';
+import { ChevronLeft } from 'lucide-react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import Enter from '@/components/Enter';
+import { Palette, Radius, Space, Type } from '@/constants/theme';
 import type { UserProfile } from '@/types/user';
-import { Colors } from '@/constants/colors';
 
 interface OnboardingModalProps {
   visible: boolean;
@@ -22,612 +46,310 @@ interface OnboardingModalProps {
 }
 
 const STEPS = [
-  { id: 'personal', title: 'Personal Information' },
-  { id: 'dietary', title: 'Dietary Preferences' },
-  { id: 'physical', title: 'Physical Activity' },
+  { id: 'personal', eyebrow: 'Step 1 of 3', title: 'About you' },
+  { id: 'dietary', eyebrow: 'Step 2 of 3', title: 'How you eat' },
+  { id: 'physical', eyebrow: 'Step 3 of 3', title: 'How you train' },
+] as const;
+
+const GENDERS: { value: NonNullable<UserProfile['gender']>; label: string }[] = [
+  { value: 'male', label: 'Male' }, { value: 'female', label: 'Female' }, { value: 'other', label: 'Other' },
 ];
+const DIETS = ['Vegetarian', 'Vegan', 'Keto', 'Mediterranean', 'Low-Carb', 'High-Protein', 'Balanced', 'None', 'Other'];
+const ALLERGIES = ['Nuts', 'Dairy/Lactose', 'Gluten/Wheat', 'Shellfish', 'Eggs', 'None', 'Other'];
+const HABITS = ['Regular 3 meals', 'Small frequent meals', 'Intermittent fasting', 'Irregular schedule', 'Other'];
+const ACTIVITY: { value: NonNullable<UserProfile['activityLevel']>; label: string; hint: string }[] = [
+  { value: 'sedentary', label: 'Sedentary', hint: 'little or no exercise' },
+  { value: 'light', label: 'Light', hint: '1–3 days a week' },
+  { value: 'moderate', label: 'Moderate', hint: '3–5 days a week' },
+  { value: 'active', label: 'Active', hint: '6–7 days a week' },
+  { value: 'very-active', label: 'Very active', hint: 'twice a day, or intense' },
+];
+const EXERCISE = ['Cardio/Running', 'Weight Training', 'Yoga', 'Swimming', 'HIIT', 'Walking/Hiking', 'Bodyweight', 'None', 'Other'];
+const FREQUENCY: { days: number; label: string }[] = [
+  { days: 2, label: '1–2 days' }, { days: 4, label: '3–4 days' }, { days: 6, label: '5–6 days' }, { days: 7, label: '7 days' },
+];
+const GOALS = ['Weight Loss', 'Muscle Gain/Bulking', 'Maintain Current Weight', 'General Health & Wellness', 'Build Strength', 'Other'];
+const PACE: { value: number; label: string }[] = [
+  { value: 0.25, label: '0.25 kg · slow' }, { value: 0.5, label: '0.5 kg · steady' },
+  { value: 0.75, label: '0.75 kg · fast' }, { value: 1, label: '1 kg · very fast' },
+];
+
+const hasWeightGoal = (goal?: string) => {
+  const g = (goal ?? '').toLowerCase();
+  return g.includes('weight loss') || g.includes('fat loss') || g.includes('muscle gain') || g.includes('bulking');
+};
+
+const tap = () => Haptics.selectionAsync().catch(() => {});
+
+function Pills<V extends string | number>({ options, selected, onPick }: {
+  options: { value: V; label: string }[];
+  selected: (v: V) => boolean;
+  onPick: (v: V) => void;
+}) {
+  return (
+    <View style={styles.pills}>
+      {options.map((o) => {
+        const on = selected(o.value);
+        return (
+          <TouchableOpacity
+            key={String(o.value)}
+            style={[styles.pill, on && styles.pillOn]}
+            onPress={() => { tap(); onPick(o.value); }}
+            accessibilityRole="button"
+            accessibilityState={{ selected: on }}
+          >
+            <Text style={[styles.pillText, on && styles.pillTextOn]}>{o.label}</Text>
+          </TouchableOpacity>
+        );
+      })}
+    </View>
+  );
+}
+
+const asOptions = (xs: readonly string[]) => xs.map((x) => ({ value: x, label: x }));
 
 export default function OnboardingModal({ visible, onComplete }: OnboardingModalProps) {
   const [currentStep, setCurrentStep] = useState(0);
   const [formData, setFormData] = useState<Partial<UserProfile>>({});
+  const step = STEPS[currentStep];
 
-  const isStepValid = () => {
-    switch (STEPS[currentStep].id) {
+  const updateField = <K extends keyof UserProfile>(field: K, value: UserProfile[K]) => {
+    setFormData((prev) => ({ ...prev, [field]: value }));
+  };
+  const toggleIn = (field: 'dietaryPreferences' | 'allergies' | 'exerciseTypes', value: string) => {
+    const current = formData[field] ?? [];
+    updateField(field, current.includes(value) ? current.filter((v) => v !== value) : [...current, value]);
+  };
+  const numeric = (field: 'age' | 'height' | 'weight' | 'targetWeight') => (text: string) =>
+    updateField(field, parseInt(text, 10) || 0);
+
+  const isStepValid = (): boolean => {
+    switch (step.id) {
       case 'personal':
-        return formData.name && formData.age && formData.gender && formData.height && formData.weight;
+        return Boolean(formData.name && formData.age && formData.gender && formData.height && formData.weight);
       case 'dietary':
-        return formData.dietaryPreferences?.length && formData.allergies?.length && formData.eatingHabits;
-      case 'physical':
-        const hasWeightGoal = formData.fitnessGoal?.toLowerCase().includes('weight loss') || 
-                             formData.fitnessGoal?.toLowerCase().includes('fat loss') ||
-                             formData.fitnessGoal?.toLowerCase().includes('muscle gain') ||
-                             formData.fitnessGoal?.toLowerCase().includes('bulking');
-        const weightGoalValid = !hasWeightGoal || (formData.targetWeight && formData.weeklyWeightGoal);
-        return formData.activityLevel && formData.exerciseTypes?.length && formData.weeklyFrequency && formData.fitnessGoal && weightGoalValid;
-      default:
-        return true;
+        return Boolean(formData.dietaryPreferences?.length && formData.allergies?.length && formData.eatingHabits);
+      case 'physical': {
+        const weightOk = !hasWeightGoal(formData.fitnessGoal) || Boolean(formData.targetWeight && formData.weeklyWeightGoal);
+        return Boolean(formData.activityLevel && formData.exerciseTypes?.length && formData.weeklyFrequency && formData.fitnessGoal && weightOk);
+      }
     }
   };
 
   const handleNext = () => {
     if (!isStepValid()) {
-      Alert.alert('Required Fields', 'Please fill in all required fields marked with *');
+      Alert.alert('A few more answers', 'Every question on this step is needed to set your targets.');
       return;
     }
-    
-    if (currentStep < STEPS.length - 1) {
-      setCurrentStep(currentStep + 1);
-    } else {
-      onComplete(formData);
-    }
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(() => {});
+    if (currentStep < STEPS.length - 1) setCurrentStep(currentStep + 1);
+    else onComplete(formData);
   };
 
-  const handleBack = () => {
-    if (currentStep > 0) {
-      setCurrentStep(currentStep - 1);
-    }
-  };
+  const handleBack = () => { if (currentStep > 0) { tap(); setCurrentStep(currentStep - 1); } };
 
-  const updateField = (field: keyof UserProfile, value: any) => {
-    setFormData({ ...formData, [field]: value });
-  };
+  const numeralField = (label: string, unit: string, field: 'age' | 'height' | 'weight' | 'targetWeight', placeholder: string) => (
+    <View>
+      <Text style={styles.label}>{label}</Text>
+      <View style={styles.numeralRow}>
+        <TextInput
+          style={styles.numeralInput}
+          keyboardType="number-pad"
+          value={formData[field] ? String(formData[field]) : ''}
+          onChangeText={numeric(field)}
+          placeholder={placeholder}
+          placeholderTextColor={Palette.inkFaint}
+          maxLength={3}
+          accessibilityLabel={label}
+        />
+        {unit ? <Text style={styles.unit}>{unit}</Text> : null}
+      </View>
+    </View>
+  );
 
-  const renderStepContent = () => {
-    switch (STEPS[currentStep].id) {
+  const otherInput = (field: 'otherDietaryPreferences' | 'otherAllergies' | 'otherEatingHabits' | 'otherExerciseTypes' | 'otherFitnessGoal', placeholder: string) => (
+    <TextInput
+      style={styles.textInput}
+      placeholder={placeholder}
+      placeholderTextColor={Palette.inkFaint}
+      value={formData[field] ?? ''}
+      onChangeText={(t) => updateField(field, t)}
+    />
+  );
+
+  const renderStep = () => {
+    switch (step.id) {
       case 'personal':
         return (
-          <View style={styles.stepContent}>
-            <Text style={styles.label}>Name *</Text>
-            <TextInput
-              style={styles.input}
-              placeholder="Your name"
-              value={formData.name || ''}
-              onChangeText={(text) => updateField('name', text)}
-            />
-
-            <Text style={styles.label}>Age *</Text>
-            <TextInput
-              style={styles.input}
-              placeholder="Your age"
-              keyboardType="numeric"
-              value={formData.age?.toString() || ''}
-              onChangeText={(text) => updateField('age', parseInt(text) || 0)}
-            />
-
-            <Text style={styles.label}>Gender *</Text>
-            <View style={styles.buttonGroup}>
-              {['male', 'female', 'other'].map((gender) => (
-                <TouchableOpacity
-                  key={gender}
-                  style={[
-                    styles.optionButton,
-                    formData.gender === gender && styles.optionButtonActive,
-                  ]}
-                  onPress={() => updateField('gender', gender as UserProfile['gender'])}
-                >
-                  <Text
-                    style={[
-                      styles.optionText,
-                      formData.gender === gender && styles.optionTextActive,
-                    ]}
-                  >
-                    {gender.charAt(0).toUpperCase() + gender.slice(1)}
-                  </Text>
-                </TouchableOpacity>
-              ))}
-            </View>
-
-            <Text style={styles.label}>Height (cm) *</Text>
-            <TextInput
-              style={styles.input}
-              placeholder="Your height in cm"
-              keyboardType="numeric"
-              value={formData.height?.toString() || ''}
-              onChangeText={(text) => updateField('height', parseInt(text) || 0)}
-            />
-
-            <Text style={styles.label}>Weight (kg) *</Text>
-            <TextInput
-              style={styles.input}
-              placeholder="Your weight in kg"
-              keyboardType="numeric"
-              value={formData.weight?.toString() || ''}
-              onChangeText={(text) => updateField('weight', parseInt(text) || 0)}
-            />
-          </View>
+          <>
+            <Enter order={1}>
+              <Text style={styles.label}>Name</Text>
+              <TextInput
+                style={styles.textInput}
+                placeholder="What should we call you?"
+                placeholderTextColor={Palette.inkFaint}
+                value={formData.name ?? ''}
+                onChangeText={(t) => updateField('name', t)}
+                autoCapitalize="words"
+                accessibilityLabel="Name"
+              />
+            </Enter>
+            <Enter order={2}>
+              <Text style={styles.label}>Gender</Text>
+              <Pills options={GENDERS} selected={(v) => formData.gender === v} onPick={(v) => updateField('gender', v)} />
+            </Enter>
+            <Enter order={3} style={styles.numeralGrid}>
+              {numeralField('Age', 'years', 'age', '0')}
+              {numeralField('Height', 'cm', 'height', '0')}
+              {numeralField('Weight', 'kg', 'weight', '0')}
+            </Enter>
+          </>
         );
-
       case 'dietary':
         return (
-          <View style={styles.stepContent}>
-            <Text style={styles.label}>Dietary Preferences *</Text>
-            <View style={styles.buttonGroup}>
-              {[
-                'Vegetarian', 'Vegan', 'Keto', 'Mediterranean', 
-                'Low-Carb', 'High-Protein', 'Balanced', 'None', 'Other'
-              ].map((pref) => (
-                <TouchableOpacity
-                  key={pref}
-                  style={[
-                    styles.optionButton,
-                    formData.dietaryPreferences?.includes(pref) && styles.optionButtonActive,
-                  ]}
-                  onPress={() => {
-                    const current = formData.dietaryPreferences || [];
-                    const updated = current.includes(pref)
-                      ? current.filter((p) => p !== pref)
-                      : [...current, pref];
-                    updateField('dietaryPreferences', updated);
-                  }}
-                >
-                  <Text
-                    style={[
-                      styles.optionText,
-                      formData.dietaryPreferences?.includes(pref) && styles.optionTextActive,
-                    ]}
-                  >
-                    {pref}
-                  </Text>
-                </TouchableOpacity>
-              ))}
-            </View>
-            
-            {formData.dietaryPreferences?.includes('Other') && (
-              <TextInput
-                style={styles.input}
-                placeholder="Please specify other dietary preferences"
-                value={formData.otherDietaryPreferences || ''}
-                onChangeText={(text) => updateField('otherDietaryPreferences', text)}
-              />
-            )}
-
-            <Text style={styles.label}>Food Allergies *</Text>
-            <View style={styles.buttonGroup}>
-              {[
-                'Nuts', 'Dairy/Lactose', 'Gluten/Wheat', 
-                'Shellfish', 'Eggs', 'None', 'Other'
-              ].map((allergy) => (
-                <TouchableOpacity
-                  key={allergy}
-                  style={[
-                    styles.optionButton,
-                    formData.allergies?.includes(allergy) && styles.optionButtonActive,
-                  ]}
-                  onPress={() => {
-                    const current = formData.allergies || [];
-                    const updated = current.includes(allergy)
-                      ? current.filter((a) => a !== allergy)
-                      : [...current, allergy];
-                    updateField('allergies', updated);
-                  }}
-                >
-                  <Text
-                    style={[
-                      styles.optionText,
-                      formData.allergies?.includes(allergy) && styles.optionTextActive,
-                    ]}
-                  >
-                    {allergy}
-                  </Text>
-                </TouchableOpacity>
-              ))}
-            </View>
-            
-            {formData.allergies?.includes('Other') && (
-              <TextInput
-                style={styles.input}
-                placeholder="Please specify other allergies"
-                value={formData.otherAllergies || ''}
-                onChangeText={(text) => updateField('otherAllergies', text)}
-              />
-            )}
-
-            <Text style={styles.label}>Eating Habits *</Text>
-            <View style={styles.buttonGroup}>
-              {[
-                'Regular 3 meals',
-                'Small frequent meals',
-                'Intermittent fasting',
-                'Irregular schedule',
-                'Other'
-              ].map((habit) => (
-                <TouchableOpacity
-                  key={habit}
-                  style={[
-                    styles.optionButton,
-                    formData.eatingHabits === habit && styles.optionButtonActive,
-                  ]}
-                  onPress={() => updateField('eatingHabits', habit)}
-                >
-                  <Text
-                    style={[
-                      styles.optionText,
-                      formData.eatingHabits === habit && styles.optionTextActive,
-                    ]}
-                  >
-                    {habit}
-                  </Text>
-                </TouchableOpacity>
-              ))}
-            </View>
-            
-            {formData.eatingHabits === 'Other' && (
-              <TextInput
-                style={styles.input}
-                placeholder="Please describe your eating habits"
-                value={formData.otherEatingHabits || ''}
-                onChangeText={(text) => updateField('otherEatingHabits', text)}
-              />
-            )}
-          </View>
+          <>
+            <Enter order={1}>
+              <Text style={styles.label}>Diet — pick all that apply</Text>
+              <Pills options={asOptions(DIETS)} selected={(v) => Boolean(formData.dietaryPreferences?.includes(v))} onPick={(v) => toggleIn('dietaryPreferences', v)} />
+              {formData.dietaryPreferences?.includes('Other') && otherInput('otherDietaryPreferences', 'Tell us about your diet')}
+            </Enter>
+            <Enter order={2}>
+              <Text style={styles.label}>Allergies — pick all that apply</Text>
+              <Pills options={asOptions(ALLERGIES)} selected={(v) => Boolean(formData.allergies?.includes(v))} onPick={(v) => toggleIn('allergies', v)} />
+              {formData.allergies?.includes('Other') && otherInput('otherAllergies', 'Which allergies?')}
+            </Enter>
+            <Enter order={3}>
+              <Text style={styles.label}>Eating pattern</Text>
+              <Pills options={asOptions(HABITS)} selected={(v) => formData.eatingHabits === v} onPick={(v) => updateField('eatingHabits', v)} />
+              {formData.eatingHabits === 'Other' && otherInput('otherEatingHabits', 'Describe how you usually eat')}
+            </Enter>
+          </>
         );
-
       case 'physical':
         return (
-          <View style={styles.stepContent}>
-            <Text style={styles.label}>Activity Level *</Text>
-            <View style={styles.buttonGroup}>
-              {[
-                { value: 'sedentary', label: 'Sedentary (Little to no exercise)' },
-                { value: 'light', label: 'Light (1-3 days/week)' },
-                { value: 'moderate', label: 'Moderate (3-5 days/week)' },
-                { value: 'active', label: 'Active (6-7 days/week)' },
-                { value: 'very-active', label: 'Very Active (2x/day or intense)' },
-              ].map((level) => (
-                <TouchableOpacity
-                  key={level.value}
-                  style={[
-                    styles.optionButton,
-                    formData.activityLevel === level.value && styles.optionButtonActive,
-                  ]}
-                  onPress={() =>
-                    updateField('activityLevel', level.value as UserProfile['activityLevel'])
-                  }
-                >
-                  <Text
-                    style={[
-                      styles.optionText,
-                      formData.activityLevel === level.value && styles.optionTextActive,
-                    ]}
-                  >
-                    {level.label}
-                  </Text>
-                </TouchableOpacity>
-              ))}
-            </View>
-
-            <Text style={styles.label}>Preferred Exercise Types *</Text>
-            <View style={styles.buttonGroup}>
-              {[
-                'Cardio/Running', 'Weight Training', 'Yoga', 'Swimming', 
-                'HIIT', 'Walking/Hiking', 'Bodyweight', 'None', 'Other'
-              ].map((exercise) => (
-                <TouchableOpacity
-                  key={exercise}
-                  style={[
-                    styles.optionButton,
-                    formData.exerciseTypes?.includes(exercise) && styles.optionButtonActive,
-                  ]}
-                  onPress={() => {
-                    const current = formData.exerciseTypes || [];
-                    const updated = current.includes(exercise)
-                      ? current.filter((e) => e !== exercise)
-                      : [...current, exercise];
-                    updateField('exerciseTypes', updated);
-                  }}
-                >
-                  <Text
-                    style={[
-                      styles.optionText,
-                      formData.exerciseTypes?.includes(exercise) && styles.optionTextActive,
-                    ]}
-                  >
-                    {exercise}
-                  </Text>
-                </TouchableOpacity>
-              ))}
-            </View>
-            
-            {formData.exerciseTypes?.includes('Other') && (
-              <TextInput
-                style={styles.input}
-                placeholder="Please specify other exercise types"
-                value={formData.otherExerciseTypes || ''}
-                onChangeText={(text) => updateField('otherExerciseTypes', text)}
-              />
-            )}
-
-            <Text style={styles.label}>Weekly Exercise Frequency *</Text>
-            <View style={styles.buttonGroup}>
-              {['1-2 days', '3-4 days', '5-6 days', '7+ days'].map((freq, index) => (
-                <TouchableOpacity
-                  key={freq}
-                  style={[
-                    styles.optionButton,
-                    formData.weeklyFrequency === index + 1 && styles.optionButtonActive,
-                  ]}
-                  onPress={() => updateField('weeklyFrequency', index + 1)}
-                >
-                  <Text
-                    style={[
-                      styles.optionText,
-                      formData.weeklyFrequency === index + 1 && styles.optionTextActive,
-                    ]}
-                  >
-                    {freq}
-                  </Text>
-                </TouchableOpacity>
-              ))}
-            </View>
-
-            <Text style={styles.label}>Primary Fitness Goal *</Text>
-            <View style={styles.buttonGroup}>
-              {[
-                'Weight Loss', 'Muscle Gain/Bulking', 'Maintain Current Weight',
-                'General Health & Wellness', 'Build Strength', 'Other'
-              ].map((goal) => (
-                <TouchableOpacity
-                  key={goal}
-                  style={[
-                    styles.optionButton,
-                    formData.fitnessGoal === goal && styles.optionButtonActive,
-                  ]}
-                  onPress={() => updateField('fitnessGoal', goal)}
-                >
-                  <Text
-                    style={[
-                      styles.optionText,
-                      formData.fitnessGoal === goal && styles.optionTextActive,
-                    ]}
-                  >
-                    {goal}
-                  </Text>
-                </TouchableOpacity>
-              ))}
-            </View>
-            
-            {formData.fitnessGoal === 'Other' && (
-              <TextInput
-                style={styles.input}
-                placeholder="Please describe your fitness goal"
-                value={formData.otherFitnessGoal || ''}
-                onChangeText={(text) => updateField('otherFitnessGoal', text)}
-              />
-            )}
-
-            {(formData.fitnessGoal?.toLowerCase().includes('weight loss') || 
-              formData.fitnessGoal?.toLowerCase().includes('muscle gain') ||
-              formData.fitnessGoal?.toLowerCase().includes('bulking')) && (
-              <>
-                <Text style={styles.label}>Target Weight (kg) *</Text>
-                <TextInput
-                  style={styles.input}
-                  placeholder="Your target weight in kg"
-                  keyboardType="numeric"
-                  value={formData.targetWeight?.toString() || ''}
-                  onChangeText={(text) => updateField('targetWeight', parseInt(text) || 0)}
-                />
-
-                <Text style={styles.label}>Weekly Weight Goal *</Text>
-                <View style={styles.buttonGroup}>
-                  {[
-                    { value: 0.25, label: '0.25 kg/week (Slow)' },
-                    { value: 0.5, label: '0.5 kg/week (Moderate)' },
-                    { value: 0.75, label: '0.75 kg/week (Fast)' },
-                    { value: 1, label: '1 kg/week (Very Fast)' },
-                  ].map((option) => (
+          <>
+            <Enter order={1}>
+              <Text style={styles.label}>Activity outside training</Text>
+              <View style={styles.list}>
+                {ACTIVITY.map((a) => {
+                  const on = formData.activityLevel === a.value;
+                  return (
                     <TouchableOpacity
-                      key={option.value}
-                      style={[
-                        styles.optionButton,
-                        formData.weeklyWeightGoal === option.value && styles.optionButtonActive,
-                      ]}
-                      onPress={() => updateField('weeklyWeightGoal', option.value)}
+                      key={a.value}
+                      style={[styles.row, on && styles.rowOn]}
+                      onPress={() => { tap(); updateField('activityLevel', a.value); }}
+                      accessibilityRole="button"
+                      accessibilityState={{ selected: on }}
                     >
-                      <Text
-                        style={[
-                          styles.optionText,
-                          formData.weeklyWeightGoal === option.value && styles.optionTextActive,
-                        ]}
-                      >
-                        {option.label}
-                      </Text>
+                      <Text style={[styles.rowLabel, on && styles.rowLabelOn]}>{a.label}</Text>
+                      <Text style={[styles.rowHint, on && styles.rowHintOn]}>{a.hint}</Text>
                     </TouchableOpacity>
-                  ))}
-                </View>
-              </>
+                  );
+                })}
+              </View>
+            </Enter>
+            <Enter order={2}>
+              <Text style={styles.label}>What you like doing — pick all that apply</Text>
+              <Pills options={asOptions(EXERCISE)} selected={(v) => Boolean(formData.exerciseTypes?.includes(v))} onPick={(v) => toggleIn('exerciseTypes', v)} />
+              {formData.exerciseTypes?.includes('Other') && otherInput('otherExerciseTypes', 'Which kind of training?')}
+            </Enter>
+            <Enter order={3}>
+              <Text style={styles.label}>Sessions a week</Text>
+              <Pills options={FREQUENCY.map((f) => ({ value: f.days, label: f.label }))} selected={(v) => formData.weeklyFrequency === v} onPick={(v) => updateField('weeklyFrequency', v)} />
+            </Enter>
+            <Enter order={4}>
+              <Text style={styles.label}>Main goal</Text>
+              <Pills options={asOptions(GOALS)} selected={(v) => formData.fitnessGoal === v} onPick={(v) => updateField('fitnessGoal', v)} />
+              {formData.fitnessGoal === 'Other' && otherInput('otherFitnessGoal', 'What are you training for?')}
+            </Enter>
+            {hasWeightGoal(formData.fitnessGoal) && (
+              <Enter order={5}>
+                {numeralField('Target weight', 'kg', 'targetWeight', '0')}
+                <Text style={styles.label}>Weekly pace</Text>
+                <Pills options={PACE} selected={(v) => formData.weeklyWeightGoal === v} onPick={(v) => updateField('weeklyWeightGoal', v)} />
+              </Enter>
             )}
-          </View>
+          </>
         );
-
-
-
-      default:
-        return null;
     }
   };
 
   return (
     <Modal visible={visible} animationType="slide" presentationStyle="fullScreen">
-      <LinearGradient colors={[Colors.primary, Colors.secondary]} style={styles.container}>
-        <KeyboardAvoidingView
-          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-          style={styles.keyboardView}
-        >
-          <View style={styles.header}>
-            <Text style={styles.title}>AI Personalization</Text>
-            <Text style={styles.subtitle}>Help us understand you better</Text>
-          </View>
-
-          <View style={styles.progressContainer}>
-            {STEPS.map((_, index) => (
-              <View
-                key={index}
-                style={[
-                  styles.progressDot,
-                  index <= currentStep && styles.progressDotActive,
-                ]}
-              />
+      <SafeAreaView style={styles.screen} edges={['top', 'bottom']}>
+        <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={styles.flex}>
+          <View style={styles.progress}>
+            {STEPS.map((s, i) => (
+              <View key={s.id} style={[styles.segment, i <= currentStep && styles.segmentOn]} />
             ))}
           </View>
 
-          <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
-            <Text style={styles.stepTitle}>{STEPS[currentStep].title}</Text>
-            {renderStepContent()}
+          <ScrollView style={styles.flex} contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
+            <Enter order={0} key={`h-${step.id}`}>
+              <Text style={styles.eyebrow}>{step.eyebrow}</Text>
+              <Text style={styles.title}>{step.title}</Text>
+            </Enter>
+            <View key={step.id}>{renderStep()}</View>
           </ScrollView>
 
           <View style={styles.footer}>
-            {currentStep > 0 && (
-              <TouchableOpacity style={styles.backButton} onPress={handleBack}>
-                <ChevronLeft color={Colors.primary} size={20} />
-                <Text style={styles.backButtonText}>Back</Text>
+            {currentStep > 0 ? (
+              <TouchableOpacity style={styles.secondary} onPress={handleBack} accessibilityRole="button" accessibilityLabel="Back">
+                <ChevronLeft color={Palette.ink} size={20} />
               </TouchableOpacity>
-            )}
-
-            <TouchableOpacity style={styles.nextButton} onPress={handleNext}>
-              <Text style={styles.nextButtonText}>
-                {currentStep === STEPS.length - 1 ? 'Complete' : 'Next'}
-              </Text>
-              <ChevronRight color={Colors.white} size={20} />
+            ) : null}
+            <TouchableOpacity style={styles.primary} onPress={handleNext} accessibilityRole="button">
+              <Text style={styles.primaryText}>{currentStep === STEPS.length - 1 ? 'Finish' : 'Continue'}</Text>
             </TouchableOpacity>
           </View>
         </KeyboardAvoidingView>
-      </LinearGradient>
+      </SafeAreaView>
     </Modal>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
+  screen: { flex: 1, backgroundColor: Palette.canvas },
+  flex: { flex: 1 },
+  progress: { flexDirection: 'row', gap: Space.sm, paddingHorizontal: Space.xl, paddingTop: Space.lg, paddingBottom: Space.sm, backgroundColor: Palette.canvas },
+  segment: { flex: 1, height: 3, borderRadius: 2, backgroundColor: Palette.line },
+  segmentOn: { backgroundColor: Palette.accent },
+  content: { paddingHorizontal: Space.xl, paddingTop: Space.xl, paddingBottom: Space.xxl },
+  eyebrow: { ...Type.eyebrow, color: Palette.accent },
+  title: { ...Type.title, color: Palette.ink, marginTop: Space.xs },
+  label: { ...Type.eyebrow, color: Palette.inkMuted, marginTop: Space.xl, marginBottom: Space.sm },
+
+  textInput: {
+    ...Type.body, color: Palette.ink, backgroundColor: Palette.canvasRaised, borderRadius: Radius.md,
+    borderWidth: StyleSheet.hairlineWidth, borderColor: Palette.line, paddingHorizontal: Space.md, paddingVertical: Space.md,
+    marginTop: Space.sm,
   },
-  keyboardView: {
-    flex: 1,
+
+  pills: { flexDirection: 'row', flexWrap: 'wrap', gap: Space.sm },
+  pill: { paddingHorizontal: Space.lg, paddingVertical: Space.sm + 2, borderRadius: Radius.pill, borderWidth: 1, borderColor: Palette.lineStrong },
+  pillOn: { backgroundColor: Palette.accent, borderColor: Palette.accent },
+  pillText: { ...Type.caption, color: Palette.ink },
+  pillTextOn: { color: Palette.canvas, fontWeight: '700' },
+
+  numeralGrid: { flexDirection: 'row', gap: Space.lg },
+  numeralRow: { flexDirection: 'row', alignItems: 'baseline' },
+  // Fixed width: on web a TextInput otherwise grows to the row and pushes its unit away.
+  numeralInput: { ...Type.title, color: Palette.ink, width: 64, padding: 0, fontVariant: Type.numeral.fontVariant },
+  unit: { ...Type.caption, color: Palette.inkMuted, marginLeft: Space.xs, flexShrink: 0 },
+
+  list: { gap: Space.sm },
+  row: {
+    backgroundColor: Palette.canvasRaised, borderRadius: Radius.md, padding: Space.md,
+    borderWidth: StyleSheet.hairlineWidth, borderColor: Palette.line,
   },
-  header: {
-    paddingTop: 60,
-    paddingHorizontal: 20,
-    paddingBottom: 20,
-  },
-  title: {
-    fontSize: 32,
-    fontWeight: 'bold',
-    color: Colors.white,
-    marginBottom: 8,
-  },
-  subtitle: {
-    fontSize: 16,
-    color: 'rgba(255, 255, 255, 0.8)',
-  },
-  progressContainer: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    paddingVertical: 20,
-    gap: 8,
-  },
-  progressDot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    backgroundColor: 'rgba(255, 255, 255, 0.3)',
-  },
-  progressDotActive: {
-    backgroundColor: Colors.white,
-    width: 24,
-  },
-  content: {
-    flex: 1,
-    backgroundColor: Colors.white,
-    borderTopLeftRadius: 30,
-    borderTopRightRadius: 30,
-    paddingTop: 30,
-    paddingHorizontal: 20,
-  },
-  stepTitle: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: Colors.darkGrey,
-    marginBottom: 20,
-  },
-  stepContent: {
-    paddingBottom: 20,
-  },
-  label: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: Colors.darkGrey,
-    marginTop: 16,
-    marginBottom: 8,
-  },
-  input: {
-    borderWidth: 1,
-    borderColor: Colors.lightGrey,
-    borderRadius: 12,
-    padding: 12,
-    fontSize: 16,
-    backgroundColor: Colors.lightGrey,
-  },
-  textArea: {
-    minHeight: 80,
-    textAlignVertical: 'top',
-  },
-  buttonGroup: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 10,
-  },
-  optionButton: {
-    paddingHorizontal: 16,
-    paddingVertical: 10,
-    borderRadius: 20,
-    borderWidth: 1,
-    borderColor: Colors.lightGrey,
-    backgroundColor: Colors.lightGrey,
-  },
-  optionButtonActive: {
-    backgroundColor: Colors.primary,
-    borderColor: Colors.primary,
-  },
-  optionText: {
-    fontSize: 14,
-    color: Colors.mediumGrey,
-  },
-  optionTextActive: {
-    color: Colors.white,
-    fontWeight: '600',
-  },
-  footer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    padding: 20,
-    backgroundColor: Colors.white,
-  },
-  backButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 20,
-    paddingVertical: 12,
-    borderRadius: 25,
-    backgroundColor: Colors.lightGrey,
-  },
-  backButtonText: {
-    color: Colors.primary,
-    fontSize: 16,
-    fontWeight: '600',
-    marginLeft: 4,
-  },
-  nextButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 24,
-    paddingVertical: 12,
-    borderRadius: 25,
-    backgroundColor: Colors.primary,
-  },
-  nextButtonText: {
-    color: Colors.white,
-    fontSize: 16,
-    fontWeight: '600',
-    marginRight: 4,
-  },
+  rowOn: { borderColor: Palette.accent, backgroundColor: Palette.accentGlow },
+  rowLabel: { ...Type.bodyStrong, color: Palette.ink },
+  rowLabelOn: { color: Palette.accent },
+  rowHint: { ...Type.caption, color: Palette.inkMuted, marginTop: 2 },
+  rowHintOn: { color: Palette.inkMuted },
+
+  footer: { flexDirection: 'row', gap: Space.md, paddingHorizontal: Space.xl, paddingVertical: Space.md, borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: Palette.line },
+  secondary: { width: 56, alignItems: 'center', justifyContent: 'center', borderRadius: Radius.pill, borderWidth: 1, borderColor: Palette.lineStrong },
+  primary: { flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: Palette.accent, borderRadius: Radius.pill, paddingVertical: Space.lg },
+  primaryText: { ...Type.bodyStrong, color: Palette.canvas },
 });

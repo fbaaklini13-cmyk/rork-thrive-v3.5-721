@@ -25,9 +25,9 @@
  *   Motion: entrances only (600ms, 80ms stagger, from theme.ts). Nothing loops.
  *   The Stack header is hidden; the greeting is the header, under the safe area.
  *
- * NOT CHANGED: OnboardingModal, WeeklyCheckInModal and PremiumModal are still
- *   the light components. They open over this screen and will look like what
- *   they are -- unmigrated -- until their own pass.
+ * OnboardingModal, WeeklyCheckInModal and PremiumModal open over this screen;
+ *   all three are on the dark system as of 22 Sep (they were the light
+ *   components when this tab was first migrated).
  */
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import {
