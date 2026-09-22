@@ -37,6 +37,7 @@ import * as Haptics from 'expo-haptics';
 import { ChevronLeft } from 'lucide-react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Enter from '@/components/Enter';
+import { FITNESS_GOALS, hasWeightGoal } from '@/constants/goals';
 import { Palette, Radius, Space, Type } from '@/constants/theme';
 import type { UserProfile } from '@/types/user';
 
@@ -68,16 +69,12 @@ const EXERCISE = ['Cardio/Running', 'Weight Training', 'Yoga', 'Swimming', 'HIIT
 const FREQUENCY: { days: number; label: string }[] = [
   { days: 2, label: '1–2 days' }, { days: 4, label: '3–4 days' }, { days: 6, label: '5–6 days' }, { days: 7, label: '7 days' },
 ];
-const GOALS = ['Weight Loss', 'Muscle Gain/Bulking', 'Maintain Current Weight', 'General Health & Wellness', 'Build Strength', 'Other'];
+// One vocabulary shared with EditGoalsModal (constants/goals.ts); 'Other' opens a free-text line.
+const GOALS = [...FITNESS_GOALS, 'Other'];
 const PACE: { value: number; label: string }[] = [
   { value: 0.25, label: '0.25 kg · slow' }, { value: 0.5, label: '0.5 kg · steady' },
   { value: 0.75, label: '0.75 kg · fast' }, { value: 1, label: '1 kg · very fast' },
 ];
-
-const hasWeightGoal = (goal?: string) => {
-  const g = (goal ?? '').toLowerCase();
-  return g.includes('weight loss') || g.includes('fat loss') || g.includes('muscle gain') || g.includes('bulking');
-};
 
 const tap = () => Haptics.selectionAsync().catch(() => {});
 

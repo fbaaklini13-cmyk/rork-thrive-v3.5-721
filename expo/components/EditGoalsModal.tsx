@@ -27,6 +27,7 @@ import {
 import * as Haptics from 'expo-haptics';
 import { X } from 'lucide-react-native';
 import Enter from '@/components/Enter';
+import { FITNESS_GOALS, hasWeightGoal } from '@/constants/goals';
 import { Palette, Radius, Space, Type } from '@/constants/theme';
 import { useUserProfile } from '@/hooks/user-profile-store';
 import type { UserProfile } from '@/types/user';
@@ -46,16 +47,7 @@ const ACTIVITY_LEVELS: { value: ActivityLevel; label: string }[] = [
   { value: 'very-active', label: 'Very active' },
 ];
 
-const FITNESS_GOALS = [
-  'Weight Loss',
-  'Muscle Gain',
-  'Maintain Weight',
-  'Improve Endurance',
-  'General Fitness',
-];
-
-const needsWeightTargets = (goal: string) =>
-  goal.toLowerCase().includes('weight loss') || goal.toLowerCase().includes('muscle gain');
+const needsWeightTargets = hasWeightGoal;
 
 export default function EditGoalsModal({ visible, onClose }: EditGoalsModalProps) {
   const { profile, updateProfile } = useUserProfile();
@@ -67,6 +59,15 @@ export default function EditGoalsModal({ visible, onClose }: EditGoalsModalProps
   const [weeklyFrequency, setWeeklyFrequency] = useState(profile.weeklyFrequency?.toString() || '');
 
   const tap = () => Haptics.selectionAsync().catch(() => {});
+
+  // A goal stored before the two pickers shared one list ("Muscle Gain/Bulking"),
+  // or typed under "Other" at sign-up, is not in FITNESS_GOALS. Show it as its
+  // own pill, selected, so the sheet reflects what is actually saved instead of
+  // showing nothing chosen; picking a listed goal replaces it.
+  const goalChoices: string[] =
+    fitnessGoal && !(FITNESS_GOALS as readonly string[]).includes(fitnessGoal)
+      ? [fitnessGoal, ...FITNESS_GOALS]
+      : [...FITNESS_GOALS];
 
   const handleSave = async () => {
     if (!fitnessGoal) {
@@ -122,7 +123,7 @@ export default function EditGoalsModal({ visible, onClose }: EditGoalsModalProps
             <Enter order={1}>
               <Text style={styles.label}>Goal</Text>
               <View style={styles.pills}>
-                {FITNESS_GOALS.map((goal) => {
+                {goalChoices.map((goal) => {
                   const on = fitnessGoal === goal;
                   return (
                     <TouchableOpacity
