@@ -1,3 +1,16 @@
+/**
+ * Edit goals, on the dark system.
+ *
+ * Same fields, same `updateProfile` call, same validation rules (a goal is
+ * required; target weight and weekly pace are required only for weight-loss or
+ * muscle-gain goals). What changed: a sheet on canvas; the goal and activity
+ * choices are pill rows instead of five full-width buttons each, so the whole
+ * form fits on one screen; the numeric fields are large numerals with their
+ * unit beside them, like the check-in sheet; the two `any` casts are gone --
+ * the option values are typed from `UserProfile` now, so a typo in an activity
+ * level would fail tsc instead of silently writing a string the calorie
+ * multiplier table does not know; haptics on every choice.
+ */
 import React, { useState } from 'react';
 import {
   View,
@@ -8,292 +21,244 @@ import {
   TouchableOpacity,
   TextInput,
   Alert,
+  KeyboardAvoidingView,
+  Platform,
 } from 'react-native';
-import { X, Target } from 'lucide-react-native';
-import { Colors } from '@/constants/colors';
+import * as Haptics from 'expo-haptics';
+import { X } from 'lucide-react-native';
+import Enter from '@/components/Enter';
+import { Palette, Radius, Space, Type } from '@/constants/theme';
 import { useUserProfile } from '@/hooks/user-profile-store';
+import type { UserProfile } from '@/types/user';
 
 interface EditGoalsModalProps {
   visible: boolean;
   onClose: () => void;
 }
 
+type ActivityLevel = NonNullable<UserProfile['activityLevel']>;
+
+const ACTIVITY_LEVELS: { value: ActivityLevel; label: string }[] = [
+  { value: 'sedentary', label: 'Sedentary' },
+  { value: 'light', label: 'Light' },
+  { value: 'moderate', label: 'Moderate' },
+  { value: 'active', label: 'Active' },
+  { value: 'very-active', label: 'Very active' },
+];
+
+const FITNESS_GOALS = [
+  'Weight Loss',
+  'Muscle Gain',
+  'Maintain Weight',
+  'Improve Endurance',
+  'General Fitness',
+];
+
+const needsWeightTargets = (goal: string) =>
+  goal.toLowerCase().includes('weight loss') || goal.toLowerCase().includes('muscle gain');
+
 export default function EditGoalsModal({ visible, onClose }: EditGoalsModalProps) {
   const { profile, updateProfile } = useUserProfile();
-  
+
   const [fitnessGoal, setFitnessGoal] = useState(profile.fitnessGoal || '');
   const [targetWeight, setTargetWeight] = useState(profile.targetWeight?.toString() || '');
   const [weeklyWeightGoal, setWeeklyWeightGoal] = useState(profile.weeklyWeightGoal?.toString() || '');
-  const [activityLevel, setActivityLevel] = useState(profile.activityLevel || 'moderate');
+  const [activityLevel, setActivityLevel] = useState<ActivityLevel>(profile.activityLevel || 'moderate');
   const [weeklyFrequency, setWeeklyFrequency] = useState(profile.weeklyFrequency?.toString() || '');
 
-  const activityLevels = [
-    { value: 'sedentary', label: 'Sedentary' },
-    { value: 'light', label: 'Light' },
-    { value: 'moderate', label: 'Moderate' },
-    { value: 'active', label: 'Active' },
-    { value: 'very-active', label: 'Very Active' },
-  ];
-
-  const fitnessGoals = [
-    'Weight Loss',
-    'Muscle Gain',
-    'Maintain Weight',
-    'Improve Endurance',
-    'General Fitness',
-  ];
+  const tap = () => Haptics.selectionAsync().catch(() => {});
 
   const handleSave = async () => {
     if (!fitnessGoal) {
-      Alert.alert('Error', 'Please select a fitness goal');
+      Alert.alert('Pick a goal', 'Choose what you are training for first.');
       return;
     }
 
-    const updates: any = {
-      fitnessGoal,
-      activityLevel,
-    };
+    const updates: Partial<UserProfile> = { fitnessGoal, activityLevel };
 
     if (weeklyFrequency) {
-      updates.weeklyFrequency = parseInt(weeklyFrequency);
-    }
-
-    if (fitnessGoal.toLowerCase().includes('weight loss') || fitnessGoal.toLowerCase().includes('muscle gain')) {
-      if (!targetWeight || !weeklyWeightGoal) {
-        Alert.alert('Error', 'Please enter target weight and weekly goal');
+      const days = parseInt(weeklyFrequency, 10);
+      if (Number.isNaN(days) || days < 0 || days > 7) {
+        Alert.alert('Check the frequency', 'Days per week should be between 0 and 7.');
         return;
       }
-      updates.targetWeight = parseFloat(targetWeight);
-      updates.weeklyWeightGoal = parseFloat(weeklyWeightGoal);
+      updates.weeklyFrequency = days;
     }
 
+    if (needsWeightTargets(fitnessGoal)) {
+      const target = parseFloat(targetWeight);
+      const pace = parseFloat(weeklyWeightGoal);
+      if (!targetWeight || !weeklyWeightGoal || Number.isNaN(target) || Number.isNaN(pace) || target <= 0 || pace <= 0) {
+        Alert.alert('Two more numbers', 'A target weight and a weekly pace are needed for that goal.');
+        return;
+      }
+      updates.targetWeight = target;
+      updates.weeklyWeightGoal = pace;
+    }
+
+    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success).catch(() => {});
     await updateProfile(updates);
-    Alert.alert('Success', 'Your goals have been updated!');
     onClose();
   };
 
   return (
-    <Modal
-      visible={visible}
-      animationType="slide"
-      transparent={true}
-      onRequestClose={onClose}
-    >
-      <View style={styles.modalOverlay}>
-        <View style={styles.modalContent}>
-          <View style={styles.modalHeader}>
-            <Text style={styles.modalTitle}>Edit Your Goals</Text>
-            <TouchableOpacity onPress={onClose}>
-              <X color={Colors.darkGrey} size={24} />
-            </TouchableOpacity>
-          </View>
+    <Modal visible={visible} animationType="slide" transparent onRequestClose={onClose}>
+      <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={styles.overlay}>
+        <TouchableOpacity style={StyleSheet.absoluteFill} onPress={onClose} accessibilityLabel="Close" />
+        <View style={styles.sheet}>
+          <View style={styles.grabber} />
 
-          <ScrollView style={styles.modalBody} showsVerticalScrollIndicator={false}>
-            <View style={styles.inputGroup}>
-              <Text style={styles.label}>Fitness Goal</Text>
-              {fitnessGoals.map((goal) => (
-                <TouchableOpacity
-                  key={goal}
-                  style={[
-                    styles.optionButton,
-                    fitnessGoal === goal && styles.optionButtonActive,
-                  ]}
-                  onPress={() => setFitnessGoal(goal)}
-                >
-                  <Text
-                    style={[
-                      styles.optionText,
-                      fitnessGoal === goal && styles.optionTextActive,
-                    ]}
-                  >
-                    {goal}
-                  </Text>
-                </TouchableOpacity>
-              ))}
+          <Enter order={0} style={styles.header}>
+            <View>
+              <Text style={styles.eyebrow}>Goals</Text>
+              <Text style={styles.title}>What you&apos;re training for</Text>
             </View>
+            <TouchableOpacity onPress={onClose} hitSlop={12} accessibilityRole="button" accessibilityLabel="Close">
+              <X size={22} color={Palette.inkMuted} />
+            </TouchableOpacity>
+          </Enter>
 
-            {(fitnessGoal.toLowerCase().includes('weight loss') || 
-              fitnessGoal.toLowerCase().includes('muscle gain')) && (
-              <>
-                <View style={styles.inputGroup}>
-                  <Text style={styles.label}>Target Weight (kg)</Text>
+          <ScrollView style={styles.body} contentContainerStyle={styles.bodyContent} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
+            <Enter order={1}>
+              <Text style={styles.label}>Goal</Text>
+              <View style={styles.pills}>
+                {FITNESS_GOALS.map((goal) => {
+                  const on = fitnessGoal === goal;
+                  return (
+                    <TouchableOpacity
+                      key={goal}
+                      style={[styles.pill, on && styles.pillOn]}
+                      onPress={() => { tap(); setFitnessGoal(goal); }}
+                      accessibilityRole="button"
+                      accessibilityState={{ selected: on }}
+                    >
+                      <Text style={[styles.pillText, on && styles.pillTextOn]}>{goal}</Text>
+                    </TouchableOpacity>
+                  );
+                })}
+              </View>
+            </Enter>
+
+            {needsWeightTargets(fitnessGoal) && (
+              <Enter order={2}>
+                <Text style={styles.label}>Target weight</Text>
+                <View style={styles.numeralRow}>
                   <TextInput
-                    style={styles.input}
+                    style={styles.numeralInput}
                     value={targetWeight}
                     onChangeText={setTargetWeight}
-                    keyboardType="numeric"
-                    placeholder="Enter target weight"
-                    placeholderTextColor={Colors.mediumGrey}
+                    keyboardType="decimal-pad"
+                    placeholder="0"
+                    placeholderTextColor={Palette.inkFaint}
+                    accessibilityLabel="Target weight in kilograms"
                   />
+                  <Text style={styles.unit}>kg</Text>
                 </View>
 
-                <View style={styles.inputGroup}>
-                  <Text style={styles.label}>Weekly Goal (kg per week)</Text>
-                  <Text style={styles.helperText}>
-                    Recommended: 0.5-1 kg for healthy weight change
-                  </Text>
+                <Text style={styles.label}>Weekly pace</Text>
+                <View style={styles.numeralRow}>
                   <TextInput
-                    style={styles.input}
+                    style={styles.numeralInput}
                     value={weeklyWeightGoal}
                     onChangeText={setWeeklyWeightGoal}
                     keyboardType="decimal-pad"
-                    placeholder="e.g., 0.5"
-                    placeholderTextColor={Colors.mediumGrey}
+                    placeholder="0.5"
+                    placeholderTextColor={Palette.inkFaint}
+                    accessibilityLabel="Weekly weight change in kilograms"
                   />
+                  <Text style={styles.unit}>kg / week</Text>
                 </View>
-              </>
+                <Text style={styles.helper}>0.5 to 1 kg a week is the range most people can hold.</Text>
+              </Enter>
             )}
 
-            <View style={styles.inputGroup}>
-              <Text style={styles.label}>Activity Level</Text>
-              {activityLevels.map((level) => (
-                <TouchableOpacity
-                  key={level.value}
-                  style={[
-                    styles.optionButton,
-                    activityLevel === level.value && styles.optionButtonActive,
-                  ]}
-                  onPress={() => setActivityLevel(level.value as any)}
-                >
-                  <Text
-                    style={[
-                      styles.optionText,
-                      activityLevel === level.value && styles.optionTextActive,
-                    ]}
-                  >
-                    {level.label}
-                  </Text>
-                </TouchableOpacity>
-              ))}
-            </View>
+            <Enter order={3}>
+              <Text style={styles.label}>Activity outside training</Text>
+              <View style={styles.pills}>
+                {ACTIVITY_LEVELS.map((level) => {
+                  const on = activityLevel === level.value;
+                  return (
+                    <TouchableOpacity
+                      key={level.value}
+                      style={[styles.pill, on && styles.pillOn]}
+                      onPress={() => { tap(); setActivityLevel(level.value); }}
+                      accessibilityRole="button"
+                      accessibilityState={{ selected: on }}
+                    >
+                      <Text style={[styles.pillText, on && styles.pillTextOn]}>{level.label}</Text>
+                    </TouchableOpacity>
+                  );
+                })}
+              </View>
+            </Enter>
 
-            <View style={styles.inputGroup}>
-              <Text style={styles.label}>Workout Frequency (days per week)</Text>
-              <TextInput
-                style={styles.input}
-                value={weeklyFrequency}
-                onChangeText={setWeeklyFrequency}
-                keyboardType="number-pad"
-                placeholder="e.g., 4"
-                placeholderTextColor={Colors.mediumGrey}
-              />
-            </View>
+            <Enter order={4}>
+              <Text style={styles.label}>Sessions a week</Text>
+              <View style={styles.numeralRow}>
+                <TextInput
+                  style={styles.numeralInput}
+                  value={weeklyFrequency}
+                  onChangeText={setWeeklyFrequency}
+                  keyboardType="number-pad"
+                  placeholder="4"
+                  placeholderTextColor={Palette.inkFaint}
+                  maxLength={1}
+                  accessibilityLabel="Workout days per week"
+                />
+                <Text style={styles.unit}>days</Text>
+              </View>
+            </Enter>
           </ScrollView>
 
-          <View style={styles.modalFooter}>
-            <TouchableOpacity style={styles.cancelButton} onPress={onClose}>
-              <Text style={styles.cancelButtonText}>Cancel</Text>
+          <View style={styles.footer}>
+            <TouchableOpacity style={styles.secondary} onPress={onClose} accessibilityRole="button">
+              <Text style={styles.secondaryText}>Cancel</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
-              <Text style={styles.saveButtonText}>Save Changes</Text>
+            <TouchableOpacity style={styles.primary} onPress={handleSave} accessibilityRole="button">
+              <Text style={styles.primaryText}>Save</Text>
             </TouchableOpacity>
           </View>
         </View>
-      </View>
+      </KeyboardAvoidingView>
     </Modal>
   );
 }
 
 const styles = StyleSheet.create({
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    justifyContent: 'flex-end',
-  },
-  modalContent: {
-    backgroundColor: Colors.white,
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
+  overlay: { flex: 1, backgroundColor: 'rgba(3, 8, 6, 0.72)', justifyContent: 'flex-end' },
+  sheet: {
+    backgroundColor: Palette.canvasRaised,
+    borderTopLeftRadius: Radius.lg, borderTopRightRadius: Radius.lg,
+    borderWidth: StyleSheet.hairlineWidth, borderColor: Palette.line,
     maxHeight: '90%',
   },
-  modalHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    padding: 20,
-    borderBottomWidth: 1,
-    borderBottomColor: Colors.lightGrey,
+  grabber: { alignSelf: 'center', width: 36, height: 4, borderRadius: 2, backgroundColor: Palette.lineStrong, marginTop: Space.sm },
+  header: {
+    flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start',
+    paddingHorizontal: Space.xl, paddingTop: Space.lg, paddingBottom: Space.md,
   },
-  modalTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: Colors.darkGrey,
-  },
-  modalBody: {
-    padding: 20,
-  },
-  modalFooter: {
-    flexDirection: 'row',
-    padding: 20,
-    gap: 12,
-    borderTopWidth: 1,
-    borderTopColor: Colors.lightGrey,
-  },
-  inputGroup: {
-    marginBottom: 24,
-  },
-  label: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: Colors.darkGrey,
-    marginBottom: 8,
-  },
-  helperText: {
-    fontSize: 12,
-    color: Colors.mediumGrey,
-    marginBottom: 8,
-  },
-  input: {
-    borderWidth: 1,
-    borderColor: Colors.lightGrey,
-    borderRadius: 8,
-    padding: 12,
-    fontSize: 16,
-    color: Colors.darkGrey,
-  },
-  optionButton: {
-    padding: 12,
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: Colors.lightGrey,
-    marginBottom: 8,
-  },
-  optionButtonActive: {
-    backgroundColor: Colors.primary,
-    borderColor: Colors.primary,
-  },
-  optionText: {
-    fontSize: 14,
-    color: Colors.darkGrey,
-    textAlign: 'center',
-  },
-  optionTextActive: {
-    color: Colors.white,
-    fontWeight: '600',
-  },
-  cancelButton: {
-    flex: 1,
-    padding: 16,
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: Colors.lightGrey,
-  },
-  cancelButtonText: {
-    fontSize: 16,
-    color: Colors.darkGrey,
-    textAlign: 'center',
-    fontWeight: '600',
-  },
-  saveButton: {
-    flex: 1,
-    padding: 16,
-    borderRadius: 8,
-    backgroundColor: Colors.primary,
-  },
-  saveButtonText: {
-    fontSize: 16,
-    color: Colors.white,
-    textAlign: 'center',
-    fontWeight: '600',
-  },
+  eyebrow: { ...Type.eyebrow, color: Palette.accent },
+  title: { ...Type.heading, color: Palette.ink, marginTop: Space.xs },
+  body: { flexGrow: 0 },
+  bodyContent: { paddingHorizontal: Space.xl, paddingBottom: Space.md },
+  label: { ...Type.eyebrow, color: Palette.inkMuted, marginTop: Space.lg, marginBottom: Space.sm },
+  helper: { ...Type.caption, color: Palette.inkFaint, marginTop: Space.sm },
+
+  pills: { flexDirection: 'row', flexWrap: 'wrap', gap: Space.sm },
+  pill: { paddingHorizontal: Space.lg, paddingVertical: Space.sm + 2, borderRadius: Radius.pill, borderWidth: 1, borderColor: Palette.lineStrong },
+  pillOn: { backgroundColor: Palette.accent, borderColor: Palette.accent },
+  pillText: { ...Type.caption, color: Palette.ink },
+  pillTextOn: { color: Palette.canvas, fontWeight: '700' },
+
+  numeralRow: { flexDirection: 'row', alignItems: 'baseline' },
+  // Fixed width: on web a TextInput otherwise grows to the row and pushes its unit
+  // to the far edge (seen in the first render: 'kg / week' wrapped at the margin).
+  numeralInput: { ...Type.display, color: Palette.ink, width: 100, padding: 0, fontVariant: Type.numeral.fontVariant },
+  unit: { ...Type.heading, color: Palette.inkMuted, marginLeft: Space.sm, flexShrink: 0 },
+
+  footer: { flexDirection: 'row', gap: Space.md, padding: Space.xl, paddingTop: Space.md, borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: Palette.line },
+  primary: { flex: 1.4, alignItems: 'center', justifyContent: 'center', backgroundColor: Palette.accent, borderRadius: Radius.pill, paddingVertical: Space.lg },
+  primaryText: { ...Type.bodyStrong, color: Palette.canvas },
+  secondary: { flex: 1, alignItems: 'center', justifyContent: 'center', borderRadius: Radius.pill, paddingVertical: Space.lg, borderWidth: 1, borderColor: Palette.lineStrong },
+  secondaryText: { ...Type.bodyStrong, color: Palette.ink },
 });
