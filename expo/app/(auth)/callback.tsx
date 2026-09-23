@@ -3,7 +3,7 @@ import { Text, ActivityIndicator, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { supabase } from '@/lib/supabase';
-import { Colors } from '@/constants/colors';
+import { Palette } from '@/constants/theme';
 import * as Linking from 'expo-linking';
 
 export default function AuthCallbackScreen() {
@@ -73,7 +73,7 @@ export default function AuthCallbackScreen() {
 
   return (
     <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
-      <ActivityIndicator size="large" color={Colors.primary} />
+      <ActivityIndicator size="large" color={Palette.accent} />
       <Text style={styles.text}>Completing sign in...</Text>
     </SafeAreaView>
   );
@@ -84,11 +84,11 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: Colors.white,
+    backgroundColor: Palette.canvasRaised,
     gap: 16,
   },
   text: {
     fontSize: 16,
-    color: Colors.darkGrey,
+    color: Palette.ink,
   },
 });

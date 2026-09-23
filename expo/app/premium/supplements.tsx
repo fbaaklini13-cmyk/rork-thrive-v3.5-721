@@ -9,7 +9,7 @@ import {
 } from 'react-native';
 import { Stack } from 'expo-router';
 import { Pill, Clock, Info, RefreshCw } from 'lucide-react-native';
-import { Colors } from '@/constants/colors';
+import { Palette } from '@/constants/theme';
 import { generateSupplementPlan } from '@/services/ai-service';
 import { useUserProfile } from '@/hooks/user-profile-store';
 
@@ -46,14 +46,15 @@ export default function SupplementsScreen() {
       <Stack.Screen
         options={{
           title: 'Supplement Guide',
-          headerStyle: { backgroundColor: Colors.primary },
-          headerTintColor: Colors.white,
+          headerStyle: { backgroundColor: Palette.canvas },
+          headerTintColor: Palette.ink,
+          headerShadowVisible: false,
         }}
       />
 
       <ScrollView showsVerticalScrollIndicator={false}>
         <View style={styles.header}>
-          <Pill size={60} color={Colors.primary} />
+          <Pill size={60} color={Palette.accent} />
           <Text style={styles.title}>Personalized Supplements</Text>
           <Text style={styles.subtitle}>
             Science-based recommendations with exact dosages
@@ -62,7 +63,7 @@ export default function SupplementsScreen() {
 
         {loading ? (
           <View style={styles.loadingContainer}>
-            <ActivityIndicator size="large" color={Colors.primary} />
+            <ActivityIndicator size="large" color={Palette.accent} />
             <Text style={styles.loadingText}>Generating your supplement plan...</Text>
           </View>
         ) : error ? (
@@ -82,7 +83,7 @@ export default function SupplementsScreen() {
                 <View key={index} style={styles.supplementCard}>
                   <View style={styles.supplementHeader}>
                     <View style={styles.iconContainer}>
-                      <Pill size={24} color={Colors.primary} />
+                      <Pill size={24} color={Palette.accent} />
                     </View>
                     <View style={styles.supplementInfo}>
                       <Text style={styles.supplementName}>{supplement.name}</Text>
@@ -91,12 +92,12 @@ export default function SupplementsScreen() {
                   </View>
                   
                   <View style={styles.timingRow}>
-                    <Clock size={16} color={Colors.mediumGrey} />
+                    <Clock size={16} color={Palette.inkMuted} />
                     <Text style={styles.timingText}>{supplement.timing}</Text>
                   </View>
                   
                   <View style={styles.benefitsRow}>
-                    <Info size={16} color={Colors.mediumGrey} />
+                    <Info size={16} color={Palette.inkMuted} />
                     <Text style={styles.benefitsText}>{supplement.benefits}</Text>
                   </View>
                 </View>
@@ -114,7 +115,7 @@ export default function SupplementsScreen() {
               style={styles.refreshButton}
               onPress={loadSupplementPlan}
             >
-              <RefreshCw size={20} color={Colors.white} />
+              <RefreshCw size={20} color={Palette.canvas} />
               <Text style={styles.refreshButtonText}>Regenerate Plan</Text>
             </TouchableOpacity>
           </>
@@ -133,22 +134,22 @@ export default function SupplementsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.lightGrey,
+    backgroundColor: Palette.canvas,
   },
   header: {
     alignItems: 'center',
     padding: 20,
-    backgroundColor: Colors.white,
+    backgroundColor: Palette.canvasRaised,
   },
   title: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: Colors.darkGrey,
+    color: Palette.ink,
     marginTop: 10,
   },
   subtitle: {
     fontSize: 16,
-    color: Colors.mediumGrey,
+    color: Palette.inkMuted,
     marginTop: 5,
     textAlign: 'center',
   },
@@ -159,21 +160,18 @@ const styles = StyleSheet.create({
   loadingText: {
     marginTop: 15,
     fontSize: 16,
-    color: Colors.mediumGrey,
+    color: Palette.inkMuted,
   },
   supplementsList: {
     padding: 20,
   },
   supplementCard: {
-    backgroundColor: Colors.white,
+    backgroundColor: Palette.canvasRaised,
     borderRadius: 12,
     padding: 15,
     marginBottom: 12,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
+    borderWidth: 1,
+    borderColor: Palette.line,
   },
   supplementHeader: {
     flexDirection: 'row',
@@ -184,10 +182,12 @@ const styles = StyleSheet.create({
     width: 48,
     height: 48,
     borderRadius: 24,
-    backgroundColor: Colors.lightGrey,
+    backgroundColor: Palette.canvasRaised,
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: 12,
+    borderWidth: 1,
+    borderColor: Palette.line,
   },
   supplementInfo: {
     flex: 1,
@@ -195,11 +195,11 @@ const styles = StyleSheet.create({
   supplementName: {
     fontSize: 18,
     fontWeight: '600',
-    color: Colors.darkGrey,
+    color: Palette.ink,
   },
   supplementDosage: {
     fontSize: 16,
-    color: Colors.primary,
+    color: Palette.accent,
     fontWeight: '500',
     marginTop: 2,
   },
@@ -211,7 +211,7 @@ const styles = StyleSheet.create({
   },
   timingText: {
     fontSize: 14,
-    color: Colors.mediumGrey,
+    color: Palette.inkMuted,
   },
   benefitsRow: {
     flexDirection: 'row',
@@ -220,33 +220,33 @@ const styles = StyleSheet.create({
   },
   benefitsText: {
     fontSize: 14,
-    color: Colors.mediumGrey,
+    color: Palette.inkMuted,
     flex: 1,
     lineHeight: 20,
   },
   notesCard: {
-    backgroundColor: '#FFF9E6',
+    backgroundColor: '#F2B33D14',
     margin: 20,
     marginTop: 0,
     padding: 15,
     borderRadius: 10,
     borderWidth: 1,
-    borderColor: '#FFD700',
+    borderColor: Palette.warn,
   },
   notesTitle: {
     fontSize: 16,
     fontWeight: '600',
-    color: Colors.darkGrey,
+    color: Palette.ink,
     marginBottom: 8,
   },
   notesText: {
     fontSize: 14,
-    color: Colors.mediumGrey,
+    color: Palette.inkMuted,
     lineHeight: 20,
   },
   refreshButton: {
     flexDirection: 'row',
-    backgroundColor: Colors.primary,
+    backgroundColor: Palette.accent,
     margin: 20,
     marginTop: 10,
     padding: 15,
@@ -256,7 +256,7 @@ const styles = StyleSheet.create({
     gap: 10,
   },
   refreshButtonText: {
-    color: Colors.white,
+    color: Palette.canvas,
     fontSize: 16,
     fontWeight: '600',
   },
@@ -266,31 +266,31 @@ const styles = StyleSheet.create({
   },
   errorText: {
     fontSize: 16,
-    color: Colors.mediumGrey,
+    color: Palette.inkMuted,
     marginBottom: 20,
   },
   retryButton: {
-    backgroundColor: Colors.primary,
+    backgroundColor: Palette.accent,
     paddingHorizontal: 30,
     paddingVertical: 12,
     borderRadius: 20,
   },
   retryButtonText: {
-    color: Colors.white,
+    color: Palette.canvas,
     fontSize: 16,
     fontWeight: '600',
   },
   disclaimer: {
     margin: 20,
     padding: 15,
-    backgroundColor: Colors.white,
+    backgroundColor: Palette.canvasRaised,
     borderRadius: 10,
     borderWidth: 1,
-    borderColor: Colors.lightGrey,
+    borderColor: Palette.line,
   },
   disclaimerText: {
     fontSize: 12,
-    color: Colors.mediumGrey,
+    color: Palette.inkMuted,
     textAlign: 'center',
     fontStyle: 'italic',
   },

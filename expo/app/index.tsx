@@ -4,7 +4,7 @@ import { INTRO_SEEN_KEY } from './(auth)/welcome';
 import { useRouter } from 'expo-router';
 import { View, ActivityIndicator, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Colors } from '@/constants/colors';
+import { Palette } from '@/constants/theme';
 import { useUserProfile } from '@/hooks/user-profile-store';
 
 export default function Index() {
@@ -30,7 +30,7 @@ export default function Index() {
   return (
     <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
       <View style={styles.content}>
-        <ActivityIndicator size="large" color={Colors.primary} />
+        <ActivityIndicator size="large" color={Palette.accent} />
       </View>
     </SafeAreaView>
   );

@@ -7,7 +7,7 @@ import {
 } from 'react-native';
 import { Stack } from 'expo-router';
 import { PieChart } from 'lucide-react-native';
-import { Colors } from '@/constants/colors';
+import { Palette } from '@/constants/theme';
 import { useUserProfile } from '@/hooks/user-profile-store';
 
 export default function MacrosScreen() {
@@ -28,7 +28,10 @@ export default function MacrosScreen() {
   const fatTarget = Math.round(dailyTarget * 0.3 / 9); // 30% of calories, 9 cal/g
 
   const MacroCard = ({ label, current, target, color, unit = 'g' }: any) => {
-    const percentage = Math.min((current / target) * 100, 100);
+    // The bar is capped at full; the number is not. Capping both made 112% of the fat
+    // target read "100%" -- as if exactly on target.
+    const percentage = target > 0 ? (current / target) * 100 : 0;
+    const barWidth = Math.min(percentage, 100);
     
     return (
       <View style={styles.macroCard}>
@@ -41,7 +44,7 @@ export default function MacrosScreen() {
           <View 
             style={[
               styles.progressFill, 
-              { width: `${percentage}%`, backgroundColor: color }
+              { width: `${barWidth}%`, backgroundColor: color }
             ]} 
           />
         </View>
@@ -55,15 +58,16 @@ export default function MacrosScreen() {
       <Stack.Screen
         options={{
           title: 'Macros Breakdown',
-          headerStyle: { backgroundColor: Colors.primary },
-          headerTintColor: Colors.white,
+          headerStyle: { backgroundColor: Palette.canvas },
+          headerTintColor: Palette.ink,
+          headerShadowVisible: false,
         }}
       />
 
       <ScrollView showsVerticalScrollIndicator={false}>
         <View style={styles.header}>
-          <PieChart size={60} color={Colors.primary} />
-          <Text style={styles.title}>Today's Macronutrients</Text>
+          <PieChart size={60} color={Palette.accent} />
+          <Text style={styles.title}>Today&apos;s Macronutrients</Text>
           <Text style={styles.date}>{new Date().toLocaleDateString()}</Text>
         </View>
 
@@ -81,7 +85,10 @@ export default function MacrosScreen() {
               />
             </View>
             <Text style={styles.caloriesRemaining}>
-              {dailyTarget - totalCalories} calories remaining
+              {/* Over target used to read "-150 calories remaining". */}
+              {totalCalories <= dailyTarget
+                ? `${dailyTarget - totalCalories} calories remaining`
+                : `${totalCalories - dailyTarget} calories over target`}
             </Text>
           </View>
         </View>
@@ -108,7 +115,7 @@ export default function MacrosScreen() {
         </View>
 
         <View style={styles.mealsSection}>
-          <Text style={styles.sectionTitle}>Today's Meals</Text>
+          <Text style={styles.sectionTitle}>Today&apos;s Meals</Text>
           {todayEntries.length > 0 ? (
             todayEntries.map((entry) => (
               <View key={entry.id} style={styles.mealCard}>
@@ -136,65 +143,68 @@ export default function MacrosScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.lightGrey,
+    backgroundColor: Palette.canvas,
   },
   header: {
     alignItems: 'center',
     padding: 20,
-    backgroundColor: Colors.white,
+    backgroundColor: Palette.canvasRaised,
   },
   title: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: Colors.darkGrey,
+    color: Palette.ink,
     marginTop: 10,
   },
   date: {
     fontSize: 16,
-    color: Colors.mediumGrey,
+    color: Palette.inkMuted,
     marginTop: 5,
   },
   caloriesCard: {
-    backgroundColor: Colors.primary,
+    backgroundColor: Palette.canvasRaised,
     margin: 20,
     padding: 20,
     borderRadius: 15,
     alignItems: 'center',
+    borderWidth: 1,
+    borderColor: Palette.line,
   },
   caloriesLabel: {
     fontSize: 16,
-    color: Colors.white,
+    color: Palette.ink,
     opacity: 0.9,
   },
   caloriesValue: {
     fontSize: 48,
     fontWeight: 'bold',
-    color: Colors.white,
+    color: Palette.ink,
     marginVertical: 5,
   },
   caloriesTarget: {
     fontSize: 14,
-    color: Colors.white,
+    color: Palette.ink,
     opacity: 0.8,
   },
   caloriesProgress: {
     marginTop: 15,
+    alignSelf: 'stretch',   // the card centres its children, which squeezed the bar to a stub
   },
   caloriesProgressBar: {
     width: '100%',
     height: 8,
-    backgroundColor: 'rgba(255, 255, 255, 0.3)',
+    backgroundColor: Palette.line,
     borderRadius: 4,
     overflow: 'hidden',
   },
   caloriesProgressFill: {
     height: '100%',
-    backgroundColor: Colors.white,
+    backgroundColor: Palette.accent,
     borderRadius: 4,
   },
   caloriesRemaining: {
     fontSize: 12,
-    color: Colors.white,
+    color: Palette.ink,
     opacity: 0.9,
     textAlign: 'center',
     marginTop: 8,
@@ -206,14 +216,16 @@ const styles = StyleSheet.create({
   },
   macroCard: {
     flex: 1,
-    backgroundColor: Colors.white,
+    backgroundColor: Palette.canvasRaised,
     padding: 15,
     borderRadius: 12,
     alignItems: 'center',
+    borderWidth: 1,
+    borderColor: Palette.line,
   },
   macroLabel: {
     fontSize: 14,
-    color: Colors.mediumGrey,
+    color: Palette.inkMuted,
     marginBottom: 5,
   },
   macroValue: {
@@ -222,13 +234,13 @@ const styles = StyleSheet.create({
   },
   macroTarget: {
     fontSize: 12,
-    color: Colors.mediumGrey,
+    color: Palette.inkMuted,
     marginTop: 2,
   },
   progressBar: {
     width: '100%',
     height: 6,
-    backgroundColor: Colors.lightGrey,
+    backgroundColor: Palette.line,
     borderRadius: 3,
     marginTop: 10,
     overflow: 'hidden',
@@ -239,7 +251,7 @@ const styles = StyleSheet.create({
   },
   percentageText: {
     fontSize: 12,
-    color: Colors.mediumGrey,
+    color: Palette.inkMuted,
     marginTop: 5,
   },
   mealsSection: {
@@ -248,14 +260,16 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: Colors.darkGrey,
+    color: Palette.ink,
     marginBottom: 15,
   },
   mealCard: {
-    backgroundColor: Colors.white,
+    backgroundColor: Palette.canvasRaised,
     padding: 15,
     borderRadius: 10,
     marginBottom: 10,
+    borderWidth: 1,
+    borderColor: Palette.line,
   },
   mealHeader: {
     flexDirection: 'row',
@@ -266,16 +280,16 @@ const styles = StyleSheet.create({
   mealName: {
     fontSize: 16,
     fontWeight: '600',
-    color: Colors.darkGrey,
+    color: Palette.ink,
   },
   mealCalories: {
     fontSize: 14,
     fontWeight: '600',
-    color: Colors.primary,
+    color: Palette.accent,
   },
   mealDescription: {
     fontSize: 14,
-    color: Colors.mediumGrey,
+    color: Palette.inkMuted,
     marginBottom: 8,
   },
   mealMacros: {
@@ -284,11 +298,11 @@ const styles = StyleSheet.create({
   },
   mealMacro: {
     fontSize: 14,
-    color: Colors.mediumGrey,
+    color: Palette.inkMuted,
   },
   emptyText: {
     fontSize: 16,
-    color: Colors.mediumGrey,
+    color: Palette.inkMuted,
     textAlign: 'center',
     marginTop: 20,
   },

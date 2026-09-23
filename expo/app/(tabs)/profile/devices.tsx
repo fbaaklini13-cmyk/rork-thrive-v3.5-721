@@ -13,7 +13,7 @@ import { RefreshCw } from 'lucide-react-native';
 import { useHealthDevices } from '@/hooks/use-health-devices';
 import { DeviceConnectionCard } from '@/components/DeviceConnectionCard';
 import { DeviceType } from '@/types/health';
-import { Colors } from '@/constants/colors';
+import { Palette } from '@/constants/theme';
 
 export default function DevicesScreen() {
   const {
@@ -108,16 +108,16 @@ export default function DevicesScreen() {
         options={{
           title: 'Connected Devices',
           headerStyle: {
-            backgroundColor: Colors.white,
+            backgroundColor: Palette.canvas,
           },
-          headerTintColor: Colors.darkGrey,
+          headerTintColor: Palette.ink,
           headerShadowVisible: false,
           headerRight: () =>
             connectedDevicesCount > 0 ? (
               <TouchableOpacity onPress={handleSyncAll} disabled={syncing}>
                 <RefreshCw
                   size={22}
-                  color={syncing ? Colors.mediumGrey : Colors.primary}
+                  color={syncing ? Palette.inkMuted : Palette.accent}
                 />
               </TouchableOpacity>
             ) : null,
@@ -208,7 +208,7 @@ export default function DevicesScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.lightGrey,
+    backgroundColor: Palette.canvas,
   },
   content: {
     padding: 16,
@@ -219,85 +219,93 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 28,
     fontWeight: '700' as const,
-    color: Colors.darkGrey,
+    color: Palette.ink,
     marginBottom: 8,
   },
   subtitle: {
     fontSize: 16,
-    color: Colors.mediumGrey,
+    color: Palette.inkMuted,
     lineHeight: 22,
   },
   badge: {
     marginTop: 12,
     paddingHorizontal: 12,
     paddingVertical: 6,
-    backgroundColor: Colors.primary,
+    backgroundColor: Palette.canvasRaised,
     borderRadius: 16,
     alignSelf: 'flex-start',
+    borderWidth: 1,
+    borderColor: Palette.line,
   },
   badgeText: {
     fontSize: 13,
     fontWeight: '600' as const,
-    color: Colors.white,
+    color: Palette.ink,
   },
   devicesList: {
     marginBottom: 24,
   },
   info: {
-    backgroundColor: Colors.white,
+    backgroundColor: Palette.canvasRaised,
     borderRadius: 16,
     padding: 16,
     marginBottom: 16,
+    borderWidth: 1,
+    borderColor: Palette.line,
   },
   infoTitle: {
     fontSize: 17,
     fontWeight: '600' as const,
-    color: Colors.darkGrey,
+    color: Palette.ink,
     marginBottom: 12,
   },
   infoText: {
     fontSize: 15,
-    color: Colors.mediumGrey,
+    color: Palette.inkMuted,
     lineHeight: 22,
   },
   platformInfo: {
-    backgroundColor: '#E3F2FD',
+    backgroundColor: Palette.canvasRaised,
     borderRadius: 12,
     padding: 16,
     marginBottom: 16,
+    borderWidth: 1,
+    borderColor: Palette.line,
   },
   platformInfoText: {
     fontSize: 14,
-    color: '#1976D2',
+    color: Palette.inkMuted,
     lineHeight: 20,
   },
   errorContainer: {
-    backgroundColor: '#FFEBEE',
+    backgroundColor: '#F0645A1A',
     borderRadius: 12,
     padding: 16,
     marginBottom: 16,
+    borderWidth: 1,
+    borderColor: Palette.bad,
   },
   errorTitle: {
     fontSize: 16,
     fontWeight: '600' as const,
-    color: '#C62828',
+    color: Palette.bad,
     marginBottom: 8,
   },
   errorText: {
     fontSize: 14,
-    color: '#D32F2F',
+    color: Palette.ink,
     lineHeight: 20,
     marginBottom: 12,
   },
   retryButton: {
-    backgroundColor: '#D32F2F',
+    backgroundColor: Palette.bad,
     borderRadius: 8,
     paddingVertical: 10,
     paddingHorizontal: 16,
     alignSelf: 'flex-start',
   },
   retryButtonText: {
-    color: Colors.white,
+    color: Palette.canvas,
     fontSize: 14,
     fontWeight: '600' as const,
   },

@@ -2,7 +2,7 @@ import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, ActivityIndicator, Image } from 'react-native';
 import { Watch, Smartphone, Activity, Heart, Bike, Moon, ActivitySquare } from 'lucide-react-native';
 import { DeviceType } from '@/types/health';
-import { Colors } from '@/constants/colors';
+import { Palette } from '@/constants/theme';
 
 interface DeviceConnectionCardProps {
   deviceType: DeviceType;
@@ -68,7 +68,7 @@ export function DeviceConnectionCard({
   return (
     <View style={styles.card}>
       <View style={styles.iconContainer}>
-        <Icon size={28} color={isConnected ? Colors.primary : Colors.mediumGrey} />
+        <Icon size={28} color={isConnected ? Palette.accent : Palette.inkMuted} />
       </View>
       
       <View style={styles.content}>
@@ -125,23 +125,20 @@ export function DeviceConnectionCard({
 
 const styles = StyleSheet.create({
   card: {
-    backgroundColor: '#fff',
+    backgroundColor: Palette.canvasRaised,
     borderRadius: 16,
     padding: 16,
     marginBottom: 16,
     flexDirection: 'row',
     alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 8,
-    elevation: 2,
+    borderWidth: 1,
+    borderColor: Palette.line,
   },
   iconContainer: {
     width: 56,
     height: 56,
     borderRadius: 28,
-    backgroundColor: '#F5F5F7',
+    backgroundColor: Palette.line,
     alignItems: 'center',
     justifyContent: 'center',
     marginRight: 12,
@@ -152,18 +149,18 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 17,
     fontWeight: '600' as const,
-    color: Colors.darkGrey,
+    color: Palette.ink,
     marginBottom: 4,
   },
   description: {
     fontSize: 13,
-    color: Colors.mediumGrey,
+    color: Palette.inkMuted,
     lineHeight: 18,
     marginBottom: 4,
   },
   lastSync: {
     fontSize: 12,
-    color: Colors.mediumGrey,
+    color: Palette.inkMuted,
     marginTop: 4,
   },
   actions: {
@@ -177,28 +174,28 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   connectButton: {
-    backgroundColor: Colors.primary,
+    backgroundColor: Palette.accent,
   },
   connectButtonText: {
-    color: '#fff',
+    color: Palette.canvas,
     fontSize: 14,
     fontWeight: '600' as const,
   },
   syncButton: {
-    backgroundColor: Colors.primary,
+    backgroundColor: Palette.accent,
   },
   syncButtonText: {
-    color: '#fff',
+    color: Palette.canvas,
     fontSize: 14,
     fontWeight: '600' as const,
   },
   disconnectButton: {
     backgroundColor: 'transparent',
     borderWidth: 1,
-    borderColor: '#E5E5E7',
+    borderColor: Palette.lineStrong,
   },
   disconnectButtonText: {
-    color: Colors.mediumGrey,
+    color: Palette.inkMuted,
     fontSize: 14,
     fontWeight: '600' as const,
   },

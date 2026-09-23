@@ -11,7 +11,7 @@ import {
 } from 'react-native';
 import { Stack } from 'expo-router';
 import { ChefHat, Clock, Flame } from 'lucide-react-native';
-import { Colors } from '@/constants/colors';
+import { Palette } from '@/constants/theme';
 import { generateRecipe } from '@/services/ai-service';
 import { useUserProfile } from '@/hooks/user-profile-store';
 
@@ -53,14 +53,15 @@ export default function RecipesScreen() {
       <Stack.Screen
         options={{
           title: 'Recipe Generator',
-          headerStyle: { backgroundColor: Colors.primary },
-          headerTintColor: Colors.white,
+          headerStyle: { backgroundColor: Palette.canvas },
+          headerTintColor: Palette.ink,
+          headerShadowVisible: false,
         }}
       />
 
       <ScrollView showsVerticalScrollIndicator={false}>
         <View style={styles.header}>
-          <ChefHat size={60} color={Colors.primary} />
+          <ChefHat size={60} color={Palette.accent} />
           <Text style={styles.title}>AI Recipe Generator</Text>
           <Text style={styles.subtitle}>
             Get personalized recipes based on your preferences
@@ -133,7 +134,7 @@ export default function RecipesScreen() {
             disabled={loading}
           >
             {loading ? (
-              <ActivityIndicator color={Colors.white} />
+              <ActivityIndicator color={Palette.canvas} />
             ) : (
               <Text style={styles.generateButtonText}>Generate Recipe</Text>
             )}
@@ -146,11 +147,11 @@ export default function RecipesScreen() {
             
             <View style={styles.recipeStats}>
               <View style={styles.statItem}>
-                <Flame size={20} color={Colors.primary} />
+                <Flame size={20} color={Palette.accent} />
                 <Text style={styles.statText}>{recipe.calories} cal</Text>
               </View>
               <View style={styles.statItem}>
-                <Clock size={20} color={Colors.primary} />
+                <Clock size={20} color={Palette.accent} />
                 <Text style={styles.statText}>{recipe.prepTime}</Text>
               </View>
             </View>
@@ -184,22 +185,22 @@ export default function RecipesScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.lightGrey,
+    backgroundColor: Palette.canvas,
   },
   header: {
     alignItems: 'center',
     padding: 20,
-    backgroundColor: Colors.white,
+    backgroundColor: Palette.canvasRaised,
   },
   title: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: Colors.darkGrey,
+    color: Palette.ink,
     marginTop: 10,
   },
   subtitle: {
     fontSize: 16,
-    color: Colors.mediumGrey,
+    color: Palette.inkMuted,
     marginTop: 5,
     textAlign: 'center',
   },
@@ -209,7 +210,7 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 18,
     fontWeight: '600',
-    color: Colors.darkGrey,
+    color: Palette.ink,
     marginBottom: 10,
     marginTop: 15,
   },
@@ -222,51 +223,55 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingVertical: 10,
     borderRadius: 20,
-    backgroundColor: Colors.white,
+    backgroundColor: Palette.canvasRaised,
     borderWidth: 1,
-    borderColor: Colors.primary,
+    borderColor: Palette.accent,
   },
   optionButtonActive: {
-    backgroundColor: Colors.primary,
+    backgroundColor: Palette.accent,
   },
   optionText: {
-    color: Colors.primary,
+    color: Palette.accent,
     fontSize: 14,
     fontWeight: '500',
   },
   optionTextActive: {
-    color: Colors.white,
+    color: Palette.ink,
   },
   input: {
-    backgroundColor: Colors.white,
+    backgroundColor: Palette.canvasRaised,
     padding: 15,
     borderRadius: 10,
     fontSize: 16,
     marginTop: 5,
+    borderWidth: 1,
+    borderColor: Palette.line,
   },
   generateButton: {
-    backgroundColor: Colors.primary,
+    backgroundColor: Palette.accent,
     padding: 15,
     borderRadius: 25,
     alignItems: 'center',
     marginTop: 20,
   },
   generateButtonText: {
-    color: Colors.white,
+    color: Palette.canvas,
     fontSize: 16,
     fontWeight: '600',
   },
   recipeCard: {
-    backgroundColor: Colors.white,
+    backgroundColor: Palette.canvasRaised,
     margin: 20,
     marginTop: 0,
     padding: 20,
     borderRadius: 15,
+    borderWidth: 1,
+    borderColor: Palette.line,
   },
   recipeName: {
     fontSize: 22,
     fontWeight: 'bold',
-    color: Colors.darkGrey,
+    color: Palette.ink,
     marginBottom: 15,
   },
   recipeStats: {
@@ -281,7 +286,7 @@ const styles = StyleSheet.create({
   },
   statText: {
     fontSize: 14,
-    color: Colors.mediumGrey,
+    color: Palette.inkMuted,
   },
   macrosRow: {
     flexDirection: 'row',
@@ -289,28 +294,28 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     borderTopWidth: 1,
     borderBottomWidth: 1,
-    borderColor: Colors.lightGrey,
+    borderColor: Palette.line,
     marginBottom: 15,
   },
   macroItem: {
     fontSize: 14,
-    color: Colors.mediumGrey,
+    color: Palette.inkMuted,
   },
   subheading: {
     fontSize: 18,
     fontWeight: '600',
-    color: Colors.darkGrey,
+    color: Palette.ink,
     marginTop: 15,
     marginBottom: 10,
   },
   ingredient: {
     fontSize: 14,
-    color: Colors.mediumGrey,
+    color: Palette.inkMuted,
     marginBottom: 5,
   },
   instruction: {
     fontSize: 14,
-    color: Colors.mediumGrey,
+    color: Palette.inkMuted,
     marginBottom: 10,
     lineHeight: 20,
   },

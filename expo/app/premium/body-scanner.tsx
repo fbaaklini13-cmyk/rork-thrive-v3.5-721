@@ -12,7 +12,7 @@ import {
 import { Stack } from 'expo-router';
 import { Camera, Upload, Scan } from 'lucide-react-native';
 import * as ImagePicker from 'expo-image-picker';
-import { Colors } from '@/constants/colors';
+import { Palette } from '@/constants/theme';
 import { analyzeBodyImage } from '@/services/ai-service';
 
 export default function BodyScannerScreen() {
@@ -63,15 +63,16 @@ export default function BodyScannerScreen() {
       <Stack.Screen
         options={{
           title: 'AI Body Scanner',
-          headerStyle: { backgroundColor: Colors.primary },
-          headerTintColor: Colors.white,
+          headerStyle: { backgroundColor: Palette.canvas },
+          headerTintColor: Palette.ink,
+          headerShadowVisible: false,
         }}
       />
 
       <ScrollView showsVerticalScrollIndicator={false}>
         {!selectedImage ? (
           <View style={styles.uploadSection}>
-            <Scan size={80} color={Colors.primary} />
+            <Scan size={80} color={Palette.accent} />
             <Text style={styles.title}>AI Body Analysis</Text>
             <Text style={styles.subtitle}>
               Take or upload a photo to analyze your physique
@@ -81,7 +82,7 @@ export default function BodyScannerScreen() {
               style={styles.primaryButton}
               onPress={() => pickImage(true)}
             >
-              <Camera size={20} color={Colors.white} />
+              <Camera size={20} color={Palette.canvas} />
               <Text style={styles.buttonText}>Take Photo</Text>
             </TouchableOpacity>
 
@@ -89,7 +90,7 @@ export default function BodyScannerScreen() {
               style={styles.secondaryButton}
               onPress={() => pickImage(false)}
             >
-              <Upload size={20} color={Colors.primary} />
+              <Upload size={20} color={Palette.accent} />
               <Text style={styles.secondaryButtonText}>Upload from Gallery</Text>
             </TouchableOpacity>
           </View>
@@ -101,7 +102,7 @@ export default function BodyScannerScreen() {
 
             {loading ? (
               <View style={styles.loadingContainer}>
-                <ActivityIndicator size="large" color={Colors.primary} />
+                <ActivityIndicator size="large" color={Palette.accent} />
                 <Text style={styles.loadingText}>Analyzing your physique...</Text>
               </View>
             ) : analysis ? (
@@ -167,7 +168,7 @@ export default function BodyScannerScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.lightGrey,
+    backgroundColor: Palette.canvas,
   },
   uploadSection: {
     padding: 20,
@@ -177,19 +178,19 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 28,
     fontWeight: 'bold',
-    color: Colors.darkGrey,
+    color: Palette.ink,
     marginTop: 20,
     marginBottom: 8,
   },
   subtitle: {
     fontSize: 16,
-    color: Colors.mediumGrey,
+    color: Palette.inkMuted,
     textAlign: 'center',
     marginBottom: 40,
   },
   primaryButton: {
     flexDirection: 'row',
-    backgroundColor: Colors.primary,
+    backgroundColor: Palette.accent,
     paddingVertical: 15,
     paddingHorizontal: 30,
     borderRadius: 25,
@@ -200,25 +201,25 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   buttonText: {
-    color: Colors.white,
+    color: Palette.canvas,
     fontSize: 16,
     fontWeight: '600',
   },
   secondaryButton: {
     flexDirection: 'row',
-    backgroundColor: Colors.white,
+    backgroundColor: Palette.canvasRaised,
     paddingVertical: 15,
     paddingHorizontal: 30,
     borderRadius: 25,
     alignItems: 'center',
     gap: 10,
     borderWidth: 2,
-    borderColor: Colors.primary,
+    borderColor: Palette.accent,
     width: '80%',
     justifyContent: 'center',
   },
   secondaryButtonText: {
-    color: Colors.primary,
+    color: Palette.accent,
     fontSize: 16,
     fontWeight: '600',
   },
@@ -238,17 +239,19 @@ const styles = StyleSheet.create({
   loadingText: {
     marginTop: 15,
     fontSize: 16,
-    color: Colors.mediumGrey,
+    color: Palette.inkMuted,
   },
   analysisContainer: {
-    backgroundColor: Colors.white,
+    backgroundColor: Palette.canvasRaised,
     borderRadius: 15,
     padding: 20,
+    borderWidth: 1,
+    borderColor: Palette.line,
   },
   analysisTitle: {
     fontSize: 22,
     fontWeight: 'bold',
-    color: Colors.darkGrey,
+    color: Palette.ink,
     marginBottom: 20,
   },
   metricCard: {
@@ -256,32 +259,34 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingVertical: 15,
     borderBottomWidth: 1,
-    borderBottomColor: Colors.lightGrey,
+    borderBottomColor: Palette.line,
   },
   metricLabel: {
     fontSize: 16,
-    color: Colors.mediumGrey,
+    color: Palette.inkMuted,
   },
   metricValue: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: Colors.primary,
+    color: Palette.accent,
   },
   recommendationCard: {
     marginTop: 20,
     padding: 15,
-    backgroundColor: Colors.lightGrey,
+    backgroundColor: Palette.canvasRaised,
     borderRadius: 10,
+    borderWidth: 1,
+    borderColor: Palette.line,
   },
   recommendationTitle: {
     fontSize: 18,
     fontWeight: '600',
-    color: Colors.darkGrey,
+    color: Palette.ink,
     marginBottom: 10,
   },
   recommendationText: {
     fontSize: 14,
-    color: Colors.mediumGrey,
+    color: Palette.inkMuted,
     lineHeight: 20,
   },
   confidenceCard: {
@@ -291,23 +296,23 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   confidenceHigh: {
-    backgroundColor: '#e8f5e8',
-    borderColor: '#4caf50',
+    backgroundColor: '#19C59A1A',
+    borderColor: Palette.good,
     borderWidth: 1,
   },
   confidenceMedium: {
-    backgroundColor: '#fff3e0',
-    borderColor: '#ff9800',
+    backgroundColor: '#F2B33D1A',
+    borderColor: Palette.warn,
     borderWidth: 1,
   },
   confidenceLow: {
-    backgroundColor: '#ffebee',
-    borderColor: '#f44336',
+    backgroundColor: '#F0645A1A',
+    borderColor: Palette.bad,
     borderWidth: 1,
   },
   confidenceText: {
     fontSize: 14,
     fontWeight: '600',
-    color: Colors.darkGrey,
+    color: Palette.ink,
   },
 });
