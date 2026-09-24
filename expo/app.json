@@ -17,40 +17,21 @@
       "supportsTablet": true,
       "bundleIdentifier": "app.rork.ai-personal-assistant-suite-iqrof76t-9bs2scax-m9xkyh13-kc78crp0",
       "infoPlist": {
-        "NSPhotoLibraryUsageDescription": "Allow $(PRODUCT_NAME) to access your photos",
-        "NSCameraUsageDescription": "Allow $(PRODUCT_NAME) to access your camera",
-        "NSMicrophoneUsageDescription": "Allow $(PRODUCT_NAME) to access your microphone",
-        "NSFaceIDUsageDescription": "Allow $(PRODUCT_NAME) to access your Face ID biometric data.",
-        "UIBackgroundModes": [
-          "audio"
-        ]
+        "NSPhotoLibraryUsageDescription": "Thrive uses your photo library so you can choose progress photos and meal photos to log.",
+        "NSCameraUsageDescription": "Thrive uses the camera to take progress photos and to photograph meals for nutrition logging."
       },
       "config": {
         "usesNonExemptEncryption": false
-      },
-      "entitlements": {
-        "com": {
-          "apple": {
-            "developer": {
-              "networking": {
-                "wifi-info": true
-              }
-            }
-          }
-        }
       }
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
-        "backgroundColor": "#ffffff"
+        "backgroundColor": "#0b351e"
       },
       "package": "app.rork.ai_personal_assistant_suite_iqrof76t_9bs2scax_m9xkyh13_kc78crp0",
       "permissions": [
         "CAMERA",
-        "READ_EXTERNAL_STORAGE",
-        "WRITE_EXTERNAL_STORAGE",
-        "RECORD_AUDIO",
         "INTERNET"
       ]
     },
@@ -67,20 +48,32 @@
       [
         "expo-image-picker",
         {
-          "photosPermission": "The app accesses your photos to let you share them with your friends."
+          "photosPermission": "Thrive uses your photo library so you can choose progress photos and meal photos to log.",
+          "cameraPermission": "Thrive uses the camera to take progress photos and to photograph meals for nutrition logging.",
+          "microphonePermission": false
         }
       ],
       [
         "expo-secure-store",
         {
           "configureAndroidBackup": true,
-          "faceIDPermission": "Allow $(PRODUCT_NAME) to access your Face ID biometric data."
+          "faceIDPermission": false
         }
       ],
       [
         "expo-av",
         {
-          "microphonePermission": "Allow $(PRODUCT_NAME) to access your microphone"
+          "microphonePermission": false
+        }
+      ],
+      [
+        "expo-location",
+        {
+          "locationAlwaysAndWhenInUsePermission": false,
+          "locationAlwaysPermission": false,
+          "locationWhenInUsePermission": false,
+          "isIosBackgroundLocationEnabled": false,
+          "isAndroidBackgroundLocationEnabled": false
         }
       ]
     ],
