@@ -11,35 +11,60 @@ import {
   ActivityIndicator,
   Platform,
 } from 'react-native';
-import { 
-  Target, 
-  Dumbbell, 
-  Calendar, 
+import {
+  Dumbbell,
   ChevronDown,
   ChevronUp,
+  ChevronRight,
   Play,
   X,
   Plus,
   BookOpen,
   LibraryBig,
-  ListChecks,
   TrendingUp,
+  RefreshCw,
 } from 'lucide-react-native';
+import * as Haptics from 'expo-haptics';
 import { Stack, useRouter } from 'expo-router';
 import { useUserProfile } from '@/hooks/user-profile-store';
-import { Colors } from '@/constants/colors';
+import { Palette, Radius, Space, Type } from '@/constants/theme';
 import { AIService } from '@/services/ai-service';
 import WorkoutLogger, { type WorkoutCompletionLog } from '@/components/WorkoutLogger';
 import ExerciseReplacementModal from '@/components/ExerciseReplacementModal';
 import WorkoutCompletionSummary from '@/components/WorkoutCompletionSummary';
-import MuscleHeatmap from '@/components/MuscleHeatmap';
 import MotivationalBanner from '@/components/MotivationalBanner';
 import AchievementBadge from '@/components/AchievementBadge';
-import StrengthBenchmark from '@/components/StrengthBenchmark';
-import DataExportModal from '@/components/DataExportModal';
-import ProgramProgressBar from '@/components/ProgramProgressBar';
+import { countSessions, nextDayIndex } from '@/lib/workout-sessions';
 
+/**
+ * Workout tab, Option C (decided 24 Sep): one screen that opens on TODAY'S SESSION --
+ * the next day of the current plan, with Start front and centre -- and a list
+ * underneath (Programs, Exercise library, Progress) in the same row pattern as
+ * Home's "More". "Browse Exercises" folds into Exercise library (the same
+ * exercises, two entry points). The heatmap, benchmarks and export that used to
+ * sit at the bottom of this screen live on Progress, one row away.
+ */
 
+function ListRow({ icon: Icon, title, description, onPress, last }: {
+  icon: React.ComponentType<any>; title: string; description: string; onPress: () => void; last?: boolean;
+}) {
+  return (
+    <TouchableOpacity
+      activeOpacity={0.7}
+      onPress={() => { Haptics.selectionAsync().catch(() => {}); onPress(); }}
+      style={[styles.row, last && styles.rowLast]}
+      accessibilityRole="button"
+      accessibilityLabel={title}
+    >
+      <View style={styles.rowIcon}><Icon size={20} color={Palette.accent} /></View>
+      <View style={styles.rowText}>
+        <Text style={styles.rowTitle}>{title}</Text>
+        <Text style={styles.rowDescription}>{description}</Text>
+      </View>
+      <ChevronRight size={18} color={Palette.inkFaint} />
+    </TouchableOpacity>
+  );
+}
 
 export default function WorkoutScreen() {
   const router = useRouter();
@@ -61,9 +86,14 @@ export default function WorkoutScreen() {
       if (pendingSummaryTimer.current) clearTimeout(pendingSummaryTimer.current);
     };
   }, []);
-  const [showExportModal, setShowExportModal] = useState(false);
 
   const latestPlan = workoutPlans[workoutPlans.length - 1];
+  // Option C (Freddy, 24 Sep): the tab opens on the session you are about to do.
+  const nextIndex = latestPlan ? nextDayIndex(latestPlan, workoutLogs) : 0;
+  const nextDay = latestPlan?.plan[nextIndex];
+  const sessionsDone = latestPlan ? countSessions(workoutLogs, latestPlan.id) : 0;
+  const programLength = latestPlan ? latestPlan.daysPerWeek * 12 : 0;
+  const tap = () => Haptics.selectionAsync().catch(() => {});
 
   const toggleDayExpansion = (dayIndex: number) => {
     setExpandedDays(prev => ({
@@ -155,20 +185,56 @@ export default function WorkoutScreen() {
     <View style={styles.container}>
       <Stack.Screen
         options={{
-          title: 'Workout Planner',
-          headerStyle: {
-            backgroundColor: Colors.primary,
-          },
-          headerTintColor: Colors.white,
-          headerTitleStyle: {
-            fontWeight: '600',
-          },
+          title: 'Workout',
+          headerStyle: { backgroundColor: Palette.canvas },
+          headerTintColor: Palette.ink,
+          headerTitleStyle: { fontWeight: '700' },
+          headerShadowVisible: false,
         }}
       />
-      
-      <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
+
+      <ScrollView style={styles.scroll} contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+        {/* Today's session */}
+        <Text style={styles.eyebrow}>Today&apos;s session</Text>
+        {latestPlan && nextDay ? (
+          <View style={styles.hero}>
+            <Text style={styles.title}>{nextDay.day}</Text>
+            <Text style={styles.caption}>
+              {nextDay.exercises.length} exercise{nextDay.exercises.length === 1 ? '' : 's'}
+              {nextDay.focus ? ` · ${nextDay.focus}` : ''}
+            </Text>
+            <Text style={styles.sessionCount}>
+              Session {Math.min(sessionsDone + 1, programLength)} of {programLength} in this program
+            </Text>
+            <TouchableOpacity
+              style={styles.primary}
+              activeOpacity={0.85}
+              onPress={() => { tap(); handleStartWorkout(latestPlan.id, nextIndex); }}
+              accessibilityRole="button"
+              accessibilityLabel={`Start ${nextDay.day}`}
+            >
+              <Play color={Palette.canvas} size={18} fill={Palette.canvas} />
+              <Text style={styles.primaryText}>Start workout</Text>
+            </TouchableOpacity>
+          </View>
+        ) : (
+          <View style={styles.hero}>
+            <Text style={styles.title}>No plan yet</Text>
+            <Text style={styles.caption}>Create a plan and your next session will appear here.</Text>
+            <TouchableOpacity
+              style={styles.primary}
+              activeOpacity={0.85}
+              onPress={() => { tap(); setShowAIGenerator(true); }}
+              accessibilityRole="button"
+            >
+              <Plus color={Palette.canvas} size={18} />
+              <Text style={styles.primaryText}>Create a plan</Text>
+            </TouchableOpacity>
+          </View>
+        )}
+
         <MotivationalBanner />
-        
+
         {achievements.length > 0 && (
           <View style={styles.achievementsRow}>
             <ScrollView horizontal showsHorizontalScrollIndicator={false}>
@@ -179,134 +245,71 @@ export default function WorkoutScreen() {
           </View>
         )}
 
-        <View style={styles.quickAccessRow}>
-          <TouchableOpacity
-            style={styles.quickAccessButton}
-            onPress={() => router.push('/workout/programs')}
-          >
-            <BookOpen color={Colors.white} size={20} />
-            <Text style={styles.quickAccessText}>Programs</Text>
-          </TouchableOpacity>
-          
-          <TouchableOpacity
-            style={styles.quickAccessButton}
-            onPress={() => router.push('/workout/exercise-library')}
-          >
-            <LibraryBig color={Colors.white} size={20} />
-            <Text style={styles.quickAccessText}>Exercise Library</Text>
-          </TouchableOpacity>
+        {/* The list */}
+        <View style={styles.card}>
+          <ListRow icon={BookOpen} title="Programs" description="Structured plans to follow week by week" onPress={() => router.push('/workout/programs')} />
+          <ListRow icon={LibraryBig} title="Exercise library" description="Every exercise, with how-to and muscles worked" onPress={() => router.push('/workout/exercise-library')} />
+          <ListRow icon={TrendingUp} title="Progress" description="Frequency, volume, heatmap and export" onPress={() => router.push('/workout/progress')} last />
         </View>
 
-        <View style={styles.quickAccessRow}>
-          <TouchableOpacity
-            style={styles.quickAccessButton}
-            onPress={() => router.push('/workout/exercises')}
-          >
-            <ListChecks color={Colors.white} size={20} />
-            <Text style={styles.quickAccessText}>Browse Exercises</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={styles.quickAccessButton}
-            onPress={() => router.push('/workout/progress')}
-          >
-            <TrendingUp color={Colors.white} size={20} />
-            <Text style={styles.quickAccessText}>Progress</Text>
-          </TouchableOpacity>
-        </View>
-
+        {/* The whole plan */}
         {latestPlan && (
-          <View style={{ marginHorizontal: 20, marginBottom: 12 }}>
-            <ProgramProgressBar
-              program={latestPlan}
-              completedWorkouts={workoutLogs.filter(log => log.workoutPlanId === latestPlan.id).length}
-              totalWorkouts={latestPlan.daysPerWeek * 12}
-            />
-          </View>
-        )}
-
-        <TouchableOpacity
-          style={styles.createButton}
-          onPress={() => setShowAIGenerator(true)}
-        >
-          <Plus color={Colors.white} size={20} />
-          <Text style={styles.createButtonText}>Create New Plan</Text>
-        </TouchableOpacity>
-        {!latestPlan ? (
-          <View style={styles.emptyState}>
-            <Dumbbell color={Colors.mediumGrey} size={64} />
-            <Text style={styles.emptyTitle}>No Workout Plans</Text>
-            <Text style={styles.emptyText}>
-              Create your first AI-generated workout plan
-            </Text>
-          </View>
-        ) : (
-          <View style={styles.programContent}>
-            <Text style={styles.sectionTitle}>Current Workout Plan</Text>
-
-            <View style={styles.planCard}>
-              <View style={styles.planHeader}>
-                <Target color={Colors.primary} size={20} />
-                <Text style={styles.planGoal}>{latestPlan.goals[0] || 'General Fitness'}</Text>
-              </View>
-              <View style={styles.planMeta}>
-                <Calendar color={Colors.mediumGrey} size={14} />
-                <Text style={styles.planMetaText}>{latestPlan.daysPerWeek} days/week</Text>
-              </View>
+          <View style={styles.card}>
+            <View style={styles.cardHeader}>
+              <Text style={styles.eyebrowMuted}>This plan · {latestPlan.goals[0] || 'General fitness'} · {latestPlan.daysPerWeek} days/week</Text>
             </View>
-
             {latestPlan.plan.map((day, dayIndex) => (
-              <View key={dayIndex} style={styles.dayContainer}>
+              <View key={dayIndex} style={[styles.day, dayIndex === latestPlan.plan.length - 1 && styles.rowLast]}>
                 <TouchableOpacity
                   style={styles.dayHeader}
                   onPress={() => toggleDayExpansion(dayIndex)}
+                  accessibilityRole="button"
+                  accessibilityLabel={`${day.day}, ${expandedDays[dayIndex] ? 'collapse' : 'expand'}`}
                 >
-                  <Text style={styles.dayTitle}>{day.day}</Text>
+                  <View style={styles.rowText}>
+                    <Text style={styles.rowTitle}>{day.day}</Text>
+                    <Text style={styles.rowDescription}>
+                      {day.exercises.length} exercises{dayIndex === nextIndex ? ' · next up' : ''}
+                    </Text>
+                  </View>
                   {expandedDays[dayIndex] ? (
-                    <ChevronUp color={Colors.mediumGrey} size={24} />
+                    <ChevronUp color={Palette.inkMuted} size={20} />
                   ) : (
-                    <ChevronDown color={Colors.mediumGrey} size={24} />
+                    <ChevronDown color={Palette.inkMuted} size={20} />
                   )}
                 </TouchableOpacity>
 
                 {expandedDays[dayIndex] && (
                   <View style={styles.exercisesList}>
                     {day.exercises.map((exercise, exerciseIndex) => (
-                      <View key={exerciseIndex} style={styles.exerciseCard}>
-                        <View style={styles.exerciseHeader}>
-                          <View style={styles.exerciseInfo}>
-                            <Text style={styles.exerciseName}>{exercise.name}</Text>
-                            <Text style={styles.exerciseSets}>
-                              {exercise.sets} sets × {exercise.reps}
-                            </Text>
-                            <Text style={styles.exerciseRest}>Rest: {exercise.restPeriod}</Text>
-                            {exercise.muscleGroups && exercise.muscleGroups.length > 0 && (
-                              <Text style={styles.exerciseMuscles}>
-                                {exercise.muscleGroups.join(', ')}
-                              </Text>
-                            )}
-                          </View>
-                          <TouchableOpacity
-                            style={styles.replaceButton}
-                            onPress={() => handleReplaceExercise(latestPlan.id, dayIndex, exerciseIndex)}
-                            accessibilityRole="button"
-                            accessibilityLabel={`Replace ${exercise.name}`}
-                          >
-                            <Text style={styles.replaceIcon}>🔄</Text>
-                          </TouchableOpacity>
+                      <View key={exerciseIndex} style={styles.exercise}>
+                        <View style={styles.rowText}>
+                          <Text style={styles.exerciseName}>{exercise.name}</Text>
+                          <Text style={styles.exerciseMeta}>
+                            {exercise.sets} sets × {exercise.reps} · rest {exercise.restPeriod}
+                          </Text>
+                          {exercise.muscleGroups && exercise.muscleGroups.length > 0 && (
+                            <Text style={styles.exerciseMuscles}>{exercise.muscleGroups.join(', ')}</Text>
+                          )}
+                          {exercise.notes ? <Text style={styles.exerciseNotes}>{exercise.notes}</Text> : null}
                         </View>
-                        {exercise.notes && (
-                          <Text style={styles.exerciseNotes}>{exercise.notes}</Text>
-                        )}
+                        <TouchableOpacity
+                          style={styles.replaceButton}
+                          onPress={() => handleReplaceExercise(latestPlan.id, dayIndex, exerciseIndex)}
+                          accessibilityRole="button"
+                          accessibilityLabel={`Replace ${exercise.name}`}
+                        >
+                          <RefreshCw color={Palette.inkMuted} size={16} />
+                        </TouchableOpacity>
                       </View>
                     ))}
-
                     <TouchableOpacity
-                      style={styles.startWorkoutButton}
-                      onPress={() => handleStartWorkout(latestPlan.id, dayIndex)}
+                      style={styles.secondary}
+                      onPress={() => { tap(); handleStartWorkout(latestPlan.id, dayIndex); }}
+                      accessibilityRole="button"
                     >
-                      <Play color={Colors.white} size={18} fill={Colors.white} />
-                      <Text style={styles.startWorkoutButtonText}>Start Workout</Text>
+                      <Play color={Palette.ink} size={16} />
+                      <Text style={styles.secondaryText}>Start this day instead</Text>
                     </TouchableOpacity>
                   </View>
                 )}
@@ -315,23 +318,21 @@ export default function WorkoutScreen() {
           </View>
         )}
 
-        <View style={styles.progressSection}>
-          <Text style={styles.sectionTitle}>Progress & Stats</Text>
-          
-          <MuscleHeatmap timeRange="30d" />
-          
-          <StrengthBenchmark />
-          
-          <TouchableOpacity
-            style={styles.exportButton}
-            onPress={() => setShowExportModal(true)}
-          >
-            <Text style={styles.exportButtonText}>Export Data</Text>
+        {latestPlan && (
+          <TouchableOpacity style={styles.linkButton} onPress={() => setShowAIGenerator(true)} accessibilityRole="button">
+            <Plus color={Palette.accent} size={16} />
+            <Text style={styles.link}>Create a new plan</Text>
           </TouchableOpacity>
-        </View>
+        )}
+
+        {!latestPlan && (
+          <View style={styles.emptyState}>
+            <Dumbbell color={Palette.inkFaint} size={40} />
+          </View>
+        )}
+
+        <View style={styles.footerSpace} />
       </ScrollView>
-
-
 
       {activeWorkout && (
         <WorkoutLogger
@@ -368,14 +369,6 @@ export default function WorkoutScreen() {
         />
       )}
 
-      {showExportModal && (
-        <DataExportModal
-          visible={true}
-          onClose={() => setShowExportModal(false)}
-        />
-      )}
-
-
       <Modal
         visible={showAIGenerator}
         animationType="slide"
@@ -385,67 +378,61 @@ export default function WorkoutScreen() {
         <View style={styles.modalOverlay}>
           <View style={styles.modalCard}>
             <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>Generate Workout Plan</Text>
+              <Text style={styles.modalTitle}>Generate a plan</Text>
               <TouchableOpacity
                 onPress={() => setShowAIGenerator(false)}
                 accessibilityRole="button"
                 accessibilityLabel="Close"
               >
-                <X color={Colors.darkGrey} size={24} />
+                <X color={Palette.inkMuted} size={24} />
               </TouchableOpacity>
             </View>
 
             <ScrollView style={styles.modalBody} showsVerticalScrollIndicator={false}>
-              <Text style={styles.inputLabel}>Fitness Goals</Text>
+              <Text style={styles.inputLabel}>Fitness goals</Text>
               <TextInput
                 style={styles.textInput}
                 value={fitnessGoals}
                 onChangeText={setFitnessGoals}
                 placeholder="Build muscle, lose fat, strength..."
-                placeholderTextColor={Colors.mediumGrey}
+                placeholderTextColor={Palette.inkFaint}
                 multiline
               />
 
-              <Text style={styles.inputLabel}>Available Equipment</Text>
+              <Text style={styles.inputLabel}>Available equipment</Text>
               <TextInput
                 style={styles.textInput}
                 value={availableEquipment}
                 onChangeText={setAvailableEquipment}
                 placeholder="Dumbbells, resistance bands, none..."
-                placeholderTextColor={Colors.mediumGrey}
+                placeholderTextColor={Palette.inkFaint}
                 multiline
               />
 
-              <Text style={styles.inputLabel}>Days Per Week</Text>
+              <Text style={styles.inputLabel}>Days per week</Text>
               <TextInput
                 style={styles.textInput}
                 value={daysPerWeek}
                 onChangeText={setDaysPerWeek}
                 placeholder="3"
-                placeholderTextColor={Colors.mediumGrey}
+                placeholderTextColor={Palette.inkFaint}
                 keyboardType="number-pad"
               />
             </ScrollView>
 
             <View style={styles.modalFooter}>
-              <TouchableOpacity
-                style={styles.cancelButton}
-                onPress={() => setShowAIGenerator(false)}
-              >
-                <Text style={styles.cancelButtonText}>Cancel</Text>
+              <TouchableOpacity style={[styles.secondary, styles.modalButton]} onPress={() => setShowAIGenerator(false)}>
+                <Text style={styles.secondaryText}>Cancel</Text>
               </TouchableOpacity>
               <TouchableOpacity
-                style={[
-                  styles.generateButton,
-                  isGenerating && styles.generateButtonDisabled,
-                ]}
+                style={[styles.primary, styles.modalButton, isGenerating && styles.disabled]}
                 onPress={handleGenerateWorkout}
                 disabled={isGenerating}
               >
                 {isGenerating ? (
-                  <ActivityIndicator color={Colors.white} />
+                  <ActivityIndicator color={Palette.canvas} />
                 ) : (
-                  <Text style={styles.generateButtonText}>Generate Plan</Text>
+                  <Text style={styles.primaryText}>Generate plan</Text>
                 )}
               </TouchableOpacity>
             </View>
@@ -457,705 +444,90 @@ export default function WorkoutScreen() {
 }
 
 const styles = StyleSheet.create({
-  content: {
-    flex: 1,
+  container: { flex: 1, backgroundColor: Palette.canvas },
+  scroll: { flex: 1 },
+  content: { paddingTop: Space.lg },
+
+  eyebrow: { ...Type.eyebrow, color: Palette.accent, marginHorizontal: Space.xl },
+  eyebrowMuted: { ...Type.eyebrow, color: Palette.inkMuted, marginBottom: Space.sm },
+  title: { ...Type.title, color: Palette.ink, marginTop: Space.xs },
+  caption: { ...Type.caption, color: Palette.inkMuted, marginTop: Space.sm },
+  sessionCount: { ...Type.caption, color: Palette.inkFaint, marginTop: Space.xs, fontVariant: Type.numeral.fontVariant },
+
+  hero: { marginHorizontal: Space.xl, marginBottom: Space.md },
+  primary: {
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: Space.sm,
+    backgroundColor: Palette.accent, borderRadius: Radius.pill, paddingVertical: Space.lg, marginTop: Space.xl,
+    shadowColor: Palette.accent, shadowOpacity: 0.35, shadowRadius: 16, shadowOffset: { width: 0, height: 6 },
   },
-  achievementsRow: {
-    paddingHorizontal: 20,
-    marginBottom: 12,
+  primaryText: { ...Type.bodyStrong, color: Palette.canvas },
+  secondary: {
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: Space.sm,
+    borderRadius: Radius.pill, paddingVertical: Space.md, borderWidth: 1, borderColor: Palette.lineStrong, marginTop: Space.md,
   },
-  quickAccessRow: {
-    flexDirection: 'row',
-    gap: 12,
-    paddingHorizontal: 20,
-    marginBottom: 16,
+  secondaryText: { ...Type.bodyStrong, color: Palette.ink },
+  disabled: { opacity: 0.6 },
+
+  achievementsRow: { paddingHorizontal: Space.xl, marginBottom: Space.md },
+
+  card: {
+    marginHorizontal: Space.xl, marginTop: Space.lg,
+    backgroundColor: Palette.canvasRaised, borderRadius: Radius.lg,
+    borderWidth: StyleSheet.hairlineWidth, borderColor: Palette.line, padding: Space.lg,
   },
-  quickAccessButton: {
-    flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 8,
-    backgroundColor: Colors.primary,
-    paddingVertical: 14,
-    borderRadius: 12,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
+  cardHeader: { flexDirection: 'row', justifyContent: 'space-between' },
+
+  row: {
+    flexDirection: 'row', alignItems: 'center', paddingVertical: Space.md,
+    borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: Palette.line,
   },
-  quickAccessText: {
-    color: Colors.white,
-    fontSize: 15,
-    fontWeight: '600',
+  rowLast: { borderBottomWidth: 0, paddingBottom: 0 },
+  rowIcon: {
+    width: 36, height: 36, borderRadius: Radius.sm, backgroundColor: Palette.canvas,
+    alignItems: 'center', justifyContent: 'center', marginRight: Space.md,
   },
-  createButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 8,
-    backgroundColor: Colors.primary,
-    marginHorizontal: 20,
-    paddingVertical: 14,
-    borderRadius: 12,
-    marginBottom: 16,
+  rowText: { flex: 1 },
+  rowTitle: { ...Type.bodyStrong, color: Palette.ink },
+  rowDescription: { ...Type.caption, color: Palette.inkMuted, marginTop: 2 },
+
+  day: { borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: Palette.line, paddingVertical: Space.md },
+  dayHeader: { flexDirection: 'row', alignItems: 'center' },
+  exercisesList: { marginTop: Space.md },
+  exercise: {
+    flexDirection: 'row', alignItems: 'flex-start', paddingVertical: Space.sm,
+    borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: Palette.line,
   },
-  createButtonText: {
-    color: Colors.white,
-    fontSize: 16,
-    fontWeight: '600',
-  },
-  planCard: {
-    backgroundColor: Colors.white,
-    borderRadius: 12,
-    padding: 16,
-    marginHorizontal: 20,
-    marginBottom: 16,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 4,
-    elevation: 2,
-  },
-  planHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    marginBottom: 8,
-  },
-  planGoal: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: Colors.darkGrey,
-  },
-  planMeta: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-  },
-  planMetaText: {
-    fontSize: 13,
-    color: Colors.mediumGrey,
-  },
-  dayContainer: {
-    backgroundColor: Colors.white,
-    borderRadius: 12,
-    marginHorizontal: 20,
-    marginBottom: 12,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 4,
-    elevation: 2,
-  },
-  dayHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    padding: 16,
-  },
-  exercisesList: {
-    padding: 16,
-    paddingTop: 0,
-  },
-  exerciseCard: {
-    backgroundColor: Colors.lightGrey,
-    borderRadius: 8,
-    padding: 12,
-    marginBottom: 8,
-  },
-  exerciseHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
-  },
-  exerciseInfo: {
-    flex: 1,
-  },
-  exerciseName: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: Colors.darkGrey,
-    marginBottom: 4,
-  },
-  exerciseSets: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: Colors.primary,
-    marginBottom: 2,
-  },
-  exerciseRest: {
-    fontSize: 12,
-    color: Colors.mediumGrey,
-    marginBottom: 4,
-  },
-  exerciseMuscles: {
-    fontSize: 11,
-    color: Colors.primary,
-    fontWeight: '500',
-  },
-  replaceButton: {
-    padding: 4,
-  },
-  replaceIcon: {
-    fontSize: 20,
-  },
-  exerciseNotes: {
-    fontSize: 13,
-    color: Colors.mediumGrey,
-    fontStyle: 'italic',
-    marginTop: 8,
-  },
-  startWorkoutButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 8,
-    backgroundColor: Colors.primary,
-    paddingVertical: 14,
-    borderRadius: 8,
-    marginTop: 8,
-  },
-  startWorkoutButtonText: {
-    color: Colors.white,
-    fontSize: 16,
-    fontWeight: '600',
-  },
-  progressSection: {
-    padding: 20,
-  },
-  exportButton: {
-    backgroundColor: Colors.lightGrey,
-    paddingVertical: 12,
-    borderRadius: 8,
-    alignItems: 'center',
-    marginTop: 16,
-  },
-  exportButtonText: {
-    color: Colors.primary,
-    fontSize: 14,
-    fontWeight: '600',
-  },
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    justifyContent: 'flex-end',
-  },
+  exerciseName: { ...Type.bodyStrong, color: Palette.ink },
+  exerciseMeta: { ...Type.caption, color: Palette.inkMuted, marginTop: 2, fontVariant: Type.numeral.fontVariant },
+  exerciseMuscles: { ...Type.caption, color: Palette.inkFaint, marginTop: 2 },
+  exerciseNotes: { ...Type.caption, color: Palette.inkMuted, marginTop: Space.xs, fontStyle: 'italic' },
+  replaceButton: { padding: Space.sm, marginLeft: Space.sm },
+
+  linkButton: { flexDirection: 'row', alignItems: 'center', gap: Space.xs, marginHorizontal: Space.xl, marginTop: Space.lg },
+  link: { ...Type.caption, color: Palette.accent },
+
+  emptyState: { alignItems: 'center', marginTop: Space.xxl },
+  footerSpace: { height: Space.xxxl },
+
+  modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.6)', justifyContent: 'flex-end' },
   modalCard: {
-    backgroundColor: Colors.white,
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-    maxHeight: '80%',
-  },
-  modalBody: {
-    padding: 20,
-  },
-  inputLabel: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: Colors.darkGrey,
-    marginBottom: 8,
-    marginTop: 12,
-  },
-  textInput: {
-    backgroundColor: Colors.lightGrey,
-    borderRadius: 8,
-    padding: 12,
-    fontSize: 16,
-    color: Colors.darkGrey,
-    marginBottom: 4,
-    minHeight: 48,
-  },
-  modalFooter: {
-    flexDirection: 'row',
-    padding: 20,
-    gap: 12,
-    borderTopWidth: 1,
-    borderTopColor: Colors.lightGrey,
-  },
-  cancelButton: {
-    flex: 1,
-    paddingVertical: 14,
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: Colors.lightGrey,
-    alignItems: 'center',
-  },
-  cancelButtonText: {
-    color: Colors.darkGrey,
-    fontSize: 16,
-    fontWeight: '600',
-  },
-  container: {
-    flex: 1,
-    backgroundColor: Colors.lightGrey,
-  },
-  tabBar: {
-    flexDirection: 'row',
-    backgroundColor: Colors.white,
-    borderBottomWidth: 1,
-    borderBottomColor: Colors.lightGrey,
-    paddingHorizontal: 4,
-  },
-  tab: {
-    flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 6,
-    paddingVertical: 12,
-    borderBottomWidth: 2,
-    borderBottomColor: 'transparent',
-  },
-  tabActive: {
-    borderBottomColor: Colors.primary,
-  },
-  tabText: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: Colors.mediumGrey,
-  },
-  tabTextActive: {
-    color: Colors.primary,
-  },
-  scrollContent: {
-    flex: 1,
-  },
-  tabContent: {
-    padding: 20,
-  },
-  emptyState: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: 80,
-  },
-  emptyTitle: {
-    fontSize: 22,
-    fontWeight: '600',
-    color: Colors.darkGrey,
-    marginTop: 20,
-    marginBottom: 8,
-  },
-  emptyText: {
-    fontSize: 15,
-    color: Colors.mediumGrey,
-    textAlign: 'center',
-    lineHeight: 22,
-    marginBottom: 24,
-    paddingHorizontal: 40,
-  },
-  aiGenerateButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    backgroundColor: Colors.primary,
-    paddingHorizontal: 24,
-    paddingVertical: 14,
-    borderRadius: 12,
-    marginBottom: 12,
-  },
-  aiGenerateButtonText: {
-    color: Colors.white,
-    fontSize: 16,
-    fontWeight: '600',
-  },
-  browseProgramsButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    backgroundColor: Colors.white,
-    paddingHorizontal: 24,
-    paddingVertical: 14,
-    borderRadius: 12,
-    borderWidth: 2,
-    borderColor: Colors.primary,
-  },
-  browseProgramsButtonText: {
-    color: Colors.primary,
-    fontSize: 16,
-    fontWeight: '600',
-  },
-  programHeaderActions: {
-    flexDirection: 'row',
-    gap: 8,
-  },
-  aiButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    borderRadius: 8,
-    backgroundColor: Colors.primary + '15',
-  },
-  aiButtonText: {
-    fontSize: 13,
-    fontWeight: '600',
-    color: Colors.primary,
-  },
-  programContent: {
-    paddingBottom: 20,
-  },
-  programHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 16,
-  },
-  programTitle: {
-    fontSize: 20,
-    fontWeight: '600',
-    color: Colors.darkGrey,
-  },
-  changeButton: {
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 8,
-    backgroundColor: Colors.lightGrey,
-  },
-  changeButtonText: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: Colors.primary,
-  },
-  programCard: {
-    backgroundColor: Colors.white,
-    borderRadius: 16,
-    padding: 16,
-    marginBottom: 24,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 4,
-    elevation: 2,
-  },
-  programGoals: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    marginBottom: 8,
-  },
-  programGoalsText: {
-    fontSize: 16,
-    color: Colors.darkGrey,
-    fontWeight: '500',
-    flex: 1,
-  },
-  programMeta: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-  },
-  programMetaText: {
-    fontSize: 14,
-    color: Colors.mediumGrey,
-  },
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: Colors.darkGrey,
-    marginBottom: 12,
-  },
-  dayCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    backgroundColor: Colors.white,
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 12,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 4,
-    elevation: 2,
-  },
-  dayCardLeft: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-    flex: 1,
-  },
-  dayIconContainer: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: Colors.primary + '15',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  dayTitle: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: Colors.darkGrey,
-    marginBottom: 2,
-  },
-  dayExercises: {
-    fontSize: 13,
-    color: Colors.mediumGrey,
-  },
-  startButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-    backgroundColor: Colors.primary,
-    paddingHorizontal: 16,
-    paddingVertical: 10,
-    borderRadius: 8,
-  },
-  startButtonText: {
-    color: Colors.white,
-    fontSize: 14,
-    fontWeight: '600',
-  },
-  exploreHeader: {
-    marginBottom: 20,
-  },
-  exploreTitle: {
-    fontSize: 22,
-    fontWeight: '600',
-    color: Colors.darkGrey,
-    marginBottom: 4,
-  },
-  exploreSubtitle: {
-    fontSize: 14,
-    color: Colors.mediumGrey,
-  },
-  muscleGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 12,
-    marginBottom: 24,
-  },
-
-  muscleIcon: {
-    width: 56,
-    height: 56,
-    borderRadius: 28,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 12,
-  },
-  muscleEmoji: {
-    fontSize: 28,
-  },
-  muscleLabel: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: Colors.darkGrey,
-  },
-  exploreSection: {
-    gap: 12,
-  },
-  allExercisesButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    backgroundColor: Colors.white,
-    borderRadius: 12,
-    padding: 16,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 4,
-    elevation: 2,
-  },
-  allExercisesContent: {
-    flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-  },
-  allExercisesText: {
-    flex: 1,
-  },
-  allExercisesTitle: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: Colors.darkGrey,
-    marginBottom: 4,
-  },
-  allExercisesDescription: {
-    fontSize: 14,
-    color: Colors.mediumGrey,
-  },
-  progressHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 20,
-  },
-  progressTitle: {
-    fontSize: 22,
-    fontWeight: '600',
-    color: Colors.darkGrey,
-  },
-  detailedButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-  },
-  detailedButtonText: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: Colors.primary,
-  },
-  statsGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 12,
-    marginBottom: 24,
-  },
-
-  statValue: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    color: Colors.darkGrey,
-    marginTop: 12,
-    marginBottom: 4,
-  },
-  statLabel: {
-    fontSize: 13,
-    color: Colors.mediumGrey,
-    textAlign: 'center',
-  },
-  progressPrompt: {
-    backgroundColor: Colors.white,
-    borderRadius: 16,
-    padding: 20,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 3,
-  },
-  progressPromptTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: Colors.darkGrey,
-    marginBottom: 8,
-  },
-  progressPromptText: {
-    fontSize: 14,
-    color: Colors.mediumGrey,
-    lineHeight: 20,
-    marginBottom: 16,
-  },
-  viewDetailsButton: {
-    backgroundColor: Colors.primary,
-    paddingVertical: 12,
-    borderRadius: 8,
-    alignItems: 'center',
-  },
-  viewDetailsButtonText: {
-    color: Colors.white,
-    fontSize: 16,
-    fontWeight: '600',
-  },
-  modalContainer: {
-    flex: 1,
-    backgroundColor: Colors.lightGrey,
+    backgroundColor: Palette.canvasRaised, borderTopLeftRadius: Radius.lg, borderTopRightRadius: Radius.lg,
+    maxHeight: '85%', borderWidth: StyleSheet.hairlineWidth, borderColor: Palette.line,
   },
   modalHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    padding: 20,
-    backgroundColor: Colors.white,
-    borderBottomWidth: 1,
-    borderBottomColor: Colors.lightGrey,
+    flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: Space.xl,
+    borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: Palette.line,
   },
-  modalTitleContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
+  modalTitle: { ...Type.heading, color: Palette.ink },
+  modalBody: { padding: Space.xl },
+  inputLabel: { ...Type.caption, color: Palette.inkMuted, marginBottom: Space.sm, marginTop: Space.md },
+  textInput: {
+    backgroundColor: Palette.canvas, borderRadius: Radius.md, borderWidth: 1, borderColor: Palette.line,
+    padding: Space.md, color: Palette.ink, ...Type.body, minHeight: 48,
   },
-  modalTitle: {
-    fontSize: 20,
-    fontWeight: '600',
-    color: Colors.darkGrey,
+  modalFooter: {
+    flexDirection: 'row', gap: Space.md, padding: Space.xl,
+    borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: Palette.line,
   },
-  modalContent: {
-    flex: 1,
-    padding: 20,
-  },
-  sectionLabel: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: Colors.darkGrey,
-    marginBottom: 12,
-    marginTop: 8,
-  },
-  optionsGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 10,
-    marginBottom: 20,
-  },
-  optionChip: {
-    paddingHorizontal: 16,
-    paddingVertical: 10,
-    borderRadius: 20,
-    backgroundColor: Colors.white,
-    borderWidth: 2,
-    borderColor: Colors.lightGrey,
-  },
-  optionChipSelected: {
-    backgroundColor: Colors.primary,
-    borderColor: Colors.primary,
-  },
-  optionChipText: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: Colors.darkGrey,
-  },
-  optionChipTextSelected: {
-    color: Colors.white,
-  },
-  daysSelector: {
-    flexDirection: 'row',
-    gap: 12,
-    marginBottom: 30,
-  },
-  dayButton: {
-    flex: 1,
-    paddingVertical: 16,
-    borderRadius: 12,
-    backgroundColor: Colors.white,
-    borderWidth: 2,
-    borderColor: Colors.lightGrey,
-    alignItems: 'center',
-  },
-  dayButtonSelected: {
-    backgroundColor: Colors.primary,
-    borderColor: Colors.primary,
-  },
-  dayButtonText: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: Colors.darkGrey,
-  },
-  dayButtonTextSelected: {
-    color: Colors.white,
-  },
-  generateButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 8,
-    backgroundColor: Colors.primary,
-    paddingVertical: 16,
-    borderRadius: 12,
-    marginTop: 10,
-    marginBottom: 30,
-  },
-  generateButtonDisabled: {
-    opacity: 0.6,
-  },
-  generateButtonText: {
-    color: Colors.white,
-    fontSize: 16,
-    fontWeight: '600',
-  },
+  modalButton: { flex: 1, marginTop: 0 },
 });
