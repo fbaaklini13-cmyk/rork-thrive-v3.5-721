@@ -12,12 +12,10 @@ import {
   Target,
   Calendar,
   TrendingUp,
-  Star,
-  Users,
   ChevronRight,
   Award,
 } from 'lucide-react-native';
-import { Colors } from '@/constants/colors';
+import { Palette } from '@/constants/theme';
 import { COMPLETE_WORKOUT_PROGRAMS, type ExtendedProgram } from '@/mocks/all-workout-programs';
 import { useUserProfile } from '@/hooks/user-profile-store';
 
@@ -58,13 +56,13 @@ export default function ProgramsScreen() {
   const getDifficultyColor = (difficulty: string) => {
     switch (difficulty) {
       case 'beginner':
-        return '#10B981';
+        return Palette.good;
       case 'intermediate':
-        return '#F59E0B';
+        return Palette.warn;
       case 'advanced':
-        return '#EF4444';
+        return Palette.bad;
       default:
-        return Colors.mediumGrey;
+        return Palette.inkMuted;
     }
   };
 
@@ -74,9 +72,9 @@ export default function ProgramsScreen() {
         options={{
           title: 'Workout Programs',
           headerStyle: {
-            backgroundColor: Colors.primary,
+            backgroundColor: Palette.canvas,
           },
-          headerTintColor: Colors.white,
+          headerTintColor: Palette.ink,
           headerTitleStyle: {
             fontWeight: '600',
           },
@@ -191,33 +189,24 @@ export default function ProgramsScreen() {
 
             <View style={styles.programMeta}>
               <View style={styles.metaItem}>
-                <Target size={16} color={Colors.mediumGrey} />
+                <Target size={16} color={Palette.inkMuted} />
                 <Text style={styles.metaText}>{program.primaryGoal}</Text>
               </View>
 
               <View style={styles.metaItem}>
-                <Calendar size={16} color={Colors.mediumGrey} />
+                <Calendar size={16} color={Palette.inkMuted} />
                 <Text style={styles.metaText}>{program.daysPerWeek} days/week</Text>
               </View>
 
               <View style={styles.metaItem}>
-                <TrendingUp size={16} color={Colors.mediumGrey} />
+                <TrendingUp size={16} color={Palette.inkMuted} />
                 <Text style={styles.metaText}>{program.duration}</Text>
               </View>
             </View>
 
-            <View style={styles.statsRow}>
-              <View style={styles.statItem}>
-                <Star size={16} color="#F59E0B" fill="#F59E0B" />
-                <Text style={styles.statText}>{program.rating}</Text>
-              </View>
-
-              <View style={styles.statItem}>
-                <Users size={16} color={Colors.mediumGrey} />
-                <Text style={styles.statText}>{program.enrolled.toLocaleString()} enrolled</Text>
-              </View>
-            </View>
-
+            {/* 24 Sep: the star rating and "N enrolled" came from mock data (every program
+                had one, e.g. 4.9 and 28,340) and were shown as fact. No user has ever
+                rated or enrolled in anything, so they are not shown. */}
             <View style={styles.tagsRow}>
               {program.tags.map((tag, index) => (
                 <View key={index} style={styles.tag}>
@@ -238,13 +227,13 @@ export default function ProgramsScreen() {
 
             <View style={styles.enrollButton}>
               <Text style={styles.enrollButtonText}>Enroll in Program</Text>
-              <ChevronRight size={20} color={Colors.white} />
+              <ChevronRight size={20} color={Palette.canvas} />
             </View>
           </TouchableOpacity>
         ))}
 
         <View style={styles.footer}>
-          <Award size={24} color={Colors.mediumGrey} />
+          <Award size={24} color={Palette.inkMuted} />
           <Text style={styles.footerText}>
             All programs are based on scientific research and ACSM guidelines
           </Text>
@@ -257,46 +246,48 @@ export default function ProgramsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.lightGrey,
+    backgroundColor: Palette.canvas,
   },
   filterContainer: {
-    backgroundColor: Colors.white,
+    backgroundColor: Palette.canvasRaised,
     paddingVertical: 12,
     paddingHorizontal: 20,
     borderBottomWidth: 1,
-    borderBottomColor: Colors.lightGrey,
+    borderBottomColor: Palette.line,
   },
   filterChip: {
     paddingHorizontal: 16,
     paddingVertical: 8,
     borderRadius: 20,
-    backgroundColor: Colors.lightGrey,
+    backgroundColor: Palette.canvasRaised,
     marginRight: 8,
+    borderWidth: 1,
+    borderColor: Palette.line,
   },
   filterChipActive: {
-    backgroundColor: Colors.primary,
+    backgroundColor: Palette.accent,
   },
   filterChipText: {
     fontSize: 14,
     fontWeight: '600',
-    color: Colors.darkGrey,
+    color: Palette.ink,
   },
   filterChipTextActive: {
-    color: Colors.white,
+    color: Palette.ink,
   },
   content: {
     flex: 1,
   },
   headerText: {
     fontSize: 16,
-    color: Colors.mediumGrey,
+    color: Palette.inkMuted,
     textAlign: 'center',
     paddingHorizontal: 20,
     paddingVertical: 16,
     lineHeight: 22,
   },
   programCard: {
-    backgroundColor: Colors.white,
+    backgroundColor: Palette.canvasRaised,
     borderRadius: 16,
     padding: 20,
     marginHorizontal: 20,
@@ -319,7 +310,7 @@ const styles = StyleSheet.create({
   programName: {
     fontSize: 18,
     fontWeight: '700',
-    color: Colors.darkGrey,
+    color: Palette.ink,
     flex: 1,
     marginRight: 12,
   },
@@ -334,7 +325,7 @@ const styles = StyleSheet.create({
   },
   programDescription: {
     fontSize: 14,
-    color: Colors.mediumGrey,
+    color: Palette.inkMuted,
     lineHeight: 20,
     marginBottom: 16,
   },
@@ -351,7 +342,7 @@ const styles = StyleSheet.create({
   },
   metaText: {
     fontSize: 13,
-    color: Colors.mediumGrey,
+    color: Palette.inkMuted,
     fontWeight: '500',
   },
   statsRow: {
@@ -367,7 +358,7 @@ const styles = StyleSheet.create({
   },
   statText: {
     fontSize: 13,
-    color: Colors.mediumGrey,
+    color: Palette.inkMuted,
     fontWeight: '500',
   },
   tagsRow: {
@@ -377,26 +368,28 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   tag: {
-    backgroundColor: Colors.primary + '15',
+    backgroundColor: Palette.canvasRaised + '15',
     paddingHorizontal: 10,
     paddingVertical: 4,
     borderRadius: 12,
+    borderWidth: 1,
+    borderColor: Palette.line,
   },
   tagText: {
     fontSize: 12,
-    color: Colors.primary,
+    color: Palette.accent,
     fontWeight: '600',
   },
   featuresSection: {
     marginBottom: 16,
     paddingTop: 16,
     borderTopWidth: 1,
-    borderTopColor: Colors.lightGrey,
+    borderTopColor: Palette.line,
   },
   featuresTitle: {
     fontSize: 14,
     fontWeight: '600',
-    color: Colors.darkGrey,
+    color: Palette.ink,
     marginBottom: 8,
   },
   featureItem: {
@@ -405,14 +398,14 @@ const styles = StyleSheet.create({
   },
   featureBullet: {
     fontSize: 14,
-    color: Colors.primary,
+    color: Palette.accent,
     fontWeight: '700',
     marginRight: 8,
     width: 12,
   },
   featureText: {
     fontSize: 13,
-    color: Colors.mediumGrey,
+    color: Palette.inkMuted,
     lineHeight: 18,
     flex: 1,
   },
@@ -420,13 +413,13 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: Colors.primary,
+    backgroundColor: Palette.accent,
     paddingVertical: 14,
     borderRadius: 12,
     gap: 8,
   },
   enrollButtonText: {
-    color: Colors.white,
+    color: Palette.canvas,
     fontSize: 16,
     fontWeight: '600',
   },
@@ -440,7 +433,7 @@ const styles = StyleSheet.create({
   },
   footerText: {
     fontSize: 13,
-    color: Colors.mediumGrey,
+    color: Palette.inkMuted,
     textAlign: 'center',
     flex: 1,
     lineHeight: 18,

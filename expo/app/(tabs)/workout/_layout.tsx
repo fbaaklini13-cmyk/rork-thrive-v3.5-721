@@ -1,5 +1,5 @@
 import { Stack } from "expo-router";
-import { Colors } from '@/constants/colors';
+import { Palette } from '@/constants/theme';
 
 export default function WorkoutLayout() {
   return (
@@ -9,9 +9,10 @@ export default function WorkoutLayout() {
         options={{ 
           title: "Workout",
           headerStyle: {
-            backgroundColor: Colors.primary,
+            backgroundColor: Palette.canvas,
           },
-          headerTintColor: "#fff",
+          headerTintColor: Palette.ink,
+          headerShadowVisible: false,
           headerTitleStyle: {
             fontWeight: "bold",
           },
@@ -22,9 +23,10 @@ export default function WorkoutLayout() {
         options={{ 
           title: "Training Programs",
           headerStyle: {
-            backgroundColor: Colors.primary,
+            backgroundColor: Palette.canvas,
           },
-          headerTintColor: "#fff",
+          headerTintColor: Palette.ink,
+          headerShadowVisible: false,
           headerTitleStyle: {
             fontWeight: "bold",
           },
@@ -35,9 +37,10 @@ export default function WorkoutLayout() {
         options={{ 
           title: "Exercises",
           headerStyle: {
-            backgroundColor: Colors.primary,
+            backgroundColor: Palette.canvas,
           },
-          headerTintColor: "#fff",
+          headerTintColor: Palette.ink,
+          headerShadowVisible: false,
           headerTitleStyle: {
             fontWeight: "bold",
           },
@@ -48,9 +51,10 @@ export default function WorkoutLayout() {
         options={{ 
           title: "Exercise Details",
           headerStyle: {
-            backgroundColor: Colors.primary,
+            backgroundColor: Palette.canvas,
           },
-          headerTintColor: "#fff",
+          headerTintColor: Palette.ink,
+          headerShadowVisible: false,
           headerTitleStyle: {
             fontWeight: "bold",
           },
@@ -61,9 +65,10 @@ export default function WorkoutLayout() {
         options={{ 
           title: "Progress",
           headerStyle: {
-            backgroundColor: Colors.primary,
+            backgroundColor: Palette.canvas,
           },
-          headerTintColor: "#fff",
+          headerTintColor: Palette.ink,
+          headerShadowVisible: false,
           headerTitleStyle: {
             fontWeight: "bold",
           },
@@ -74,9 +79,10 @@ export default function WorkoutLayout() {
         options={{ 
           title: "Exercise Library",
           headerStyle: {
-            backgroundColor: Colors.primary,
+            backgroundColor: Palette.canvas,
           },
-          headerTintColor: "#fff",
+          headerTintColor: Palette.ink,
+          headerShadowVisible: false,
           headerTitleStyle: {
             fontWeight: "bold",
           },

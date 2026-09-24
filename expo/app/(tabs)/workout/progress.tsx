@@ -16,7 +16,7 @@ import {
   Ruler,
   Plus,
 } from 'lucide-react-native';
-import { Colors } from '@/constants/colors';
+import { Palette } from '@/constants/theme';
 import { useUserProfile } from '@/hooks/user-profile-store';
 import BodyMeasurementsModal from '@/components/BodyMeasurementsModal';
 import ProgressPhotosModal from '@/components/ProgressPhotosModal';
@@ -140,13 +140,13 @@ export default function ProgressScreen() {
 
       <View style={styles.summaryCard}>
         <View style={styles.summaryHeader}>
-          <Calendar color={Colors.primary} size={24} />
+          <Calendar color={Palette.accent} size={24} />
           <Text style={styles.summaryTitle}>Week {weeklyStats.week} Summary</Text>
         </View>
         
         <View style={styles.summaryStats}>
           <View style={styles.summaryItem}>
-            <Dumbbell color={Colors.secondary} size={20} />
+            <Dumbbell color={Palette.accent} size={20} />
             <Text style={styles.summaryLabel}>Workouts</Text>
             <Text style={styles.summaryValue}>{weeklyStats.workoutCount}</Text>
           </View>
@@ -154,7 +154,7 @@ export default function ProgressScreen() {
           <View style={styles.summaryDivider} />
           
           <View style={styles.summaryItem}>
-            <Activity color={Colors.primary} size={20} />
+            <Activity color={Palette.accent} size={20} />
             <Text style={styles.summaryLabel}>Sets done</Text>
             <Text style={styles.summaryValue}>{weeklyStats.completedSets}</Text>
           </View>
@@ -162,7 +162,7 @@ export default function ProgressScreen() {
           <View style={styles.summaryDivider} />
           
           <View style={styles.summaryItem}>
-            <TrendingUp color={Colors.success} size={20} />
+            <TrendingUp color={Palette.good} size={20} />
             <Text style={styles.summaryLabel}>Volume</Text>
             <Text style={styles.summaryValue}>
               {(weeklyStats.totalVolume / 1000).toFixed(1)}K kg
@@ -199,19 +199,19 @@ export default function ProgressScreen() {
         
         <View style={styles.overviewGrid}>
           <View style={styles.overviewCard}>
-            <Dumbbell color={Colors.primary} size={28} />
+            <Dumbbell color={Palette.accent} size={28} />
             <Text style={styles.overviewValue}>{sessions.length}</Text>
             <Text style={styles.overviewLabel}>Total Workouts</Text>
           </View>
           
           <View style={styles.overviewCard}>
-            <Activity color={Colors.secondary} size={28} />
+            <Activity color={Palette.accent} size={28} />
             <Text style={styles.overviewValue}>{totalCompletedSets}</Text>
             <Text style={styles.overviewLabel}>Sets Done</Text>
           </View>
           
           <View style={styles.overviewCard}>
-            <TrendingUp color={Colors.success} size={28} />
+            <TrendingUp color={Palette.good} size={28} />
             <Text style={styles.overviewValue}>
               {(totalVolume / 1000).toFixed(0)}K
             </Text>
@@ -219,7 +219,7 @@ export default function ProgressScreen() {
           </View>
           
           <View style={styles.overviewCard}>
-            <Calendar color={Colors.warning} size={28} />
+            <Calendar color={Palette.warn} size={28} />
             <Text style={styles.overviewValue}>
               {weeklyCheckIns.length}
             </Text>
@@ -235,28 +235,28 @@ export default function ProgressScreen() {
           style={styles.featureCard}
           onPress={() => setPhotosModalVisible(true)}
         >
-          <Camera color={Colors.primary} size={24} />
+          <Camera color={Palette.accent} size={24} />
           <View style={styles.featureContent}>
             <Text style={styles.featureTitle}>Progress Photos</Text>
             <Text style={styles.featureDescription}>
               {progressPhotos.length} photos saved
             </Text>
           </View>
-          <Plus color={Colors.primary} size={20} />
+          <Plus color={Palette.accent} size={20} />
         </TouchableOpacity>
         
         <TouchableOpacity 
           style={styles.featureCard}
           onPress={() => setMeasurementsModalVisible(true)}
         >
-          <Ruler color={Colors.secondary} size={24} />
+          <Ruler color={Palette.accent} size={24} />
           <View style={styles.featureContent}>
             <Text style={styles.featureTitle}>Body Measurements</Text>
             <Text style={styles.featureDescription}>
               {bodyMeasurements.length} measurements tracked
             </Text>
           </View>
-          <Plus color={Colors.secondary} size={20} />
+          <Plus color={Palette.accent} size={20} />
         </TouchableOpacity>
       </View>
 
@@ -303,7 +303,7 @@ export default function ProgressScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.lightGrey,
+    backgroundColor: Palette.canvas,
   },
   filterContainer: {
     flexDirection: 'row',
@@ -315,25 +315,25 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     paddingHorizontal: 12,
     borderRadius: 8,
-    backgroundColor: Colors.white,
+    backgroundColor: Palette.canvasRaised,
     alignItems: 'center',
     borderWidth: 1,
-    borderColor: Colors.lightGrey,
+    borderColor: Palette.line,
   },
   filterButtonActive: {
-    backgroundColor: Colors.primary,
-    borderColor: Colors.primary,
+    backgroundColor: Palette.accent,
+    borderColor: Palette.accent,
   },
   filterText: {
     fontSize: 14,
     fontWeight: '600',
-    color: Colors.mediumGrey,
+    color: Palette.inkMuted,
   },
   filterTextActive: {
-    color: Colors.white,
+    color: Palette.ink,
   },
   summaryCard: {
-    backgroundColor: Colors.white,
+    backgroundColor: Palette.canvasRaised,
     marginHorizontal: 20,
     marginBottom: 20,
     borderRadius: 16,
@@ -353,7 +353,7 @@ const styles = StyleSheet.create({
   summaryTitle: {
     fontSize: 18,
     fontWeight: '600',
-    color: Colors.darkGrey,
+    color: Palette.ink,
   },
   summaryStats: {
     flexDirection: 'row',
@@ -366,18 +366,18 @@ const styles = StyleSheet.create({
   },
   summaryDivider: {
     width: 1,
-    backgroundColor: Colors.lightGrey,
+    backgroundColor: Palette.line,
     marginHorizontal: 8,
   },
   summaryLabel: {
     fontSize: 12,
-    color: Colors.mediumGrey,
+    color: Palette.inkMuted,
     marginTop: 4,
   },
   summaryValue: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: Colors.darkGrey,
+    color: Palette.ink,
   },
   section: {
     paddingHorizontal: 20,
@@ -386,11 +386,11 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 20,
     fontWeight: '600',
-    color: Colors.darkGrey,
+    color: Palette.ink,
     marginBottom: 16,
   },
   chartCard: {
-    backgroundColor: Colors.white,
+    backgroundColor: Palette.canvasRaised,
     borderRadius: 16,
     padding: 20,
     shadowColor: '#000',
@@ -418,7 +418,7 @@ const styles = StyleSheet.create({
   },
   bar: {
     width: 24,
-    backgroundColor: Colors.primary,
+    backgroundColor: Palette.accent,
     borderRadius: 4,
     minHeight: 10,
     justifyContent: 'flex-start',
@@ -427,12 +427,12 @@ const styles = StyleSheet.create({
   },
   barValue: {
     fontSize: 10,
-    fontWeight: '600',
-    color: Colors.white,
+    fontWeight: '700',
+    color: Palette.canvas,
   },
   barLabel: {
     fontSize: 10,
-    color: Colors.mediumGrey,
+    color: Palette.inkMuted,
     marginTop: 4,
   },
   overviewGrid: {
@@ -443,7 +443,7 @@ const styles = StyleSheet.create({
   overviewCard: {
     flex: 1,
     minWidth: (CARD_WIDTH - 12) / 2,
-    backgroundColor: Colors.white,
+    backgroundColor: Palette.canvasRaised,
     borderRadius: 16,
     padding: 20,
     alignItems: 'center',
@@ -456,19 +456,19 @@ const styles = StyleSheet.create({
   overviewValue: {
     fontSize: 28,
     fontWeight: 'bold',
-    color: Colors.darkGrey,
+    color: Palette.ink,
     marginTop: 12,
     marginBottom: 4,
   },
   overviewLabel: {
     fontSize: 13,
-    color: Colors.mediumGrey,
+    color: Palette.inkMuted,
     textAlign: 'center',
   },
   featureCard: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: Colors.white,
+    backgroundColor: Palette.canvasRaised,
     borderRadius: 12,
     padding: 16,
     marginBottom: 12,
@@ -485,12 +485,12 @@ const styles = StyleSheet.create({
   featureTitle: {
     fontSize: 16,
     fontWeight: '600',
-    color: Colors.darkGrey,
+    color: Palette.ink,
     marginBottom: 2,
   },
   featureDescription: {
     fontSize: 13,
-    color: Colors.mediumGrey,
+    color: Palette.inkMuted,
   },
   sectionHeader: {
     flexDirection: 'row',
@@ -501,10 +501,10 @@ const styles = StyleSheet.create({
   exportLink: {
     fontSize: 14,
     fontWeight: '600',
-    color: Colors.primary,
+    color: Palette.accent,
   },
   card: {
-    backgroundColor: Colors.white,
+    backgroundColor: Palette.canvasRaised,
     borderRadius: 16,
     padding: 20,
     shadowColor: '#000',

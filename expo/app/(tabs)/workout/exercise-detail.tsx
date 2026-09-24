@@ -9,7 +9,7 @@ import {
 } from 'react-native';
 import { useLocalSearchParams } from 'expo-router';
 import { Bookmark, Share2, Dumbbell } from 'lucide-react-native';
-import { Colors } from '@/constants/colors';
+import { Palette } from '@/constants/theme';
 import { ALL_EXERCISES } from '@/mocks/full-exercise-library';
 import { AnatomicalMuscleMap } from '@/components/AnatomicalMuscleMap';
 import ExerciseDemo from '@/components/ExerciseDemo';
@@ -68,7 +68,7 @@ export default function ExerciseDetailScreen() {
               <ExerciseDemo imageUrls={enrichment.imageUrls} width={windowWidth - 32} height={240} />
             ) : (
               <View style={styles.placeholderContainer}>
-                <Dumbbell size={64} color={Colors.mediumGrey} />
+                <Dumbbell size={64} color={Palette.inkMuted} />
                 <Text style={styles.placeholderText}>Animation not available</Text>
                 <Text style={styles.placeholderSubtext}>Exercise: {exercise.name}</Text>
               </View>
@@ -86,7 +86,7 @@ export default function ExerciseDetailScreen() {
 
       <View style={styles.actionButtons}>
         <TouchableOpacity style={styles.actionButton}>
-          <Share2 color={Colors.darkGrey} size={20} />
+          <Share2 color={Palette.ink} size={20} />
           <Text style={styles.actionButtonText}>Share Exercise</Text>
         </TouchableOpacity>
         
@@ -95,9 +95,9 @@ export default function ExerciseDetailScreen() {
           onPress={() => setIsFavorite(!isFavorite)}
         >
           <Bookmark 
-            color={isFavorite ? Colors.primary : Colors.darkGrey} 
+            color={isFavorite ? Palette.accent : Palette.inkMuted} 
             size={20}
-            fill={isFavorite ? Colors.primary : 'transparent'}
+            fill={isFavorite ? Palette.accent : 'transparent'}
           />
           <Text style={styles.actionButtonText}>Add to Favorites</Text>
         </TouchableOpacity>
@@ -161,16 +161,16 @@ export default function ExerciseDetailScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.lightGrey,
+    backgroundColor: Palette.canvas,
   },
   visualSection: {
-    backgroundColor: Colors.white,
+    backgroundColor: Palette.canvasRaised,
     marginBottom: 12,
   },
   tabBar: {
     flexDirection: 'row',
     borderBottomWidth: 1,
-    borderBottomColor: Colors.lightGrey,
+    borderBottomColor: Palette.line,
   },
   tab: {
     flex: 1,
@@ -180,15 +180,15 @@ const styles = StyleSheet.create({
   },
   activeTab: {
     borderBottomWidth: 2,
-    borderBottomColor: Colors.primary,
+    borderBottomColor: Palette.accent,
   },
   tabText: {
     fontSize: 15,
     fontWeight: '600',
-    color: Colors.mediumGrey,
+    color: Palette.inkMuted,
   },
   activeTabText: {
-    color: Colors.primary,
+    color: Palette.accent,
   },
   animationContainer: {
     height: 300,
@@ -213,13 +213,13 @@ const styles = StyleSheet.create({
   placeholderText: {
     fontSize: 16,
     fontWeight: '600',
-    color: Colors.mediumGrey,
+    color: Palette.inkMuted,
     marginTop: 16,
     textAlign: 'center',
   },
   placeholderSubtext: {
     fontSize: 14,
-    color: Colors.mediumGrey,
+    color: Palette.inkMuted,
     marginTop: 8,
     textAlign: 'center',
   },
@@ -236,12 +236,12 @@ const styles = StyleSheet.create({
   },
   actionButtons: {
     flexDirection: 'row',
-    backgroundColor: Colors.white,
+    backgroundColor: Palette.canvasRaised,
     paddingVertical: 16,
     paddingHorizontal: 20,
     gap: 12,
     borderBottomWidth: 1,
-    borderBottomColor: Colors.lightGrey,
+    borderBottomColor: Palette.line,
   },
   actionButton: {
     flex: 1,
@@ -252,22 +252,24 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     paddingHorizontal: 16,
     borderRadius: 8,
-    backgroundColor: Colors.lightGrey,
+    backgroundColor: Palette.canvasRaised,
+    borderWidth: 1,
+    borderColor: Palette.line,
   },
   actionButtonText: {
     fontSize: 13,
     fontWeight: '600',
-    color: Colors.darkGrey,
+    color: Palette.ink,
   },
   titleSection: {
-    backgroundColor: Colors.white,
+    backgroundColor: Palette.canvasRaised,
     padding: 20,
     marginBottom: 12,
   },
   title: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: Colors.darkGrey,
+    color: Palette.ink,
     marginBottom: 12,
   },
   headerBadges: {
@@ -278,28 +280,30 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 16,
-    backgroundColor: Colors.lightGrey,
+    backgroundColor: Palette.canvasRaised,
+    borderWidth: 1,
+    borderColor: Palette.line,
   },
   badgeText: {
     fontSize: 13,
     fontWeight: '600',
-    color: Colors.darkGrey,
+    color: Palette.ink,
     textTransform: 'capitalize',
   },
   section: {
-    backgroundColor: Colors.white,
+    backgroundColor: Palette.canvasRaised,
     padding: 20,
     marginBottom: 12,
   },
   sectionTitle: {
     fontSize: 18,
     fontWeight: '600',
-    color: Colors.darkGrey,
+    color: Palette.ink,
     marginBottom: 12,
   },
   description: {
     fontSize: 16,
-    color: Colors.mediumGrey,
+    color: Palette.inkMuted,
     lineHeight: 24,
   },
 
@@ -312,19 +316,21 @@ const styles = StyleSheet.create({
     width: 28,
     height: 28,
     borderRadius: 14,
-    backgroundColor: Colors.primary,
+    backgroundColor: Palette.canvasRaised,
     alignItems: 'center',
     justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: Palette.line,
   },
   instructionNumberText: {
     fontSize: 14,
     fontWeight: '600',
-    color: Colors.white,
+    color: Palette.ink,
   },
   instructionText: {
     flex: 1,
     fontSize: 15,
-    color: Colors.darkGrey,
+    color: Palette.ink,
     lineHeight: 22,
   },
   tipItem: {
@@ -336,7 +342,7 @@ const styles = StyleSheet.create({
   tipText: {
     flex: 1,
     fontSize: 15,
-    color: Colors.darkGrey,
+    color: Palette.ink,
     lineHeight: 22,
   },
   goalsContainer: {
@@ -348,30 +354,30 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     paddingVertical: 8,
     borderRadius: 16,
-    backgroundColor: Colors.primary + '20',
+    backgroundColor: Palette.accent + '20',
   },
   goalText: {
     fontSize: 14,
     fontWeight: '600',
-    color: Colors.primary,
+    color: Palette.accent,
   },
   videoButton: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     gap: 8,
-    backgroundColor: Colors.primary,
+    backgroundColor: Palette.accent,
     padding: 16,
     borderRadius: 12,
   },
   videoButtonText: {
     fontSize: 16,
     fontWeight: '600',
-    color: Colors.white,
+    color: Palette.canvas,
   },
   errorText: {
     fontSize: 16,
-    color: Colors.mediumGrey,
+    color: Palette.inkMuted,
     textAlign: 'center',
     marginTop: 40,
   },
@@ -383,11 +389,11 @@ const styles = StyleSheet.create({
   muscleLabel: {
     fontSize: 15,
     fontWeight: '600',
-    color: Colors.darkGrey,
+    color: Palette.ink,
   },
   muscleValue: {
     fontSize: 15,
-    color: Colors.mediumGrey,
+    color: Palette.inkMuted,
     textTransform: 'capitalize' as const,
   },
   infoRow: {
@@ -398,12 +404,12 @@ const styles = StyleSheet.create({
   infoLabel: {
     fontSize: 15,
     fontWeight: '600',
-    color: Colors.darkGrey,
+    color: Palette.ink,
     marginRight: 8,
   },
   infoValue: {
     fontSize: 15,
-    color: Colors.mediumGrey,
+    color: Palette.inkMuted,
     textTransform: 'capitalize' as const,
   },
 });

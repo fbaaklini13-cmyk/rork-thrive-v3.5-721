@@ -1,6 +1,6 @@
 import { View, Text, StyleSheet, ScrollView, TextInput, TouchableOpacity, FlatList } from 'react-native';
 import { useState, useMemo } from 'react';
-import { Colors } from '@/constants/colors';
+import { Palette } from '@/constants/theme';
 import { Dumbbell, Search } from 'lucide-react-native';
 import { ALL_EXERCISES } from '@/mocks/full-exercise-library';
 import { router } from 'expo-router';
@@ -37,36 +37,13 @@ export default function ExerciseLibraryScreen() {
     return exercises;
   }, [searchQuery, selectedMuscle, selectedDifficulty]);
 
-  const getMuscleColor = (muscle: string) => {
-    const colors: Record<string, string> = {
-      'chest': '#FF6B6B',
-      'shoulders': '#4ECDC4',
-      'back': '#FFEAA7',
-      'biceps': '#96CEB4',
-      'triceps': '#45B7D1',
-      'legs': '#74B9FF',
-      'quadriceps': '#74B9FF',
-      'hamstrings': '#A29BFE',
-      'glutes': '#FD79A8',
-      'calves': '#FDCB6E',
-      'abdominals': '#DFE6E9',
-      'abs': '#DFE6E9',
-      'forearms': '#6C5CE7',
-      'traps': '#FFA07A',
-      'lats': '#FFD700',
-      'middle back': '#FAE3D9',
-      'lower back': '#FFB6B9',
-    };
-    return colors[muscle.toLowerCase()] || '#A0A0A0';
-  };
-
   const getDifficultyColor = (difficulty: string) => {
     switch (difficulty) {
-      case 'beginner': return '#4CAF50';
-      case 'intermediate': return '#FF9800';
-      case 'advanced': return '#F44336';
-      case 'expert': return '#9C27B0';
-      default: return '#757575';
+      case 'beginner': return Palette.good;
+      case 'intermediate': return Palette.warn;
+      case 'advanced': return Palette.bad;
+      case 'expert': return Palette.bad;
+      default: return Palette.inkMuted;
     }
   };
 
@@ -74,13 +51,13 @@ export default function ExerciseLibraryScreen() {
     <View style={styles.container}>
       {/* Search Bar */}
       <View style={styles.searchContainer}>
-        <Search size={20} color="#666" style={styles.searchIcon} />
+        <Search size={20} color={Palette.inkMuted} style={styles.searchIcon} />
         <TextInput
           style={styles.searchInput}
           placeholder="Search exercises..."
           value={searchQuery}
           onChangeText={setSearchQuery}
-          placeholderTextColor="#999"
+          placeholderTextColor={Palette.inkFaint}
         />
       </View>
 
@@ -137,12 +114,12 @@ export default function ExerciseLibraryScreen() {
             })}
           >
             <View style={styles.exerciseIconContainer}>
-              <Dumbbell size={24} color={Colors.primary} />
+              <Dumbbell size={24} color={Palette.accent} />
             </View>
             <View style={styles.exerciseInfo}>
               <Text style={styles.exerciseName}>{item.name}</Text>
               <View style={styles.exerciseMeta}>
-                <View style={[styles.muscleBadge, { backgroundColor: getMuscleColor(item.primaryMuscle) }]}>
+                <View style={styles.muscleBadge}>
                   <Text style={styles.muscleBadgeText}>{item.primaryMuscle}</Text>
                 </View>
                 <View style={[styles.difficultyBadge, { backgroundColor: getDifficultyColor(item.difficulty) }]}>
@@ -160,137 +137,47 @@ export default function ExerciseLibraryScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#f5f5f5',
-  },
+  container: { flex: 1, backgroundColor: Palette.canvas },
   searchContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#fff',
-    margin: 16,
-    marginBottom: 8,
-    paddingHorizontal: 16,
-    borderRadius: 12,
-    elevation: 2,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
+    flexDirection: 'row', alignItems: 'center', backgroundColor: Palette.canvasRaised,
+    margin: 16, marginBottom: 8, paddingHorizontal: 16, borderRadius: 12,
+    borderWidth: StyleSheet.hairlineWidth, borderColor: Palette.line,
   },
-  searchIcon: {
-    marginRight: 8,
-  },
-  searchInput: {
-    flex: 1,
-    paddingVertical: 14,
-    fontSize: 16,
-    color: '#333',
-  },
-  filterContainer: {
-    paddingHorizontal: 16,
-    paddingBottom: 12,
-    maxHeight: 50,
-  },
+  searchIcon: { marginRight: 8 },
+  searchInput: { flex: 1, paddingVertical: 14, fontSize: 16, color: Palette.ink },
+  // flexGrow/flexShrink 0: the FlatList below takes the remaining height, and without
+  // these the pill row was squeezed to ~30px and the pills cut in half (seen on web, 24 Sep).
+  filterContainer: { paddingHorizontal: 16, paddingBottom: 12, flexGrow: 0, flexShrink: 0 },
   filterPill: {
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 20,
-    backgroundColor: '#fff',
-    marginRight: 8,
-    borderWidth: 1,
-    borderColor: '#ddd',
+    paddingHorizontal: 16, paddingVertical: 8, borderRadius: 20, backgroundColor: Palette.canvasRaised,
+    marginRight: 8, borderWidth: 1, borderColor: Palette.lineStrong,
   },
-  filterPillActive: {
-    backgroundColor: Colors.primary,
-    borderColor: Colors.primary,
-  },
-  filterPillText: {
-    fontSize: 14,
-    color: '#666',
-    fontWeight: '500',
-  },
-  filterPillTextActive: {
-    color: '#fff',
-  },
+  filterPillActive: { backgroundColor: Palette.accent, borderColor: Palette.accent },
+  filterPillText: { fontSize: 14, color: Palette.inkMuted, fontWeight: '500' },
+  filterPillTextActive: { color: Palette.canvas },
 
-  resultsHeader: {
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-  },
-  resultsText: {
-    fontSize: 14,
-    color: '#666',
-    fontWeight: '600',
-  },
-  listContent: {
-    paddingHorizontal: 16,
-    paddingBottom: 16,
-  },
+  resultsHeader: { paddingHorizontal: 16, paddingVertical: 8 },
+  resultsText: { fontSize: 14, color: Palette.inkMuted, fontWeight: '600' },
+  listContent: { paddingHorizontal: 16, paddingBottom: 16 },
   exerciseCard: {
-    flexDirection: 'row',
-    backgroundColor: '#fff',
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 12,
-    elevation: 2,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
+    flexDirection: 'row', backgroundColor: Palette.canvasRaised, borderRadius: 12, padding: 16, marginBottom: 12,
+    borderWidth: StyleSheet.hairlineWidth, borderColor: Palette.line,
   },
   exerciseIconContainer: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
-    backgroundColor: '#f0f0f0',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: 12,
+    width: 50, height: 50, borderRadius: 25, backgroundColor: Palette.canvas,
+    justifyContent: 'center', alignItems: 'center', marginRight: 12,
   },
-  exerciseInfo: {
-    flex: 1,
-  },
-  exerciseName: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#333',
-    marginBottom: 8,
-  },
-  exerciseMeta: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    flexWrap: 'wrap',
-  },
+  exerciseInfo: { flex: 1 },
+  exerciseName: { fontSize: 16, fontWeight: '600', color: Palette.ink, marginBottom: 8 },
+  exerciseMeta: { flexDirection: 'row', alignItems: 'center', flexWrap: 'wrap' },
+  // Muscle chips were pastel fills under white text (white on #FFEAA7 is ~1.1:1).
+  // One neutral chip now; colour is kept for difficulty, where it carries meaning.
   muscleBadge: {
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 12,
-    marginRight: 6,
-    marginBottom: 4,
+    paddingHorizontal: 8, paddingVertical: 4, borderRadius: 12, marginRight: 6, marginBottom: 4,
+    backgroundColor: Palette.canvas, borderWidth: StyleSheet.hairlineWidth, borderColor: Palette.lineStrong,
   },
-  muscleBadgeText: {
-    fontSize: 11,
-    color: '#fff',
-    fontWeight: '600',
-    textTransform: 'capitalize',
-  },
-  difficultyBadge: {
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 12,
-    marginRight: 6,
-    marginBottom: 4,
-  },
-  difficultyBadgeText: {
-    fontSize: 11,
-    color: '#fff',
-    fontWeight: '600',
-    textTransform: 'capitalize',
-  },
-  equipmentText: {
-    fontSize: 12,
-    color: '#666',
-    fontStyle: 'italic',
-  },
+  muscleBadgeText: { fontSize: 11, color: Palette.inkMuted, fontWeight: '600', textTransform: 'capitalize' },
+  difficultyBadge: { paddingHorizontal: 8, paddingVertical: 4, borderRadius: 12, marginRight: 6, marginBottom: 4 },
+  difficultyBadgeText: { fontSize: 11, color: Palette.canvas, fontWeight: '700', textTransform: 'capitalize' },
+  equipmentText: { fontSize: 12, color: Palette.inkMuted, fontStyle: 'italic' },
 });
