@@ -24,6 +24,7 @@ import MuscleHeatmap from '@/components/MuscleHeatmap';
 import StrengthBenchmark from '@/components/StrengthBenchmark';
 import MotivationalBanner from '@/components/MotivationalBanner';
 import DataExportModal from '@/components/DataExportModal';
+import { groupSessions } from '@/lib/workout-sessions';
 
 type TimeFilter = '3M' | '6M' | '1Y' | 'ALL';
 
@@ -66,53 +67,42 @@ export default function ProgressScreen() {
     return workoutLogs.filter(log => new Date(log.date) >= filterDate);
   }, [workoutLogs, timeFilter]);
 
-  const weeklyStats = useMemo(() => {
-    const stats = {
-      week: getCurrentWeek(),
-      workoutCount: 0,
-      totalTime: 0,
-      totalVolume: 0,
-    };
+  // One WorkoutLog is one EXERCISE; these stats are about workouts, so they count
+  // sessions (lib/workout-sessions.ts). Before 24 Sep a six-exercise workout read
+  // as "6 workouts" and "9.0h" -- the time was the log count x 1.5h, a number the
+  // app never measured. Durations are not stored, so the time stat is now sets done.
+  const sessions = useMemo(() => groupSessions(filteredWorkouts), [filteredWorkouts]);
 
+  const weeklyStats = useMemo(() => {
     const oneWeekAgo = new Date();
     oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
-
-    filteredWorkouts.forEach(log => {
-      if (new Date(log.date) >= oneWeekAgo) {
-        stats.workoutCount++;
-        
-        log.sets.forEach(set => {
-          if (set.completed) {
-            stats.totalVolume += set.weight * set.reps;
-          }
-        });
-      }
-    });
-
-    stats.totalTime = stats.workoutCount * 1.5;
-
-    return stats;
-  }, [filteredWorkouts]);
+    const floor = `${oneWeekAgo.getFullYear()}-${String(oneWeekAgo.getMonth() + 1).padStart(2, '0')}-${String(oneWeekAgo.getDate()).padStart(2, '0')}`;
+    const recent = sessions.filter(s => s.day >= floor);
+    return {
+      week: getCurrentWeek(),
+      workoutCount: recent.length,
+      completedSets: recent.reduce((n, s) => n + s.completedSets, 0),
+      totalVolume: recent.reduce((n, s) => n + s.volumeKg, 0),
+    };
+  }, [sessions]);
 
   const workoutsByWeek = useMemo(() => {
-    const weeks: { [key: string]: number } = {};
-    
-    filteredWorkouts.forEach(log => {
-      const date = new Date(log.date);
+    const weeks = new Map<string, { week: string; count: number }>();
+    sessions.forEach(s => {
+      const date = new Date(`${s.day}T12:00:00`);
       const year = date.getFullYear();
       const firstDayOfYear = new Date(year, 0, 1);
       const pastDaysOfYear = (date.getTime() - firstDayOfYear.getTime()) / 86400000;
       const week = Math.ceil((pastDaysOfYear + firstDayOfYear.getDay() + 1) / 7);
-      const key = `W${week}`;
-      weeks[key] = (weeks[key] || 0) + 1;
+      const key = `${year}-W${week}`;
+      const entry = weeks.get(key) ?? { week: `W${week}`, count: 0 };
+      entry.count += 1;
+      weeks.set(key, entry);
     });
+    return [...weeks.values()];
+  }, [sessions]);
 
-    return Object.entries(weeks).map(([week, count]) => ({ week, count }));
-  }, [filteredWorkouts]);
-
-  const totalWorkoutDuration = useMemo(() => {
-    return filteredWorkouts.length * 1.5;
-  }, [filteredWorkouts]);
+  const totalCompletedSets = useMemo(() => sessions.reduce((n, s) => n + s.completedSets, 0), [sessions]);
 
   const totalVolume = useMemo(() => {
     return filteredWorkouts.reduce((total, log) => {
@@ -165,8 +155,8 @@ export default function ProgressScreen() {
           
           <View style={styles.summaryItem}>
             <Activity color={Colors.primary} size={20} />
-            <Text style={styles.summaryLabel}>Total Time</Text>
-            <Text style={styles.summaryValue}>{weeklyStats.totalTime.toFixed(1)}h</Text>
+            <Text style={styles.summaryLabel}>Sets done</Text>
+            <Text style={styles.summaryValue}>{weeklyStats.completedSets}</Text>
           </View>
           
           <View style={styles.summaryDivider} />
@@ -210,14 +200,14 @@ export default function ProgressScreen() {
         <View style={styles.overviewGrid}>
           <View style={styles.overviewCard}>
             <Dumbbell color={Colors.primary} size={28} />
-            <Text style={styles.overviewValue}>{filteredWorkouts.length}</Text>
+            <Text style={styles.overviewValue}>{sessions.length}</Text>
             <Text style={styles.overviewLabel}>Total Workouts</Text>
           </View>
           
           <View style={styles.overviewCard}>
             <Activity color={Colors.secondary} size={28} />
-            <Text style={styles.overviewValue}>{totalWorkoutDuration.toFixed(1)}h</Text>
-            <Text style={styles.overviewLabel}>Training Time</Text>
+            <Text style={styles.overviewValue}>{totalCompletedSets}</Text>
+            <Text style={styles.overviewLabel}>Sets Done</Text>
           </View>
           
           <View style={styles.overviewCard}>

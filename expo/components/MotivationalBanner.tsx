@@ -1,7 +1,8 @@
 import React, { useMemo } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { TrendingUp, Award, Zap, Target, Flame } from 'lucide-react-native';
-import { Colors } from '@/constants/colors';
+import { Palette, Radius, Space, Type } from '@/constants/theme';
+import { sessionsSince } from '@/lib/workout-sessions';
 import { useUserProfile } from '@/hooks/user-profile-store';
 
 export default function MotivationalBanner() {
@@ -10,78 +11,70 @@ export default function MotivationalBanner() {
   const banner = useMemo(() => {
     const now = new Date();
     const oneWeekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
-    const recentWorkouts = workoutLogs.filter(log => new Date(log.date) >= oneWeekAgo);
+    // Sessions, not logs: one log is one exercise (lib/workout-sessions.ts).
+    const recentWorkouts = sessionsSince(workoutLogs, oneWeekAgo);
 
     const streak = calculateStreak(workoutLogs);
-    const weeklyVolume = recentWorkouts.reduce((total, log) =>
-      total + log.sets.reduce((setTotal, set) =>
-        setTotal + (set.completed ? set.weight * set.reps : 0), 0
-      ), 0
-    );
+    const weeklyVolume = recentWorkouts.reduce((total, s) => total + s.volumeKg, 0);
 
     if (streak >= 7) {
       return {
         icon: Flame,
-        color: Colors.warning,
+        color: Palette.warn,
         title: `${streak} Day Streak! 🔥`,
         message: 'You\'re on fire! Keep the momentum going!',
-        bgColor: '#FFF3E0',
       };
     }
 
     if (recentWorkouts.length >= 5) {
       return {
         icon: TrendingUp,
-        color: Colors.success,
-        title: 'Top 5% This Week! 💪',
-        message: `${recentWorkouts.length} workouts completed. You're crushing it!`,
-        bgColor: '#E8F5E9',
+        color: Palette.good,
+        // Was "Top 5% This Week!": a percentile with no population behind it.
+        title: `${recentWorkouts.length} workouts this week 💪`,
+        message: `That's a strong week. Keep it going!`,
       };
     }
 
     if (achievements.length >= 5) {
       return {
         icon: Award,
-        color: Colors.primary,
+        color: Palette.accent,
         title: 'Achievement Hunter! 🏆',
         message: `${achievements.length} achievements unlocked. Amazing progress!`,
-        bgColor: '#E3F2FD',
       };
     }
 
     if (weeklyVolume > 50000) {
       return {
         icon: Zap,
-        color: Colors.secondary,
+        color: Palette.accent,
         title: 'Volume Beast! ⚡',
         message: `${(weeklyVolume / 1000).toFixed(0)}K kg moved this week!`,
-        bgColor: '#FFF8E1',
       };
     }
 
     if (recentWorkouts.length > 0) {
       return {
         icon: Target,
-        color: Colors.primary,
+        color: Palette.accent,
         title: 'Keep Going! 🎯',
         message: `${recentWorkouts.length} workout${recentWorkouts.length > 1 ? 's' : ''} this week. You got this!`,
-        bgColor: '#F3E5F5',
       };
     }
 
     return {
       icon: Zap,
-      color: Colors.mediumGrey,
+      color: Palette.inkMuted,
       title: 'Ready to Start? 💪',
       message: 'Begin your fitness journey today!',
-      bgColor: Colors.lightGrey,
     };
   }, [workoutLogs, achievements]);
 
   const Icon = banner.icon;
 
   return (
-    <View style={[styles.container, { backgroundColor: banner.bgColor }]}>
+    <View style={styles.container}>
       <Icon color={banner.color} size={32} />
       <View style={styles.textContainer}>
         <Text style={styles.title}>{banner.title}</Text>
@@ -125,23 +118,25 @@ const styles = StyleSheet.create({
   container: {
     flexDirection: 'row',
     alignItems: 'center',
-    padding: 16,
-    borderRadius: 16,
-    marginHorizontal: 20,
-    marginVertical: 12,
-    gap: 12,
+    padding: Space.lg,
+    borderRadius: Radius.lg,
+    marginHorizontal: Space.xl,
+    marginVertical: Space.md,
+    gap: Space.md,
+    backgroundColor: Palette.canvasRaised,
+    borderWidth: 1,
+    borderColor: Palette.line,
   },
   textContainer: {
     flex: 1,
   },
   title: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: Colors.darkGrey,
-    marginBottom: 4,
+    ...Type.bodyStrong,
+    color: Palette.ink,
+    marginBottom: Space.xs,
   },
   message: {
-    fontSize: 14,
-    color: Colors.mediumGrey,
+    ...Type.caption,
+    color: Palette.inkMuted,
   },
 });

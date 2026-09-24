@@ -109,7 +109,7 @@ export default function DataExportModal({ visible, onClose }: DataExportModalPro
                 <View style={styles.exportInfo}>
                   <Text style={styles.exportTitle}>Workout Logs</Text>
                   <Text style={styles.exportSubtitle}>
-                    {workoutLogs.length} workouts • CSV format
+                    {workoutLogs.length} exercise logs • CSV format
                   </Text>
                 </View>
               </TouchableOpacity>
