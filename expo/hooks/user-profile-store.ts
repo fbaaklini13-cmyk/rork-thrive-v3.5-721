@@ -6,6 +6,7 @@ import * as Linking from 'expo-linking';
 import type { UserProfile, NutritionEntry, WorkoutPlan, ChatMessage, WorkoutLog, WeeklyCheckIn, BodyScan, Recipe, BodyMeasurement, ProgressPhoto, Achievement } from '@/types/user';
 import type { AuthChangeEvent, Session } from '@supabase/supabase-js';
 import { supabase } from '@/lib/supabase';
+import { deleteAccount as runDeleteAccount, type DeleteAccountResult } from '@/lib/delete-account';
 
 const STORAGE_KEYS = {
   PROFILE: 'user_profile',
@@ -582,6 +583,26 @@ export const [UserProfileProvider, useUserProfile] = createContextHook(() => {
     }
   };
 
+  // In-app account deletion (App Review 5.1.1(v)). Server first; see lib/delete-account.ts.
+  const deleteAccount = async (): Promise<DeleteAccountResult> => {
+    if (!supabase) return { ok: false, reason: 'Accounts are not available in this build.' };
+    const result = await runDeleteAccount(userId, {
+      invokeServerDelete: async () => {
+        const { error } = await supabase.functions.invoke('delete-account', { method: 'POST' });
+        return { error: error ? String(error.message ?? error) : null };
+      },
+      getAllKeys: () => AsyncStorage.getAllKeys(),
+      multiRemove: (keys) => AsyncStorage.multiRemove(keys),
+      signOutLocal: async () => { await supabase.auth.signOut({ scope: 'local' }); },
+    });
+    if (result.ok) {
+      setIsAuthenticated(false);
+      setUserId(null);
+      clearUserData();
+    }
+    return result;
+  };
+
   const signInWithPhone = async (phone: string, password: string) => {
     try {
       const { data, error } = await supabase.auth.signInWithPassword({
@@ -786,6 +807,7 @@ export const [UserProfileProvider, useUserProfile] = createContextHook(() => {
     signIn,
     signUp,
     signOut,
+    deleteAccount,
     signInWithPhone,
     signUpWithPhone,
     signInWithOAuth,

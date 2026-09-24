@@ -41,10 +41,12 @@ export default function ProfileScreen() {
     cancelPremium,
     subscribeToPremium,
     signOut,
+    deleteAccount,
   } = useUserProfile();
 
   const [showEditGoals, setShowEditGoals] = useState(false);
   const [showPremiumModal, setShowPremiumModal] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
   const handleToggleAI = async (value: boolean) => {
     await toggleAI(value);
@@ -91,6 +93,32 @@ export default function ProfileScreen() {
   };
 
 
+
+  // App Review 5.1.1(v): deletion, not deactivation, reachable from inside the app.
+  const handleDeleteAccount = () => {
+    if (deleting) return;
+    Alert.alert(
+      'Delete account?',
+      'This permanently deletes your Thrive account and the data stored with it, and removes this account\'s data from this phone. It cannot be undone.',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Delete account',
+          style: 'destructive',
+          onPress: async () => {
+            setDeleting(true);
+            const result = await deleteAccount();
+            setDeleting(false);
+            if (result.ok) {
+              router.replace('/(auth)/sign-in');
+            } else {
+              Alert.alert('Account not deleted', result.reason);
+            }
+          },
+        },
+      ]
+    );
+  };
 
   const bmi = calculateBMI();
   const dailyCalories = calculateDailyCalories();
@@ -354,6 +382,15 @@ export default function ProfileScreen() {
           <LogOut color={Palette.bad} size={20} />
           <Text style={styles.signOutText}>Sign Out</Text>
         </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.deleteAccountButton}
+          onPress={handleDeleteAccount}
+          disabled={deleting}
+          accessibilityRole="button"
+          accessibilityLabel="Delete account"
+        >
+          <Text style={styles.deleteAccountText}>{deleting ? 'Deleting…' : 'Delete account'}</Text>
+        </TouchableOpacity>
       </View>
       </Enter>
 
@@ -481,6 +518,8 @@ const styles = StyleSheet.create({
     borderRadius: Radius.pill, borderWidth: 1, borderColor: Palette.lineStrong,
   },
   signOutText: { ...Type.bodyStrong, color: Palette.bad },
+  deleteAccountButton: { alignItems: 'center', marginTop: Space.md, paddingVertical: Space.md },
+  deleteAccountText: { ...Type.caption, color: Palette.inkMuted, textDecorationLine: 'underline' },
 
   footerSpace: { height: Space.xxxl },
 });
