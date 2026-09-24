@@ -59,7 +59,7 @@
     "superjson": "^2.2.2",
     "zod": "^4.1.12",
     "zustand": "^5.0.2",
-    "@rork-ai/toolkit-sdk": "latest"
+    "@rork-ai/toolkit-sdk": "0.3.3"
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",
@@ -69,5 +69,8 @@
     "eslint-config-expo": "~10.0.0",
     "typescript": "~5.9.2"
   },
-  "private": true
+  "private": true,
+  "overrides": {
+    "expo-location": "~19.0.7"
+  }
 }
