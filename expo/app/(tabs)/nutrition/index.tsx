@@ -19,6 +19,7 @@ import { AIService } from '@/services/ai-service';
 import type { NutritionEntry } from '@/types/user';
 import { Palette, Radius, Space, Type } from '@/constants/theme';
 import Enter from '@/components/Enter';
+import { useAIConsent } from '@/components/AIConsentProvider';
 
 const MEAL_TYPES = [
   { id: 'breakfast', label: 'Breakfast', icon: Coffee },
@@ -29,6 +30,7 @@ const MEAL_TYPES = [
 
 export default function NutritionScreen() {
   const { profile, nutritionEntries, addNutritionEntry, calculateDailyCalories, calculateWeeksToTarget } = useUserProfile();
+  const requestAIConsent = useAIConsent();
   const [showAddMeal, setShowAddMeal] = useState<boolean>(false);
   const [selectedMeal, setSelectedMeal] = useState<NutritionEntry['meal']>('breakfast');
   const [mealDescription, setMealDescription] = useState<string>('');
@@ -119,7 +121,8 @@ export default function NutritionScreen() {
       photoUri: pickedPhotoUri,
     };
 
-    if (profile.aiEnabled) {
+    // aiEnabled alone predates any disclosure; analysis also needs recorded consent.
+    if (profile.aiEnabled && (await requestAIConsent())) {
       setIsAnalyzing(true);
       try {
         let analysis;
@@ -160,7 +163,7 @@ export default function NutritionScreen() {
     setPickedPhotoUri(undefined);
     setPickedPhotoBase64(undefined);
     setShowAddMeal(false);
-  }, [mealDescription, pickedPhotoUri, pickedPhotoBase64, profile.aiEnabled, selectedMeal, today, addNutritionEntry, profile, calculateDailyCalories]);
+  }, [mealDescription, pickedPhotoUri, pickedPhotoBase64, profile.aiEnabled, selectedMeal, today, addNutritionEntry, profile, calculateDailyCalories, requestAIConsent]);
 
   return (
     <SafeAreaView edges={['top']} style={styles.safe}>

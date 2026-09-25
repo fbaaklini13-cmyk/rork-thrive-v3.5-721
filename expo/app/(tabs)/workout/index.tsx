@@ -35,6 +35,7 @@ import WorkoutCompletionSummary from '@/components/WorkoutCompletionSummary';
 import MotivationalBanner from '@/components/MotivationalBanner';
 import AchievementBadge from '@/components/AchievementBadge';
 import { countSessions, nextDayIndex } from '@/lib/workout-sessions';
+import { useAIConsent } from '@/components/AIConsentProvider';
 
 /**
  * Workout tab, Option C (decided 24 Sep): one screen that opens on TODAY'S SESSION --
@@ -69,6 +70,7 @@ function ListRow({ icon: Icon, title, description, onPress, last }: {
 export default function WorkoutScreen() {
   const router = useRouter();
   const { workoutPlans, workoutLogs, profile, addWorkoutPlan, replaceExerciseInPlan, achievements } = useUserProfile();
+  const requestAIConsent = useAIConsent();
   const [showAIGenerator, setShowAIGenerator] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
   const [fitnessGoals, setFitnessGoals] = useState('');
@@ -107,6 +109,9 @@ export default function WorkoutScreen() {
       Alert.alert('Enter Goals', 'Please enter your fitness goals');
       return;
     }
+    // 25/26 Sep: this sent goals, equipment and activity level to the AI service with
+    // the AI switch off -- it never checked it. Nothing leaves the phone without consent.
+    if (!(await requestAIConsent())) return;
 
     setIsGenerating(true);
     try {

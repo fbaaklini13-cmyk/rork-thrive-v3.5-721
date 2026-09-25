@@ -6,6 +6,7 @@ import React, { useEffect, useRef } from "react";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { UserProfileProvider } from "@/hooks/user-profile-store";
 import { HealthDevicesProvider } from "@/hooks/use-health-devices";
+import { AIConsentProvider } from "@/components/AIConsentProvider";
 import { trpc, trpcClient } from "@/lib/trpc";
 import { whoopService } from "@/services/whoop-service";
 import { garminService } from "@/services/garmin-service";
@@ -114,9 +115,11 @@ export default function RootLayout() {
       <QueryClientProvider client={queryClient}>
         <UserProfileProvider>
           <HealthDevicesProvider>
-            <GestureHandlerRootView>
-              <RootLayoutNav />
-            </GestureHandlerRootView>
+            <AIConsentProvider>
+              <GestureHandlerRootView>
+                <RootLayoutNav />
+              </GestureHandlerRootView>
+            </AIConsentProvider>
           </HealthDevicesProvider>
         </UserProfileProvider>
       </QueryClientProvider>

@@ -12,20 +12,24 @@ import { Pill, Clock, Info, RefreshCw } from 'lucide-react-native';
 import { Palette } from '@/constants/theme';
 import { generateSupplementPlan } from '@/services/ai-service';
 import { useUserProfile } from '@/hooks/user-profile-store';
+import { useAIConsent } from '@/components/AIConsentProvider';
 
 export default function SupplementsScreen() {
   const { profile } = useUserProfile();
+  const requestAIConsent = useAIConsent();
   const [supplementPlan, setSupplementPlan] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   const loadSupplementPlan = async () => {
+    if (!(await requestAIConsent())) {
+      setError('AI features are off. Allow them to get a supplement plan (Profile → AI Assistant).');
+      return;
+    }
     setLoading(true);
     setError(null);
     try {
-      console.log('Loading supplement plan...');
       const plan = await generateSupplementPlan(profile);
-      console.log('Supplement plan loaded:', plan);
       setSupplementPlan(plan);
     } catch (error: any) {
       console.error('Failed to generate supplement plan:', error);

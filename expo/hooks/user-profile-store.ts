@@ -8,6 +8,7 @@ import type { AuthChangeEvent, Session } from '@supabase/supabase-js';
 import { supabase } from '@/lib/supabase';
 import { deleteAccount as runDeleteAccount, type DeleteAccountResult } from '@/lib/delete-account';
 import { signInWithAppleNative, type AppleSignInResult } from '@/lib/apple-sign-in';
+import { consentRevoke } from '@/lib/ai-consent';
 import * as AppleAuthentication from 'expo-apple-authentication';
 import * as Crypto from 'expo-crypto';
 
@@ -189,8 +190,10 @@ export const [UserProfileProvider, useUserProfile] = createContextHook(() => {
   };
 
   // Toggle AI
+  // Only ever used to turn AI OFF: turning it on must go through the consent screen
+  // (components/AIConsentProvider), which records a versioned consent.
   const toggleAI = async (enabled: boolean) => {
-    await updateProfile({ aiEnabled: enabled });
+    await updateProfile(enabled ? { aiEnabled: true } : consentRevoke());
   };
 
   // Complete onboarding

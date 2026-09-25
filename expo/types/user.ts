@@ -28,6 +28,9 @@ export interface UserProfile {
   
   // AI Settings
   aiEnabled: boolean;
+  // Explicit consent to send data to the outside AI service (App Review 5.1.2(i)).
+  // aiEnabled alone is not consent: the switch existed before any disclosure did.
+  aiConsent?: { version: number; grantedAt: string };
   onboardingCompleted: boolean;
   
   // Premium Subscription

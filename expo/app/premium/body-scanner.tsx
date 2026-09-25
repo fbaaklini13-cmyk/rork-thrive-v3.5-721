@@ -14,13 +14,17 @@ import { Camera, Upload, Scan } from 'lucide-react-native';
 import * as ImagePicker from 'expo-image-picker';
 import { Palette } from '@/constants/theme';
 import { analyzeBodyImage } from '@/services/ai-service';
+import { useAIConsent } from '@/components/AIConsentProvider';
 
 export default function BodyScannerScreen() {
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [analysis, setAnalysis] = useState<any>(null);
   const [loading, setLoading] = useState(false);
+  const requestAIConsent = useAIConsent();
 
   const pickImage = async (useCamera: boolean) => {
+    // Ask before a body photo is even taken: it is the most sensitive thing the app sends.
+    if (!(await requestAIConsent())) return;
     const result = await (useCamera
       ? ImagePicker.launchCameraAsync({
           mediaTypes: ImagePicker.MediaTypeOptions.Images,

@@ -14,9 +14,11 @@ import { ChefHat, Clock, Flame } from 'lucide-react-native';
 import { Palette } from '@/constants/theme';
 import { generateRecipe } from '@/services/ai-service';
 import { useUserProfile } from '@/hooks/user-profile-store';
+import { useAIConsent } from '@/components/AIConsentProvider';
 
 export default function RecipesScreen() {
   const { profile } = useUserProfile();
+  const requestAIConsent = useAIConsent();
   const [preferences, setPreferences] = useState({
     mealType: 'lunch',
     calories: '',
@@ -29,6 +31,7 @@ export default function RecipesScreen() {
   const cuisines = ['Italian', 'Asian', 'Mexican', 'Mediterranean', 'American'];
 
   const handleGenerateRecipe = async () => {
+    if (!(await requestAIConsent())) return;
     setLoading(true);
     try {
       const result = await generateRecipe({

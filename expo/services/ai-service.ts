@@ -1,6 +1,7 @@
 import type { ChatMessage, WorkoutPlan, UserProfile } from '@/types/user';
 import { generateObject, generateText } from '@rork-ai/toolkit-sdk';
 import { z } from 'zod';
+import { requireAIConsent } from '@/lib/ai-consent';
 
 export class AIService {
   static async generateExerciseAlternatives(
@@ -9,6 +10,7 @@ export class AIService {
     equipment: string[],
     userProfile: any
   ): Promise<any[]> {
+    requireAIConsent(); // before anything leaves the phone -- see lib/ai-consent.ts
     try {
       const prompt = `Generate 5 scientifically-effective alternative exercises for "${exerciseName}" that target the same muscle groups: ${muscleGroups.join(', ')}.
 
@@ -81,6 +83,7 @@ For each alternative, provide exercises that:
   }
 
   static async chat(messages: ChatMessage[], userContext: any): Promise<string> {
+    requireAIConsent(); // before anything leaves the phone -- see lib/ai-consent.ts
     try {
       const systemPrompt = `System: You are a ${userContext?.userType === 'student' ? 'study assistant' : 'productivity coach'} helping a user with:
 - Stress level: ${userContext?.stressLevel}
@@ -111,6 +114,7 @@ Provide helpful, personalized advice based on their profile.`;
     daysPerWeek: number,
     userProfile: any,
   ): Promise<WorkoutPlan> {
+    requireAIConsent(); // before anything leaves the phone -- see lib/ai-consent.ts
     const equipmentStr = equipment.length > 0 ? equipment.join(', ') : 'bodyweight exercises only';
     
     console.log('Generating workout plan...');
@@ -189,6 +193,7 @@ Create ${daysPerWeek} days with 4-6 exercises each. Include proper form cues in 
     meal: string,
     userProfile: any,
   ): Promise<{ insights: string; healthierAlternatives: string[]; calories?: number; protein?: number; carbs?: number; fat?: number }> {
+    requireAIConsent(); // before anything leaves the phone -- see lib/ai-consent.ts
     try {
       const dailyCalories = userProfile?.dailyCalories ?? 2000;
       const prompt = `Analyze this meal: "${meal}"\n\nUser profile:\n- Daily calorie target: ${dailyCalories}\n- Dietary preferences: ${userProfile?.dietaryPreferences?.join(', ') || 'none'}\n- Allergies: ${userProfile?.allergies?.join(', ') || 'none'}\n- Target weight: ${userProfile?.targetWeight ? userProfile.targetWeight + ' kg' : 'not specified'}\n- Weekly goal: ${userProfile?.weeklyWeightGoal ? userProfile.weeklyWeightGoal + ' kg/week' : 'not specified'}\n\nProvide detailed nutritional breakdown with specific macronutrient values. Be specific with numbers. Estimate based on typical portion sizes.`;
@@ -227,6 +232,7 @@ Create ${daysPerWeek} days with 4-6 exercises each. Include proper form cues in 
     base64Image: string,
     userProfile: any,
   ): Promise<{ insights: string; healthierAlternatives: string[]; calories?: number; protein?: number; carbs?: number; fat?: number }> {
+    requireAIConsent(); // before anything leaves the phone -- see lib/ai-consent.ts
     try {
       const dailyCalories = userProfile?.dailyCalories ?? 2000;
       const instruction = `Analyze the food in this image.\n\nUser profile:\n- Daily calorie target: ${dailyCalories}\n- Dietary preferences: ${userProfile?.dietaryPreferences?.join(', ') || 'none'}\n- Allergies: ${userProfile?.allergies?.join(', ') || 'none'}\n- Target weight: ${userProfile?.targetWeight ? userProfile.targetWeight + ' kg' : 'not specified'}\n- Weekly goal: ${userProfile?.weeklyWeightGoal ? userProfile.weeklyWeightGoal + ' kg/week' : 'not specified'}\n\nProvide detailed nutritional breakdown with specific macronutrient values. Be specific with numbers. Estimate based on typical portion sizes shown in the image.`;
@@ -269,8 +275,8 @@ Create ${daysPerWeek} days with 4-6 exercises each. Include proper form cues in 
 }
 
 export async function generateSupplementPlan(profile: UserProfile): Promise<any> {
+  requireAIConsent(); // before anything leaves the phone -- see lib/ai-consent.ts
   try {
-    console.log('Generating supplement plan for profile:', profile);
 
     const prompt = `Generate a personalized supplement plan for:
     - Age: ${profile.age}
@@ -322,6 +328,7 @@ export async function generateSupplementPlan(profile: UserProfile): Promise<any>
 }
 
 export async function analyzeBodyImage(imageUri: string): Promise<any> {
+  requireAIConsent(); // before anything leaves the phone -- see lib/ai-consent.ts
   try {
     const response = await fetch(imageUri);
     const blob = await response.blob();
@@ -387,6 +394,7 @@ For body fat estimation:
 }
 
 export async function generateRecipe(preferences: any): Promise<any> {
+  requireAIConsent(); // before anything leaves the phone -- see lib/ai-consent.ts
   try {
     const prompt = `Generate a healthy recipe that is:
     - Calories: ${preferences.calories || 'balanced'}

@@ -13,6 +13,7 @@ import {
 import { X, RefreshCw, Target, Clock, Dumbbell, Plus, Edit3 } from 'lucide-react-native';
 import { Palette } from '@/constants/theme';
 import { AIService } from '@/services/ai-service';
+import { hasAIConsent, requireAIConsent } from '@/lib/ai-consent';
 import { useUserProfile } from '@/hooks/user-profile-store';
 
 interface ExerciseReplacementModalProps {
@@ -57,8 +58,8 @@ export default function ExerciseReplacementModal({
     if (!exercise) return;
     
     // Check if AI is enabled, if not use fallback alternatives
-    if (!profile?.aiEnabled) {
-      // Provide some default alternatives when AI is disabled
+    if (!hasAIConsent(profile)) {
+      // No recorded AI consent: offline defaults, nothing sent
       const defaultAlternatives = [
         {
           name: "Dumbbell Variation",
@@ -138,8 +139,8 @@ export default function ExerciseReplacementModal({
   };
 
   const generateCustomExerciseDetails = async (exerciseName: string) => {
-    if (!profile?.aiEnabled) {
-      // Default values when AI is disabled
+    if (!hasAIConsent(profile)) {
+      // No recorded AI consent: defaults, nothing sent
       return {
         sets: '3',
         reps: '8-12',
@@ -148,6 +149,7 @@ export default function ExerciseReplacementModal({
     }
 
     try {
+      requireAIConsent(); // backstop: this is a direct call to the AI service
       const response = await fetch('https://toolkit.rork.com/text/llm/', {
         method: 'POST',
         headers: {

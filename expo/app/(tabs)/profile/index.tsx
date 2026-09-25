@@ -27,6 +27,8 @@ import { Palette, Radius, Space, Type } from '@/constants/theme';
 import Enter from '@/components/Enter';
 import EditGoalsModal from '@/components/EditGoalsModal';
 import PremiumModal from '@/components/PremiumModal';
+import { useAIConsent } from '@/components/AIConsentProvider';
+import { AI_SERVICE, hasAIConsent } from '@/lib/ai-consent';
 
 export default function ProfileScreen() {
   const router = useRouter();
@@ -45,11 +47,18 @@ export default function ProfileScreen() {
   } = useUserProfile();
 
   const [showEditGoals, setShowEditGoals] = useState(false);
+  const requestAIConsent = useAIConsent();
   const [showPremiumModal, setShowPremiumModal] = useState(false);
   const [deleting, setDeleting] = useState(false);
 
+  // Turning AI on goes through the disclosure (lib/ai-consent.ts); turning it off
+  // withdraws the recorded consent, so turning it back on asks again.
   const handleToggleAI = async (value: boolean) => {
-    await toggleAI(value);
+    if (value) {
+      if (!(await requestAIConsent())) return;
+    } else {
+      await toggleAI(false);
+    }
     if (value && !profile.onboardingCompleted) {
       Alert.alert(
         'Setup Required',
@@ -229,12 +238,14 @@ export default function ProfileScreen() {
             <View style={styles.settingText}>
               <Text style={styles.settingLabel}>AI Assistant</Text>
               <Text style={styles.settingDescription}>
-                Enable personalized insights and recommendations
+                {hasAIConsent(profile)
+                  ? `On: sends data to ${AI_SERVICE.name} when you use an AI feature`
+                  : 'Off: nothing is sent to an AI service'}
               </Text>
             </View>
           </View>
           <Switch
-            value={profile.aiEnabled}
+            value={hasAIConsent(profile)}
             onValueChange={handleToggleAI}
             trackColor={{ false: Palette.lineStrong, true: Palette.accent }}
             thumbColor={Palette.ink}
