@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   View,
   Text,
@@ -14,13 +14,36 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
-import { Mail, Lock, Eye, EyeOff, Chrome, Apple as AppleIcon } from 'lucide-react-native';
+import { Mail, Lock, Eye, EyeOff, Chrome } from 'lucide-react-native';
+import * as AppleAuthentication from 'expo-apple-authentication';
 import { Palette, Radius, Space, Type } from '@/constants/theme';
 import { useUserProfile } from '@/hooks/user-profile-store';
 
 export default function SignInScreen() {
   const router = useRouter();
-  const { signIn, signInWithOAuth } = useUserProfile();
+  const { signIn, signInWithOAuth, signInWithApple } = useUserProfile();
+  // Sign in with Apple is native-only (iOS 13+). Elsewhere the button is not shown:
+  // App Review guideline 4.8 applies to the iOS app, and Apple's web flow would need a
+  // Services ID and a rotating client secret that this setup deliberately avoids.
+  const [appleAvailable, setAppleAvailable] = useState(false);
+  useEffect(() => {
+    if (Platform.OS !== 'ios') return;
+    AppleAuthentication.isAvailableAsync().then(setAppleAvailable).catch(() => setAppleAvailable(false));
+  }, []);
+
+  const onAppleSignIn = async () => {
+    setLoading(true);
+    try {
+      const result = await signInWithApple();
+      if (result.ok) {
+        router.replace('/(tabs)/home');
+      } else if (!result.cancelled) {
+        Alert.alert('Sign in with Apple', result.reason);
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const [emailAddress, setEmailAddress] = useState('');
   const [password, setPassword] = useState('');
@@ -47,7 +70,7 @@ export default function SignInScreen() {
     }
   };
 
-  const onOAuthSignIn = async (provider: 'google' | 'apple') => {
+  const onOAuthSignIn = async (provider: 'google') => {
     setLoading(true);
     try {
       const success = await signInWithOAuth(provider);
@@ -148,6 +171,16 @@ export default function SignInScreen() {
               <View style={styles.divider} />
             </View>
 
+            {appleAvailable && (
+              <AppleAuthentication.AppleAuthenticationButton
+                buttonType={AppleAuthentication.AppleAuthenticationButtonType.SIGN_IN}
+                buttonStyle={AppleAuthentication.AppleAuthenticationButtonStyle.WHITE}
+                cornerRadius={Radius.md}
+                style={styles.appleButton}
+                onPress={onAppleSignIn}
+              />
+            )}
+
             <View style={styles.oauthContainer}>
               <TouchableOpacity
                 style={styles.oauthButton}
@@ -157,15 +190,6 @@ export default function SignInScreen() {
                 accessibilityLabel="Continue with Google"
               >
                 <Chrome size={24} color={Palette.ink} />
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={styles.oauthButton}
-                onPress={() => onOAuthSignIn('apple')}
-                disabled={loading}
-                accessibilityRole="button"
-                accessibilityLabel="Continue with Apple"
-              >
-                <AppleIcon size={24} color={Palette.ink} />
               </TouchableOpacity>
             </View>
 
@@ -311,6 +335,11 @@ const styles = StyleSheet.create({
     ...Type.caption,
     color: Palette.inkFaint,
     marginHorizontal: Space.md,
+  },
+  appleButton: {
+    width: '100%',
+    height: 52,
+    marginBottom: Space.md,
   },
   oauthContainer: {
     flexDirection: 'row',

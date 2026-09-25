@@ -7,6 +7,9 @@ import type { UserProfile, NutritionEntry, WorkoutPlan, ChatMessage, WorkoutLog,
 import type { AuthChangeEvent, Session } from '@supabase/supabase-js';
 import { supabase } from '@/lib/supabase';
 import { deleteAccount as runDeleteAccount, type DeleteAccountResult } from '@/lib/delete-account';
+import { signInWithAppleNative, type AppleSignInResult } from '@/lib/apple-sign-in';
+import * as AppleAuthentication from 'expo-apple-authentication';
+import * as Crypto from 'expo-crypto';
 
 const STORAGE_KEYS = {
   PROFILE: 'user_profile',
@@ -603,6 +606,30 @@ export const [UserProfileProvider, useUserProfile] = createContextHook(() => {
     return result;
   };
 
+  // Native Sign in with Apple (iOS only). See lib/apple-sign-in.ts.
+  const signInWithApple = async (): Promise<AppleSignInResult> => {
+    if (!supabase) return { ok: false, cancelled: false, reason: 'Accounts are not available in this build.' };
+    return signInWithAppleNative({
+      randomHex: (n) => Array.from(Crypto.getRandomBytes(n), (b) => b.toString(16).padStart(2, '0')).join(''),
+      sha256: (input) => Crypto.digestStringAsync(Crypto.CryptoDigestAlgorithm.SHA256, input),
+      appleSignIn: (hashedNonce) => AppleAuthentication.signInAsync({
+        requestedScopes: [
+          AppleAuthentication.AppleAuthenticationScope.FULL_NAME,
+          AppleAuthentication.AppleAuthenticationScope.EMAIL,
+        ],
+        nonce: hashedNonce,
+      }),
+      supabaseSignInWithIdToken: async (token, rawNonce) => {
+        const { error } = await supabase.auth.signInWithIdToken({ provider: 'apple', token, nonce: rawNonce });
+        return { error: error ? error.message : null };
+      },
+      supabaseSaveName: async (meta) => {
+        const { error } = await supabase.auth.updateUser({ data: meta });
+        if (error) throw error;
+      },
+    });
+  };
+
   const signInWithPhone = async (phone: string, password: string) => {
     try {
       const { data, error } = await supabase.auth.signInWithPassword({
@@ -808,6 +835,7 @@ export const [UserProfileProvider, useUserProfile] = createContextHook(() => {
     signUp,
     signOut,
     deleteAccount,
+    signInWithApple,
     signInWithPhone,
     signUpWithPhone,
     signInWithOAuth,
