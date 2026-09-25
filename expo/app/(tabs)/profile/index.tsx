@@ -29,6 +29,7 @@ import EditGoalsModal from '@/components/EditGoalsModal';
 import PremiumModal from '@/components/PremiumModal';
 import { useAIConsent } from '@/components/AIConsentProvider';
 import { AI_SERVICE, hasAIConsent } from '@/lib/ai-consent';
+import { SHOW_DEVICES } from '@/constants/features';
 
 export default function ProfileScreen() {
   const router = useRouter();
@@ -363,6 +364,7 @@ export default function ProfileScreen() {
         </Enter>
       )}
 
+      {SHOW_DEVICES && (
       <Enter order={4}>
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Devices & Data</Text>
@@ -383,6 +385,7 @@ export default function ProfileScreen() {
         </TouchableOpacity>
       </View>
       </Enter>
+      )}
 
       <Enter order={5}>
       <View style={styles.section}>

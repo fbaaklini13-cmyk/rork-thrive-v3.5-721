@@ -8,14 +8,21 @@ import {
   Alert,
   Platform,
 } from 'react-native';
-import { Stack } from 'expo-router';
+import { Redirect, Stack } from 'expo-router';
+import { SHOW_DEVICES } from '@/constants/features';
 import { RefreshCw } from 'lucide-react-native';
 import { useHealthDevices } from '@/hooks/use-health-devices';
 import { DeviceConnectionCard } from '@/components/DeviceConnectionCard';
 import { DeviceType } from '@/types/health';
 import { Palette } from '@/constants/theme';
 
+// A deep link must not reach the screen while it is switched off (see constants/features).
 export default function DevicesScreen() {
+  if (!SHOW_DEVICES) return <Redirect href="/(tabs)/profile" />;
+  return <DevicesScreenInner />;
+}
+
+function DevicesScreenInner() {
   const {
     devices,
     syncing,
