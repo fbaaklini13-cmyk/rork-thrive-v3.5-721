@@ -7,6 +7,7 @@ import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { UserProfileProvider } from "@/hooks/user-profile-store";
 import { HealthDevicesProvider } from "@/hooks/use-health-devices";
 import { AIConsentProvider } from "@/components/AIConsentProvider";
+import { Palette } from "@/constants/theme";
 import { trpc, trpcClient } from "@/lib/trpc";
 import { whoopService } from "@/services/whoop-service";
 import { garminService } from "@/services/garmin-service";
@@ -15,16 +16,25 @@ SplashScreen.preventAutoHideAsync();
 
 const queryClient = new QueryClient();
 
+// The four premium screens also set these from inside themselves; setting them
+// here too means the first frame, before the screen mounts, is already dark
+// rather than the old green header (26 Sep).
+const premiumHeader = {
+  headerStyle: { backgroundColor: Palette.canvas },
+  headerTintColor: Palette.ink,
+  headerShadowVisible: false,
+} as const;
+
 function RootLayoutNav() {
   return (
     <Stack screenOptions={{ headerBackTitle: "Back" }}>
       <Stack.Screen name="index" options={{ headerShown: false }} />
       <Stack.Screen name="(auth)" options={{ headerShown: false }} />
       <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-      <Stack.Screen name="premium/body-scanner" options={{ title: "AI Body Scanner", headerStyle: { backgroundColor: '#008264' }, headerTintColor: '#FFFFFF' }} />
-      <Stack.Screen name="premium/macros" options={{ title: "Macros Breakdown", headerStyle: { backgroundColor: '#008264' }, headerTintColor: '#FFFFFF' }} />
-      <Stack.Screen name="premium/recipes" options={{ title: "Recipe Generator", headerStyle: { backgroundColor: '#008264' }, headerTintColor: '#FFFFFF' }} />
-      <Stack.Screen name="premium/supplements" options={{ title: "Supplement Guide", headerStyle: { backgroundColor: '#008264' }, headerTintColor: '#FFFFFF' }} />
+      <Stack.Screen name="premium/body-scanner" options={{ title: "AI Body Scanner", ...premiumHeader }} />
+      <Stack.Screen name="premium/macros" options={{ title: "Macros Breakdown", ...premiumHeader }} />
+      <Stack.Screen name="premium/recipes" options={{ title: "Recipe Generator", ...premiumHeader }} />
+      <Stack.Screen name="premium/supplements" options={{ title: "Supplement Guide", ...premiumHeader }} />
     </Stack>
   );
 }

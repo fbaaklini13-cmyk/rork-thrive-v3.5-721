@@ -9,7 +9,7 @@ import {
 } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Search, Filter, X } from 'lucide-react-native';
-import { Colors } from '@/constants/colors';
+import { Palette } from '@/constants/theme';
 import { 
   EXERCISES, 
   MUSCLE_GROUP_COLORS, 
@@ -105,13 +105,13 @@ export default function ExercisesScreen() {
     <View style={styles.container}>
       <View style={styles.searchSection}>
         <View style={styles.searchBar}>
-          <Search color={Colors.mediumGrey} size={20} />
+          <Search color={Palette.inkMuted} size={20} />
           <TextInput
             style={styles.searchInput}
             placeholder="Search exercises..."
             value={searchQuery}
             onChangeText={setSearchQuery}
-            placeholderTextColor={Colors.mediumGrey}
+            placeholderTextColor={Palette.inkFaint}
           />
           {searchQuery.length > 0 && (
             <TouchableOpacity
@@ -119,7 +119,7 @@ export default function ExercisesScreen() {
               accessibilityRole="button"
               accessibilityLabel="Clear search"
             >
-              <X color={Colors.mediumGrey} size={20} />
+              <X color={Palette.inkMuted} size={20} />
             </TouchableOpacity>
           )}
         </View>
@@ -134,7 +134,7 @@ export default function ExercisesScreen() {
           accessibilityLabel={showFilters ? 'Hide filters' : 'Show filters'}
         >
           <Filter
-            color={hasActiveFilters ? Colors.white : Colors.darkGrey}
+            color={hasActiveFilters ? Palette.canvas : Palette.ink}
             size={20}
           />
         </TouchableOpacity>
@@ -275,21 +275,21 @@ export default function ExercisesScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.lightGrey,
+    backgroundColor: Palette.canvas,
   },
   searchSection: {
     flexDirection: 'row',
     padding: 16,
     gap: 12,
-    backgroundColor: Colors.white,
+    backgroundColor: Palette.canvas,
     borderBottomWidth: 1,
-    borderBottomColor: Colors.lightGrey,
+    borderBottomColor: Palette.line,
   },
   searchBar: {
     flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: Colors.lightGrey,
+    backgroundColor: Palette.canvasRaised,
     borderRadius: 12,
     paddingHorizontal: 12,
     height: 44,
@@ -298,24 +298,24 @@ const styles = StyleSheet.create({
   searchInput: {
     flex: 1,
     fontSize: 16,
-    color: Colors.darkGrey,
+    color: Palette.ink,
   },
   filterButton: {
     width: 44,
     height: 44,
     borderRadius: 12,
-    backgroundColor: Colors.lightGrey,
+    backgroundColor: Palette.canvasRaised,
     alignItems: 'center',
     justifyContent: 'center',
   },
   filterButtonActive: {
-    backgroundColor: Colors.primary,
+    backgroundColor: Palette.accent,
   },
   filtersContainer: {
-    backgroundColor: Colors.white,
+    backgroundColor: Palette.canvas,
     padding: 16,
     borderBottomWidth: 1,
-    borderBottomColor: Colors.lightGrey,
+    borderBottomColor: Palette.line,
   },
   filterHeader: {
     flexDirection: 'row',
@@ -326,17 +326,17 @@ const styles = StyleSheet.create({
   filterTitle: {
     fontSize: 18,
     fontWeight: '600',
-    color: Colors.darkGrey,
+    color: Palette.ink,
   },
   clearText: {
     fontSize: 14,
     fontWeight: '500',
-    color: Colors.primary,
+    color: Palette.accent,
   },
   filterCategoryTitle: {
     fontSize: 14,
     fontWeight: '600',
-    color: Colors.mediumGrey,
+    color: Palette.inkMuted,
     marginTop: 12,
     marginBottom: 8,
   },
@@ -349,21 +349,21 @@ const styles = StyleSheet.create({
     paddingHorizontal: 14,
     paddingVertical: 8,
     borderRadius: 20,
-    backgroundColor: Colors.lightGrey,
+    backgroundColor: Palette.canvasRaised,
     borderWidth: 1,
-    borderColor: Colors.lightGrey,
+    borderColor: Palette.line,
   },
   chipActive: {
-    backgroundColor: Colors.primary,
-    borderColor: Colors.primary,
+    backgroundColor: Palette.accent,
+    borderColor: Palette.accent,
   },
   chipText: {
     fontSize: 13,
     fontWeight: '500',
-    color: Colors.darkGrey,
+    color: Palette.inkMuted,
   },
   chipTextActive: {
-    color: Colors.white,
+    color: Palette.canvas,
   },
   exercisesList: {
     flex: 1,
@@ -371,12 +371,12 @@ const styles = StyleSheet.create({
   resultsCount: {
     fontSize: 14,
     fontWeight: '500',
-    color: Colors.mediumGrey,
+    color: Palette.inkMuted,
     padding: 16,
   },
   exerciseCard: {
     flexDirection: 'row',
-    backgroundColor: Colors.white,
+    backgroundColor: Palette.canvasRaised,
     marginHorizontal: 16,
     marginBottom: 12,
     borderRadius: 12,
@@ -397,12 +397,12 @@ const styles = StyleSheet.create({
   exerciseName: {
     fontSize: 16,
     fontWeight: '600',
-    color: Colors.darkGrey,
+    color: Palette.ink,
     marginBottom: 6,
   },
   exerciseDescription: {
     fontSize: 14,
-    color: Colors.mediumGrey,
+    color: Palette.inkMuted,
     lineHeight: 20,
     marginBottom: 10,
   },
@@ -415,11 +415,11 @@ const styles = StyleSheet.create({
     paddingHorizontal: 8,
     paddingVertical: 4,
     borderRadius: 6,
-    backgroundColor: Colors.lightGrey,
+    backgroundColor: Palette.line,
   },
   metaText: {
     fontSize: 12,
-    color: Colors.mediumGrey,
+    color: Palette.inkMuted,
     fontWeight: '500',
   },
   emptyState: {
@@ -430,11 +430,11 @@ const styles = StyleSheet.create({
   emptyTitle: {
     fontSize: 18,
     fontWeight: '600',
-    color: Colors.mediumGrey,
+    color: Palette.inkMuted,
     marginBottom: 8,
   },
   emptyText: {
     fontSize: 14,
-    color: Colors.mediumGrey,
+    color: Palette.inkMuted,
   },
 });
