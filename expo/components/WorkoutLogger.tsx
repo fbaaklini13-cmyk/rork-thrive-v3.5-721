@@ -10,7 +10,7 @@ import {
   Alert,
 } from 'react-native';
 import { X, CheckCircle, Circle, Plus, Minus, Timer, Calculator, Flame } from 'lucide-react-native';
-import { Colors } from '@/constants/colors';
+import { Palette } from '@/constants/theme';
 import { useUserProfile } from '@/hooks/user-profile-store';
 import type { Exercise, SetLog } from '@/types/user';
 import RestTimer from './RestTimer';
@@ -238,7 +238,7 @@ export default function WorkoutLogger({
               accessibilityRole="button"
               accessibilityLabel="Close workout"
             >
-              <X color={Colors.darkGrey} size={24} />
+              <X color={Palette.ink} size={24} />
             </TouchableOpacity>
           </View>
 
@@ -258,7 +258,7 @@ export default function WorkoutLogger({
                 style={styles.toolButton}
                 onPress={() => setRestTimerVisible(true)}
               >
-                <Timer color={Colors.primary} size={20} />
+                <Timer color={Palette.accent} size={20} />
                 <Text style={styles.toolText}>Rest Timer</Text>
               </TouchableOpacity>
               
@@ -266,7 +266,7 @@ export default function WorkoutLogger({
                 style={styles.toolButton}
                 onPress={() => setShowWarmups(!showWarmups)}
               >
-                <Flame color={showWarmups ? Colors.warning : Colors.mediumGrey} size={20} />
+                <Flame color={showWarmups ? Palette.warn : Palette.inkMuted} size={20} />
                 <Text style={styles.toolText}>{showWarmups ? 'Hide' : 'Show'} Warmups</Text>
               </TouchableOpacity>
             </View>
@@ -288,9 +288,9 @@ export default function WorkoutLogger({
                     accessibilityLabel={`Mark set ${set.isWarmup ? 'W' + Math.abs(set.setNumber) : set.setNumber} as ${set.completed ? 'incomplete' : 'complete'}`}
                   >
                     {set.completed ? (
-                      <CheckCircle color={Colors.primary} size={24} />
+                      <CheckCircle color={Palette.accent} size={24} />
                     ) : (
-                      <Circle color={Colors.mediumGrey} size={24} />
+                      <Circle color={Palette.inkMuted} size={24} />
                     )}
                   </TouchableOpacity>
 
@@ -305,7 +305,7 @@ export default function WorkoutLogger({
                       accessibilityRole="button"
                       accessibilityLabel="Decrease weight by 2.5 kg"
                     >
-                      <Minus color={Colors.mediumGrey} size={16} />
+                      <Minus color={Palette.inkMuted} size={16} />
                     </TouchableOpacity>
                     <TextInput
                       style={styles.numberInput}
@@ -320,7 +320,7 @@ export default function WorkoutLogger({
                       accessibilityRole="button"
                       accessibilityLabel="Increase weight by 2.5 kg"
                     >
-                      <Plus color={Colors.mediumGrey} size={16} />
+                      <Plus color={Palette.inkMuted} size={16} />
                     </TouchableOpacity>
                     <Text style={styles.unitLabel}>kg</Text>
                     <TouchableOpacity
@@ -329,7 +329,7 @@ export default function WorkoutLogger({
                       accessibilityRole="button"
                       accessibilityLabel="Open plate calculator"
                     >
-                      <Calculator color={Colors.primary} size={16} />
+                      <Calculator color={Palette.accent} size={16} />
                     </TouchableOpacity>
                   </View>
 
@@ -340,7 +340,7 @@ export default function WorkoutLogger({
                       accessibilityRole="button"
                       accessibilityLabel="Decrease reps by 1"
                     >
-                      <Minus color={Colors.mediumGrey} size={16} />
+                      <Minus color={Palette.inkMuted} size={16} />
                     </TouchableOpacity>
                     <TextInput
                       style={styles.numberInput}
@@ -355,7 +355,7 @@ export default function WorkoutLogger({
                       accessibilityRole="button"
                       accessibilityLabel="Increase reps by 1"
                     >
-                      <Plus color={Colors.mediumGrey} size={16} />
+                      <Plus color={Palette.inkMuted} size={16} />
                     </TouchableOpacity>
                     <Text style={styles.unitLabel}>reps</Text>
                   </View>
@@ -397,7 +397,10 @@ export default function WorkoutLogger({
               ]} 
               onPress={handleNext}
             >
-              <Text style={styles.nextButtonText}>
+              <Text style={[
+                styles.nextButtonText,
+                !currentExerciseLogs.some(s => s.completed) && styles.nextButtonTextIdle,
+              ]}>
                 {currentExerciseIndex < exercises.length - 1 ? 'Next Exercise' : 'Finish Workout'}
               </Text>
             </TouchableOpacity>
@@ -427,7 +430,7 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-end',
   },
   modalContent: {
-    backgroundColor: Colors.white,
+    backgroundColor: Palette.canvasRaised,
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
     maxHeight: '90%',
@@ -438,16 +441,16 @@ const styles = StyleSheet.create({
     alignItems: 'flex-start',
     padding: 20,
     borderBottomWidth: 1,
-    borderBottomColor: Colors.lightGrey,
+    borderBottomColor: Palette.line,
   },
   modalTitle: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: Colors.darkGrey,
+    color: Palette.ink,
   },
   exerciseProgress: {
     fontSize: 14,
-    color: Colors.mediumGrey,
+    color: Palette.inkMuted,
     marginTop: 4,
   },
   modalBody: {
@@ -458,7 +461,7 @@ const styles = StyleSheet.create({
     padding: 20,
     gap: 12,
     borderTopWidth: 1,
-    borderTopColor: Colors.lightGrey,
+    borderTopColor: Palette.line,
   },
   exerciseHeader: {
     marginBottom: 24,
@@ -466,35 +469,41 @@ const styles = StyleSheet.create({
   exerciseName: {
     fontSize: 22,
     fontWeight: 'bold',
-    color: Colors.darkGrey,
+    color: Palette.ink,
     marginBottom: 8,
   },
   exerciseTarget: {
     fontSize: 16,
-    color: Colors.primary,
+    color: Palette.accent,
     fontWeight: '600',
   },
   exerciseNotes: {
     fontSize: 14,
-    color: Colors.mediumGrey,
+    color: Palette.inkMuted,
     marginTop: 8,
     fontStyle: 'italic',
   },
   setsContainer: {
     gap: 12,
   },
+  // 25 Sep: at 390 pt the check + label + two five-control input groups overflowed the
+  // row (the + buttons, units and plate calculator were cut off). Wrap: the label stays
+  // on the first line, and each input group takes a full line of its own.
   setRow: {
     flexDirection: 'row',
+    flexWrap: 'wrap',
     alignItems: 'center',
     gap: 12,
     padding: 12,
-    backgroundColor: Colors.lightGrey,
+    backgroundColor: Palette.canvasRaised,
     borderRadius: 12,
+    borderWidth: 1,
+    borderColor: Palette.line,
   },
   warmupRow: {
-    backgroundColor: '#FFF3E0',
+    backgroundColor: Palette.warn + '1F',
     borderLeftWidth: 3,
-    borderLeftColor: Colors.warning,
+    borderLeftColor: Palette.warn,
   },
   toolsContainer: {
     flexDirection: 'row',
@@ -508,13 +517,15 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     gap: 6,
     padding: 10,
-    backgroundColor: Colors.lightGrey,
+    backgroundColor: Palette.canvasRaised,
     borderRadius: 8,
+    borderWidth: 1,
+    borderColor: Palette.line,
   },
   toolText: {
     fontSize: 14,
     fontWeight: '500',
-    color: Colors.darkGrey,
+    color: Palette.ink,
   },
   calcButton: {
     padding: 6,
@@ -526,55 +537,63 @@ const styles = StyleSheet.create({
   setNumber: {
     fontSize: 16,
     fontWeight: '600',
-    color: Colors.darkGrey,
+    color: Palette.ink,
     width: 50,
   },
   inputGroup: {
     flexDirection: 'row',
     alignItems: 'center',
-    flex: 1,
+    flexBasis: '100%',
+    flexGrow: 1,
     gap: 4,
   },
   adjustButton: {
     padding: 8,
     borderRadius: 6,
-    backgroundColor: Colors.white,
+    backgroundColor: Palette.canvasRaised,
+    borderWidth: 1,
+    borderColor: Palette.line,
   },
   numberInput: {
     flex: 1,
+    minWidth: 0,   // web: an <input> keeps its intrinsic ~20-char width unless told it may shrink
     textAlign: 'center',
     fontSize: 16,
     fontWeight: '600',
-    color: Colors.darkGrey,
-    backgroundColor: Colors.white,
+    color: Palette.ink,
+    backgroundColor: Palette.canvasRaised,
     borderRadius: 6,
     padding: 6,
+    borderWidth: 1,
+    borderColor: Palette.line,
   },
   unitLabel: {
     fontSize: 14,
-    color: Colors.mediumGrey,
+    color: Palette.inkMuted,
     marginLeft: 4,
   },
   previousSection: {
     marginTop: 24,
     padding: 16,
-    backgroundColor: Colors.lightGrey,
+    backgroundColor: Palette.canvasRaised,
     borderRadius: 12,
+    borderWidth: 1,
+    borderColor: Palette.line,
   },
   previousTitle: {
     fontSize: 14,
     fontWeight: '600',
-    color: Colors.mediumGrey,
+    color: Palette.inkMuted,
     marginBottom: 8,
   },
   previousDate: {
     fontSize: 12,
-    color: Colors.mediumGrey,
+    color: Palette.inkMuted,
     marginBottom: 4,
   },
   previousSet: {
     fontSize: 14,
-    color: Colors.darkGrey,
+    color: Palette.ink,
     marginBottom: 2,
   },
   skipButton: {
@@ -582,11 +601,11 @@ const styles = StyleSheet.create({
     padding: 16,
     borderRadius: 8,
     borderWidth: 1,
-    borderColor: Colors.lightGrey,
+    borderColor: Palette.line,
   },
   skipButtonText: {
     fontSize: 16,
-    color: Colors.darkGrey,
+    color: Palette.ink,
     textAlign: 'center',
     fontWeight: '600',
   },
@@ -594,15 +613,22 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 16,
     borderRadius: 8,
-    backgroundColor: Colors.lightGrey,
+    backgroundColor: Palette.canvasRaised,
+    borderWidth: 1,
+    borderColor: Palette.line,
   },
   nextButtonActive: {
-    backgroundColor: Colors.primary,
+    backgroundColor: Palette.accent,
   },
   nextButtonText: {
     fontSize: 16,
-    color: Colors.white,
+    color: Palette.canvas,
     textAlign: 'center',
     fontWeight: '600',
+  },
+  // Before any set is ticked the button sits on the raised canvas, where dark "lit
+  // button" text was invisible (and was white-on-light-grey before the migration).
+  nextButtonTextIdle: {
+    color: Palette.inkMuted,
   },
 });

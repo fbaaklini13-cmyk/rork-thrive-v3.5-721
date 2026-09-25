@@ -10,7 +10,7 @@ import {
   Alert,
 } from 'react-native';
 import { X, Save } from 'lucide-react-native';
-import { Colors } from '@/constants/colors';
+import { Palette } from '@/constants/theme';
 import type { BodyMeasurement } from '@/types/user';
 
 interface BodyMeasurementsModalProps {
@@ -100,7 +100,7 @@ export default function BodyMeasurementsModal({
             <Text style={styles.subtitle}>Track your progress over time</Text>
           </View>
           <TouchableOpacity style={styles.closeButton} onPress={onClose}>
-            <X color={Colors.darkGrey} size={24} />
+            <X color={Palette.ink} size={24} />
           </TouchableOpacity>
         </View>
 
@@ -117,7 +117,7 @@ export default function BodyMeasurementsModal({
                     <TextInput
                       style={styles.input}
                       placeholder={lastValue ? `${lastValue}` : '0'}
-                      placeholderTextColor={Colors.mediumGrey}
+                      placeholderTextColor={Palette.inkMuted}
                       keyboardType="decimal-pad"
                       value={measurements[field.key]?.toString() || ''}
                       onChangeText={value => updateMeasurement(field.key, value)}
@@ -130,7 +130,7 @@ export default function BodyMeasurementsModal({
                       <Text
                         style={[
                           styles.differenceText,
-                          { color: diff > 0 ? Colors.success : Colors.error },
+                          { color: diff > 0 ? Palette.good : Palette.bad },
                         ]}
                       >
                         {diff > 0 ? '+' : ''}{diff.toFixed(1)} {field.unit}
@@ -147,7 +147,7 @@ export default function BodyMeasurementsModal({
             <TextInput
               style={styles.notesInput}
               placeholder="Add any notes about your progress..."
-              placeholderTextColor={Colors.mediumGrey}
+              placeholderTextColor={Palette.inkMuted}
               multiline
               numberOfLines={4}
               value={notes}
@@ -162,7 +162,7 @@ export default function BodyMeasurementsModal({
             onPress={handleSave}
             disabled={isSaving}
           >
-            <Save color={Colors.white} size={20} />
+            <Save color={Palette.canvas} size={20} />
             <Text style={styles.saveButtonText}>
               {isSaving ? 'Saving...' : 'Save Measurements'}
             </Text>
@@ -176,7 +176,7 @@ export default function BodyMeasurementsModal({
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.white,
+    backgroundColor: Palette.canvasRaised,
   },
   header: {
     flexDirection: 'row',
@@ -185,7 +185,7 @@ const styles = StyleSheet.create({
     padding: 20,
     paddingTop: 60,
     borderBottomWidth: 1,
-    borderBottomColor: Colors.lightGrey,
+    borderBottomColor: Palette.line,
   },
   headerContent: {
     flex: 1,
@@ -193,12 +193,12 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: Colors.darkGrey,
+    color: Palette.ink,
     marginBottom: 4,
   },
   subtitle: {
     fontSize: 14,
-    color: Colors.mediumGrey,
+    color: Palette.inkMuted,
   },
   closeButton: {
     padding: 8,
@@ -216,24 +216,26 @@ const styles = StyleSheet.create({
   measurementLabel: {
     fontSize: 16,
     fontWeight: '600',
-    color: Colors.darkGrey,
+    color: Palette.ink,
   },
   inputContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: Colors.lightGrey,
+    backgroundColor: Palette.canvasRaised,
     borderRadius: 8,
     paddingHorizontal: 12,
+    borderWidth: 1,
+    borderColor: Palette.line,
   },
   input: {
     flex: 1,
     fontSize: 16,
-    color: Colors.darkGrey,
+    color: Palette.ink,
     paddingVertical: 12,
   },
   unit: {
     fontSize: 14,
-    color: Colors.mediumGrey,
+    color: Palette.inkMuted,
     fontWeight: '500',
   },
   difference: {
@@ -249,35 +251,37 @@ const styles = StyleSheet.create({
   notesLabel: {
     fontSize: 16,
     fontWeight: '600',
-    color: Colors.darkGrey,
+    color: Palette.ink,
     marginBottom: 8,
   },
   notesInput: {
-    backgroundColor: Colors.lightGrey,
+    backgroundColor: Palette.canvasRaised,
     borderRadius: 8,
     padding: 12,
     fontSize: 16,
-    color: Colors.darkGrey,
+    color: Palette.ink,
     minHeight: 100,
     textAlignVertical: 'top',
+    borderWidth: 1,
+    borderColor: Palette.line,
   },
   footer: {
     padding: 20,
     borderTopWidth: 1,
-    borderTopColor: Colors.lightGrey,
+    borderTopColor: Palette.line,
   },
   saveButton: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     gap: 8,
-    backgroundColor: Colors.primary,
+    backgroundColor: Palette.accent,
     padding: 16,
     borderRadius: 12,
   },
   saveButtonText: {
     fontSize: 16,
     fontWeight: '600',
-    color: Colors.white,
+    color: Palette.canvas,
   },
 });

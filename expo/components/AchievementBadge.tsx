@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { Award, Zap, TrendingUp, Target, Flame, Trophy } from 'lucide-react-native';
-import { Colors } from '@/constants/colors';
+import { Palette } from '@/constants/theme';
 import type { Achievement } from '@/types/user';
 
 interface AchievementBadgeProps {
@@ -33,15 +33,15 @@ export default function AchievementBadge({ achievement, size = 'medium' }: Achie
   const getColor = (category: Achievement['category']) => {
     switch (category) {
       case 'streak':
-        return Colors.warning;
+        return Palette.warn;
       case 'pr':
-        return Colors.success;
+        return Palette.good;
       case 'milestone':
-        return Colors.primary;
+        return Palette.accent;
       case 'weight':
-        return Colors.secondary;
+        return Palette.accent;
       default:
-        return Colors.mediumGrey;
+        return Palette.inkMuted;
     }
   };
 
@@ -68,9 +68,11 @@ const styles = StyleSheet.create({
   container: {
     alignItems: 'center',
     padding: 12,
-    backgroundColor: Colors.white,
+    backgroundColor: Palette.canvasRaised,
     borderRadius: 12,
     minWidth: 100,
+    borderWidth: 1,
+    borderColor: Palette.line,
   },
   iconContainer: {
     justifyContent: 'center',
@@ -81,7 +83,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 14,
     fontWeight: '600',
-    color: Colors.darkGrey,
+    color: Palette.ink,
     textAlign: 'center',
     marginBottom: 4,
   },
@@ -90,12 +92,12 @@ const styles = StyleSheet.create({
   },
   description: {
     fontSize: 12,
-    color: Colors.mediumGrey,
+    color: Palette.inkMuted,
     textAlign: 'center',
     marginBottom: 4,
   },
   date: {
     fontSize: 10,
-    color: Colors.mediumGrey,
+    color: Palette.inkMuted,
   },
 });

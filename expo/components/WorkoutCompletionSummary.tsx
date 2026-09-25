@@ -9,7 +9,7 @@ import {
   Dimensions,
 } from 'react-native';
 import { X, Award, Flame, Target, TrendingUp, Zap } from 'lucide-react-native';
-import { Colors } from '@/constants/colors';
+import { Palette } from '@/constants/theme';
 import type { SetLog } from '@/types/user';
 
 const { width } = Dimensions.get('window');
@@ -106,37 +106,37 @@ export default function WorkoutCompletionSummary({
       <View style={styles.overlay}>
         <View style={styles.container}>
           <TouchableOpacity style={styles.closeButton} onPress={onClose}>
-            <X color={Colors.darkGrey} size={24} />
+            <X color={Palette.ink} size={24} />
           </TouchableOpacity>
 
           <ScrollView showsVerticalScrollIndicator={false}>
             <View style={styles.header}>
-              <Award color={Colors.primary} size={48} />
+              <Award color={Palette.accent} size={48} />
               <Text style={styles.title}>Workout Complete!</Text>
               <Text style={styles.subtitle}>{workoutName}</Text>
             </View>
 
             <View style={styles.statsGrid}>
               <View style={styles.statCard}>
-                <Flame color={Colors.warning} size={28} />
+                <Flame color={Palette.warn} size={28} />
                 <Text style={styles.statValue}>{stats.caloriesBurned}</Text>
                 <Text style={styles.statLabel}>Calories</Text>
               </View>
 
               <View style={styles.statCard}>
-                <Target color={Colors.success} size={28} />
+                <Target color={Palette.good} size={28} />
                 <Text style={styles.statValue}>{stats.completedSets}/{stats.totalSets}</Text>
                 <Text style={styles.statLabel}>Sets</Text>
               </View>
 
               <View style={styles.statCard}>
-                <TrendingUp color={Colors.primary} size={28} />
+                <TrendingUp color={Palette.accent} size={28} />
                 <Text style={styles.statValue}>{(stats.totalVolume / 1000).toFixed(1)}K</Text>
                 <Text style={styles.statLabel}>Volume (kg)</Text>
               </View>
 
               <View style={styles.statCard}>
-                <Zap color={Colors.secondary} size={28} />
+                <Zap color={Palette.accent} size={28} />
                 <Text style={styles.statValue}>{formatDuration(totalDuration)}</Text>
                 <Text style={styles.statLabel}>Duration</Text>
               </View>
@@ -263,9 +263,11 @@ const styles = StyleSheet.create({
   container: {
     width: width - 40,
     maxHeight: '90%',
-    backgroundColor: Colors.white,
+    backgroundColor: Palette.canvasRaised,
     borderRadius: 20,
     padding: 24,
+    borderWidth: 1,
+    borderColor: Palette.line,
   },
   closeButton: {
     position: 'absolute',
@@ -281,12 +283,12 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: Colors.darkGrey,
+    color: Palette.ink,
     marginTop: 12,
   },
   subtitle: {
     fontSize: 16,
-    color: Colors.mediumGrey,
+    color: Palette.inkMuted,
     marginTop: 4,
   },
   statsGrid: {
@@ -298,20 +300,22 @@ const styles = StyleSheet.create({
   statCard: {
     flex: 1,
     minWidth: (width - 80 - 12) / 2,
-    backgroundColor: Colors.lightGrey,
+    backgroundColor: Palette.canvasRaised,
     borderRadius: 12,
     padding: 16,
     alignItems: 'center',
     gap: 8,
+    borderWidth: 1,
+    borderColor: Palette.line,
   },
   statValue: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: Colors.darkGrey,
+    color: Palette.ink,
   },
   statLabel: {
     fontSize: 12,
-    color: Colors.mediumGrey,
+    color: Palette.inkMuted,
   },
   section: {
     marginBottom: 24,
@@ -319,7 +323,7 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 16,
     fontWeight: '600',
-    color: Colors.darkGrey,
+    color: Palette.ink,
     marginBottom: 12,
   },
   muscleGrid: {
@@ -328,24 +332,28 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   muscleTag: {
-    backgroundColor: Colors.primary,
+    backgroundColor: Palette.canvasRaised,
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 16,
+    borderWidth: 1,
+    borderColor: Palette.line,
   },
   muscleText: {
     fontSize: 12,
     fontWeight: '600',
-    color: Colors.white,
+    color: Palette.ink,
   },
   exerciseRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     padding: 12,
-    backgroundColor: Colors.lightGrey,
+    backgroundColor: Palette.canvasRaised,
     borderRadius: 8,
     marginBottom: 8,
+    borderWidth: 1,
+    borderColor: Palette.line,
   },
   exerciseLeft: {
     flex: 1,
@@ -353,26 +361,28 @@ const styles = StyleSheet.create({
   exerciseName: {
     fontSize: 14,
     fontWeight: '600',
-    color: Colors.darkGrey,
+    color: Palette.ink,
     marginBottom: 4,
   },
   exerciseStats: {
     fontSize: 12,
-    color: Colors.mediumGrey,
+    color: Palette.inkMuted,
   },
   completionBadge: {
-    backgroundColor: Colors.primary,
+    backgroundColor: Palette.canvasRaised,
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 12,
+    borderWidth: 1,
+    borderColor: Palette.line,
   },
   completionText: {
     fontSize: 12,
     fontWeight: '600',
-    color: Colors.white,
+    color: Palette.ink,
   },
   prSection: {
-    backgroundColor: '#FFF3E0',
+    backgroundColor: Palette.warn + '1F',
     borderRadius: 12,
     padding: 16,
     marginBottom: 24,
@@ -380,7 +390,7 @@ const styles = StyleSheet.create({
   prTitle: {
     fontSize: 16,
     fontWeight: '600',
-    color: Colors.darkGrey,
+    color: Palette.ink,
     marginBottom: 12,
   },
   prRow: {
@@ -391,15 +401,15 @@ const styles = StyleSheet.create({
   },
   prName: {
     fontSize: 14,
-    color: Colors.darkGrey,
+    color: Palette.ink,
   },
   prWeight: {
     fontSize: 14,
     fontWeight: '600',
-    color: Colors.warning,
+    color: Palette.warn,
   },
   doneButton: {
-    backgroundColor: Colors.primary,
+    backgroundColor: Palette.accent,
     paddingVertical: 16,
     borderRadius: 12,
     alignItems: 'center',
@@ -407,6 +417,6 @@ const styles = StyleSheet.create({
   doneButtonText: {
     fontSize: 16,
     fontWeight: '600',
-    color: Colors.white,
+    color: Palette.canvas,
   },
 });

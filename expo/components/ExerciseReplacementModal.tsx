@@ -11,7 +11,7 @@ import {
   TextInput,
 } from 'react-native';
 import { X, RefreshCw, Target, Clock, Dumbbell, Plus, Edit3 } from 'lucide-react-native';
-import { Colors } from '@/constants/colors';
+import { Palette } from '@/constants/theme';
 import { AIService } from '@/services/ai-service';
 import { useUserProfile } from '@/hooks/user-profile-store';
 
@@ -249,11 +249,11 @@ export default function ExerciseReplacementModal({
         <View style={styles.modalContent}>
           <View style={styles.modalHeader}>
             <View style={styles.headerLeft}>
-              <RefreshCw color={Colors.primary} size={24} />
+              <RefreshCw color={Palette.accent} size={24} />
               <Text style={styles.modalTitle}>Replace Exercise</Text>
             </View>
             <TouchableOpacity onPress={onClose}>
-              <X color={Colors.darkGrey} size={24} />
+              <X color={Palette.ink} size={24} />
             </TouchableOpacity>
           </View>
 
@@ -263,20 +263,20 @@ export default function ExerciseReplacementModal({
               <Text style={styles.exerciseName}>{exercise.name}</Text>
               <View style={styles.exerciseDetails}>
                 <View style={styles.detailItem}>
-                  <Dumbbell color={Colors.mediumGrey} size={16} />
+                  <Dumbbell color={Palette.inkMuted} size={16} />
                   <Text style={styles.detailText}>
                     {exercise.sets} sets × {exercise.reps} reps
                   </Text>
                 </View>
                 {exercise.restPeriod && (
                   <View style={styles.detailItem}>
-                    <Clock color={Colors.mediumGrey} size={16} />
+                    <Clock color={Palette.inkMuted} size={16} />
                     <Text style={styles.detailText}>{exercise.restPeriod}</Text>
                   </View>
                 )}
                 {exercise.muscleGroups && (
                   <View style={styles.detailItem}>
-                    <Target color={Colors.mediumGrey} size={16} />
+                    <Target color={Palette.inkMuted} size={16} />
                     <Text style={styles.detailText}>
                       {exercise.muscleGroups.join(', ')}
                     </Text>
@@ -294,7 +294,7 @@ export default function ExerciseReplacementModal({
                   style={styles.customButton}
                   onPress={() => setShowCustomInput(!showCustomInput)}
                 >
-                  <Edit3 color={Colors.primary} size={18} />
+                  <Edit3 color={Palette.accent} size={18} />
                 </TouchableOpacity>
                 <TouchableOpacity
                   style={styles.refreshButton}
@@ -302,7 +302,7 @@ export default function ExerciseReplacementModal({
                   disabled={isLoading}
                 >
                   <RefreshCw 
-                    color={Colors.primary} 
+                    color={Palette.accent} 
                     size={20} 
                     style={isLoading ? styles.spinning : undefined}
                   />
@@ -318,7 +318,7 @@ export default function ExerciseReplacementModal({
                   <TextInput
                     style={styles.exerciseNameInput}
                     placeholder="Exercise name..."
-                    placeholderTextColor={Colors.mediumGrey}
+                    placeholderTextColor={Palette.inkMuted}
                     value={customExerciseName}
                     onChangeText={handleCustomExerciseNameChange}
                     autoCapitalize="words"
@@ -327,7 +327,7 @@ export default function ExerciseReplacementModal({
                   {isGeneratingCustom && (
                     <ActivityIndicator 
                       size="small" 
-                      color={Colors.primary} 
+                      color={Palette.accent} 
                       style={styles.generatingIndicator}
                     />
                   )}
@@ -339,7 +339,7 @@ export default function ExerciseReplacementModal({
                     <TextInput
                       style={styles.smallInput}
                       placeholder="3"
-                      placeholderTextColor={Colors.mediumGrey}
+                      placeholderTextColor={Palette.inkMuted}
                       value={customSets}
                       onChangeText={setCustomSets}
                       keyboardType="numeric"
@@ -352,7 +352,7 @@ export default function ExerciseReplacementModal({
                     <TextInput
                       style={styles.smallInput}
                       placeholder="8-12"
-                      placeholderTextColor={Colors.mediumGrey}
+                      placeholderTextColor={Palette.inkMuted}
                       value={customReps}
                       onChangeText={setCustomReps}
                       returnKeyType="next"
@@ -364,7 +364,7 @@ export default function ExerciseReplacementModal({
                     <TextInput
                       style={styles.smallInput}
                       placeholder="60s"
-                      placeholderTextColor={Colors.mediumGrey}
+                      placeholderTextColor={Palette.inkMuted}
                       value={customRestPeriod}
                       onChangeText={setCustomRestPeriod}
                       returnKeyType="done"
@@ -382,7 +382,7 @@ export default function ExerciseReplacementModal({
                   disabled={!customExerciseName.trim()}
                 >
                   <Plus 
-                    color={customExerciseName.trim() ? Colors.white : Colors.mediumGrey} 
+                    color={customExerciseName.trim() ? Palette.canvas : Palette.inkFaint} 
                     size={20} 
                   />
                   <Text style={[
@@ -397,7 +397,7 @@ export default function ExerciseReplacementModal({
 
             {isLoading ? (
               <View style={styles.loadingContainer}>
-                <ActivityIndicator size="large" color={Colors.primary} />
+                <ActivityIndicator size="large" color={Palette.accent} />
                 <Text style={styles.loadingText}>Generating alternatives...</Text>
               </View>
             ) : alternatives.length > 0 ? (
@@ -424,14 +424,14 @@ export default function ExerciseReplacementModal({
                     
                     <View style={styles.alternativeDetails}>
                       <View style={styles.detailItem}>
-                        <Dumbbell color={Colors.mediumGrey} size={14} />
+                        <Dumbbell color={Palette.inkMuted} size={14} />
                         <Text style={styles.smallDetailText}>
                           {alt.sets} sets × {alt.reps} reps
                         </Text>
                       </View>
                       {alt.restPeriod && (
                         <View style={styles.detailItem}>
-                          <Clock color={Colors.mediumGrey} size={14} />
+                          <Clock color={Palette.inkMuted} size={14} />
                           <Text style={styles.smallDetailText}>{alt.restPeriod}</Text>
                         </View>
                       )}
@@ -449,7 +449,7 @@ export default function ExerciseReplacementModal({
               </View>
             ) : (
               <View style={styles.emptyState}>
-                <RefreshCw color={Colors.mediumGrey} size={48} />
+                <RefreshCw color={Palette.inkMuted} size={48} />
                 <Text style={styles.emptyTitle}>No Alternatives Found</Text>
                 <Text style={styles.emptyText}>
                   Tap the refresh button to generate exercise alternatives
@@ -470,7 +470,7 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-end',
   },
   modalContent: {
-    backgroundColor: Colors.white,
+    backgroundColor: Palette.canvasRaised,
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
     maxHeight: '90%',
@@ -482,7 +482,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     padding: 20,
     borderBottomWidth: 1,
-    borderBottomColor: Colors.lightGrey,
+    borderBottomColor: Palette.line,
   },
   headerLeft: {
     flexDirection: 'row',
@@ -492,28 +492,30 @@ const styles = StyleSheet.create({
   modalTitle: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: Colors.darkGrey,
+    color: Palette.ink,
   },
   currentExercise: {
     padding: 20,
     borderBottomWidth: 1,
-    borderBottomColor: Colors.lightGrey,
+    borderBottomColor: Palette.line,
   },
   currentTitle: {
     fontSize: 16,
     fontWeight: '600',
-    color: Colors.mediumGrey,
+    color: Palette.inkMuted,
     marginBottom: 12,
   },
   exerciseCard: {
-    backgroundColor: Colors.lightGrey,
+    backgroundColor: Palette.canvasRaised,
     borderRadius: 12,
     padding: 16,
+    borderWidth: 1,
+    borderColor: Palette.line,
   },
   exerciseName: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: Colors.darkGrey,
+    color: Palette.ink,
     marginBottom: 8,
   },
   exerciseDetails: {
@@ -526,11 +528,11 @@ const styles = StyleSheet.create({
   },
   detailText: {
     fontSize: 14,
-    color: Colors.mediumGrey,
+    color: Palette.inkMuted,
   },
   smallDetailText: {
     fontSize: 12,
-    color: Colors.mediumGrey,
+    color: Palette.inkMuted,
   },
   alternativesContainer: {
     flex: 1,
@@ -549,17 +551,21 @@ const styles = StyleSheet.create({
   customButton: {
     padding: 8,
     borderRadius: 8,
-    backgroundColor: Colors.lightGrey,
+    backgroundColor: Palette.canvasRaised,
+    borderWidth: 1,
+    borderColor: Palette.line,
   },
   alternativesTitle: {
     fontSize: 18,
     fontWeight: '600',
-    color: Colors.darkGrey,
+    color: Palette.ink,
   },
   refreshButton: {
     padding: 8,
     borderRadius: 8,
-    backgroundColor: Colors.lightGrey,
+    backgroundColor: Palette.canvasRaised,
+    borderWidth: 1,
+    borderColor: Palette.line,
   },
   spinning: {
     transform: [{ rotate: '45deg' }],
@@ -571,18 +577,18 @@ const styles = StyleSheet.create({
   },
   loadingText: {
     fontSize: 16,
-    color: Colors.mediumGrey,
+    color: Palette.inkMuted,
     marginTop: 12,
   },
   alternativesList: {
     gap: 12,
   },
   alternativeCard: {
-    backgroundColor: Colors.white,
+    backgroundColor: Palette.canvasRaised,
     borderRadius: 12,
     padding: 16,
     borderWidth: 1,
-    borderColor: Colors.lightGrey,
+    borderColor: Palette.line,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.05,
@@ -598,7 +604,7 @@ const styles = StyleSheet.create({
   alternativeName: {
     fontSize: 16,
     fontWeight: '600',
-    color: Colors.darkGrey,
+    color: Palette.ink,
     flex: 1,
     marginRight: 8,
   },
@@ -608,18 +614,18 @@ const styles = StyleSheet.create({
     borderRadius: 12,
   },
   beginnerBadge: {
-    backgroundColor: '#E8F5E8',
+    backgroundColor: Palette.accentGlow,
   },
   intermediateBadge: {
-    backgroundColor: '#FFF3E0',
+    backgroundColor: Palette.warn + '1F',
   },
   advancedBadge: {
-    backgroundColor: '#FFEBEE',
+    backgroundColor: Palette.bad + '1F',
   },
   difficultyText: {
     fontSize: 10,
     fontWeight: '600',
-    color: Colors.darkGrey,
+    color: Palette.ink,
   },
   alternativeDetails: {
     flexDirection: 'row',
@@ -628,13 +634,13 @@ const styles = StyleSheet.create({
   },
   alternativeNotes: {
     fontSize: 13,
-    color: Colors.mediumGrey,
+    color: Palette.inkMuted,
     fontStyle: 'italic',
     marginTop: 4,
   },
   equipmentText: {
     fontSize: 12,
-    color: Colors.primary,
+    color: Palette.accent,
     fontWeight: '500',
     marginTop: 4,
   },
@@ -646,28 +652,28 @@ const styles = StyleSheet.create({
   emptyTitle: {
     fontSize: 18,
     fontWeight: '600',
-    color: Colors.mediumGrey,
+    color: Palette.inkMuted,
     marginTop: 16,
     marginBottom: 8,
   },
   emptyText: {
     fontSize: 14,
-    color: Colors.mediumGrey,
+    color: Palette.inkMuted,
     textAlign: 'center',
     lineHeight: 20,
   },
   customInputContainer: {
-    backgroundColor: '#F0F8F6',
+    backgroundColor: Palette.accentGlow,
     borderRadius: 12,
     padding: 16,
     marginBottom: 20,
     borderWidth: 2,
-    borderColor: Colors.primary,
+    borderColor: Palette.accent,
   },
   customInputLabel: {
     fontSize: 16,
     fontWeight: '600',
-    color: Colors.darkGrey,
+    color: Palette.ink,
     marginBottom: 16,
   },
   customInputRow: {
@@ -678,14 +684,14 @@ const styles = StyleSheet.create({
   },
   exerciseNameInput: {
     flex: 1,
-    backgroundColor: Colors.white,
+    backgroundColor: Palette.canvasRaised,
     borderRadius: 8,
     paddingHorizontal: 16,
     paddingVertical: 14,
     fontSize: 16,
-    color: Colors.darkGrey,
+    color: Palette.ink,
     borderWidth: 2,
-    borderColor: Colors.primary,
+    borderColor: Palette.accent,
     minHeight: 48,
   },
   generatingIndicator: {
@@ -703,22 +709,22 @@ const styles = StyleSheet.create({
   detailLabel: {
     fontSize: 12,
     fontWeight: '600',
-    color: Colors.mediumGrey,
+    color: Palette.inkMuted,
     marginBottom: 6,
   },
   smallInput: {
-    backgroundColor: Colors.white,
+    backgroundColor: Palette.canvasRaised,
     borderRadius: 8,
     paddingHorizontal: 12,
     paddingVertical: 10,
     fontSize: 14,
-    color: Colors.darkGrey,
+    color: Palette.ink,
     borderWidth: 1,
-    borderColor: Colors.lightGrey,
+    borderColor: Palette.line,
     textAlign: 'center',
   },
   addCustomButton: {
-    backgroundColor: Colors.primary,
+    backgroundColor: Palette.accent,
     borderRadius: 8,
     paddingVertical: 14,
     paddingHorizontal: 20,
@@ -728,14 +734,14 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   addCustomButtonText: {
-    color: Colors.white,
+    color: Palette.canvas,
     fontSize: 16,
     fontWeight: '600',
   },
   addButtonTextDisabled: {
-    color: Colors.mediumGrey,
+    color: Palette.inkMuted,
   },
   addButtonDisabled: {
-    backgroundColor: Colors.lightGrey,
+    backgroundColor: Palette.canvasRaised,
   },
 });

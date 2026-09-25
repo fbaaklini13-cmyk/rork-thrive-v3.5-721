@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react';
 import { View, Text, StyleSheet, ScrollView } from 'react-native';
 import { TrendingUp, TrendingDown, Minus } from 'lucide-react-native';
-import { Colors } from '@/constants/colors';
+import { Palette } from '@/constants/theme';
 import { useUserProfile } from '@/hooks/user-profile-store';
 import type { WorkoutLog } from '@/types/user';
 
@@ -117,7 +117,7 @@ export default function StrengthBenchmark() {
       case 'intermediate':
         return '#FBC02D';
       case 'beginner':
-        return Colors.mediumGrey;
+        return Palette.inkMuted;
     }
   };
 
@@ -217,7 +217,7 @@ export default function StrengthBenchmark() {
       <View style={styles.legendCard}>
         <Text style={styles.legendTitle}>Strength Levels</Text>
         <View style={styles.legendItem}>
-          <View style={[styles.legendDot, { backgroundColor: Colors.mediumGrey }]} />
+          <View style={[styles.legendDot, { backgroundColor: Palette.inkMuted }]} />
           <Text style={styles.legendText}>Beginner: Just starting out</Text>
         </View>
         <View style={styles.legendItem}>
@@ -247,15 +247,15 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 20,
     fontWeight: '600',
-    color: Colors.darkGrey,
+    color: Palette.ink,
     marginBottom: 4,
   },
   subtitle: {
     fontSize: 14,
-    color: Colors.mediumGrey,
+    color: Palette.inkMuted,
   },
   benchmarkCard: {
-    backgroundColor: Colors.white,
+    backgroundColor: Palette.canvasRaised,
     borderRadius: 16,
     padding: 16,
     marginBottom: 12,
@@ -274,7 +274,7 @@ const styles = StyleSheet.create({
   exerciseName: {
     fontSize: 18,
     fontWeight: '600',
-    color: Colors.darkGrey,
+    color: Palette.ink,
   },
   levelBadge: {
     flexDirection: 'row',
@@ -299,40 +299,42 @@ const styles = StyleSheet.create({
   },
   statLabel: {
     fontSize: 12,
-    color: Colors.mediumGrey,
+    color: Palette.inkMuted,
     marginBottom: 4,
   },
   statValue: {
     fontSize: 16,
     fontWeight: '600',
-    color: Colors.darkGrey,
+    color: Palette.ink,
   },
   statDivider: {
     width: 1,
     height: 30,
-    backgroundColor: Colors.lightGrey,
+    backgroundColor: Palette.line,
   },
   comparisonRow: {
     paddingTop: 12,
     borderTopWidth: 1,
-    borderTopColor: Colors.lightGrey,
+    borderTopColor: Palette.line,
   },
   comparisonText: {
     fontSize: 14,
-    color: Colors.primary,
+    color: Palette.accent,
     fontWeight: '500',
     textAlign: 'center',
   },
   legendCard: {
-    backgroundColor: Colors.lightGrey,
+    backgroundColor: Palette.canvasRaised,
     borderRadius: 12,
     padding: 16,
     marginTop: 8,
+    borderWidth: 1,
+    borderColor: Palette.line,
   },
   legendTitle: {
     fontSize: 16,
     fontWeight: '600',
-    color: Colors.darkGrey,
+    color: Palette.ink,
     marginBottom: 12,
   },
   legendItem: {
@@ -348,7 +350,7 @@ const styles = StyleSheet.create({
   },
   legendText: {
     fontSize: 14,
-    color: Colors.mediumGrey,
+    color: Palette.inkMuted,
   },
   emptyContainer: {
     padding: 20,
@@ -357,7 +359,7 @@ const styles = StyleSheet.create({
   },
   emptyText: {
     fontSize: 14,
-    color: Colors.mediumGrey,
+    color: Palette.inkMuted,
     textAlign: 'center',
   },
 });

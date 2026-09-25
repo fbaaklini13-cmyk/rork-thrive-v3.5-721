@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { View, Text, StyleSheet, Modal, TouchableOpacity, Platform, Vibration } from 'react-native';
 import { X, Play, Pause, RotateCcw, Plus, Minus } from 'lucide-react-native';
-import { Colors } from '@/constants/colors';
+import { Palette } from '@/constants/theme';
 import { Audio } from 'expo-av';
 
 interface RestTimerProps {
@@ -103,7 +103,7 @@ export default function RestTimer({
           <View style={styles.header}>
             <Text style={styles.title}>Rest Timer</Text>
             <TouchableOpacity onPress={onClose} style={styles.closeButton}>
-              <X color={Colors.darkGrey} size={24} />
+              <X color={Palette.ink} size={24} />
             </TouchableOpacity>
           </View>
 
@@ -134,7 +134,7 @@ export default function RestTimer({
                 style={styles.controlButton}
                 onPress={() => adjustTime(-15)}
               >
-                <Minus color={Colors.darkGrey} size={24} />
+                <Minus color={Palette.ink} size={24} />
                 <Text style={styles.controlLabel}>15s</Text>
               </TouchableOpacity>
 
@@ -146,9 +146,9 @@ export default function RestTimer({
                 onPress={toggleTimer}
               >
                 {isRunning ? (
-                  <Pause color={Colors.white} size={32} />
+                  <Pause color={Palette.canvas} size={32} />
                 ) : (
-                  <Play color={Colors.white} size={32} />
+                  <Play color={Palette.canvas} size={32} />
                 )}
               </TouchableOpacity>
 
@@ -156,13 +156,13 @@ export default function RestTimer({
                 style={styles.controlButton}
                 onPress={() => adjustTime(15)}
               >
-                <Plus color={Colors.darkGrey} size={24} />
+                <Plus color={Palette.ink} size={24} />
                 <Text style={styles.controlLabel}>15s</Text>
               </TouchableOpacity>
             </View>
 
             <TouchableOpacity style={styles.resetButton} onPress={resetTimer}>
-              <RotateCcw color={Colors.primary} size={20} />
+              <RotateCcw color={Palette.accent} size={20} />
               <Text style={styles.resetText}>Reset</Text>
             </TouchableOpacity>
 
@@ -197,7 +197,7 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-end',
   },
   container: {
-    backgroundColor: Colors.white,
+    backgroundColor: Palette.canvasRaised,
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
     maxHeight: '85%',
@@ -208,12 +208,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     padding: 20,
     borderBottomWidth: 1,
-    borderBottomColor: Colors.lightGrey,
+    borderBottomColor: Palette.line,
   },
   title: {
     fontSize: 20,
     fontWeight: '600',
-    color: Colors.darkGrey,
+    color: Palette.ink,
   },
   closeButton: {
     padding: 4,
@@ -229,35 +229,39 @@ const styles = StyleSheet.create({
     width: 240,
     height: 240,
     borderRadius: 120,
-    backgroundColor: Colors.lightGrey,
+    backgroundColor: Palette.canvasRaised,
     alignItems: 'center',
     justifyContent: 'center',
     position: 'relative',
     overflow: 'hidden',
+    borderWidth: 1,
+    borderColor: Palette.line,
   },
   progressFill: {
     position: 'absolute',
     width: '100%',
     height: '100%',
-    backgroundColor: Colors.primary,
+    backgroundColor: Palette.accent,
     opacity: 0.3,
   },
   innerCircle: {
     width: 200,
     height: 200,
     borderRadius: 100,
-    backgroundColor: Colors.white,
+    backgroundColor: Palette.canvasRaised,
     alignItems: 'center',
     justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: Palette.line,
   },
   timerText: {
     fontSize: 48,
     fontWeight: 'bold',
-    color: Colors.darkGrey,
+    color: Palette.ink,
   },
   timerLabel: {
     fontSize: 14,
-    color: Colors.mediumGrey,
+    color: Palette.inkMuted,
     marginTop: 8,
   },
   controls: {
@@ -273,13 +277,13 @@ const styles = StyleSheet.create({
   },
   controlLabel: {
     fontSize: 12,
-    color: Colors.mediumGrey,
+    color: Palette.inkMuted,
   },
   mainButton: {
     width: 72,
     height: 72,
     borderRadius: 36,
-    backgroundColor: Colors.primary,
+    backgroundColor: Palette.accent,
     alignItems: 'center',
     justifyContent: 'center',
     shadowColor: '#000',
@@ -289,7 +293,7 @@ const styles = StyleSheet.create({
     elevation: 4,
   },
   mainButtonPause: {
-    backgroundColor: Colors.warning,
+    backgroundColor: Palette.warn,
   },
   resetButton: {
     flexDirection: 'row',
@@ -298,13 +302,15 @@ const styles = StyleSheet.create({
     gap: 8,
     padding: 12,
     borderRadius: 8,
-    backgroundColor: Colors.lightGrey,
+    backgroundColor: Palette.canvasRaised,
     marginBottom: 24,
+    borderWidth: 1,
+    borderColor: Palette.line,
   },
   resetText: {
     fontSize: 16,
     fontWeight: '600',
-    color: Colors.primary,
+    color: Palette.accent,
   },
   presets: {
     gap: 12,
@@ -312,7 +318,7 @@ const styles = StyleSheet.create({
   presetsLabel: {
     fontSize: 14,
     fontWeight: '600',
-    color: Colors.mediumGrey,
+    color: Palette.inkMuted,
   },
   presetsButtons: {
     flexDirection: 'row',
@@ -323,13 +329,13 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 8,
     borderRadius: 20,
-    backgroundColor: Colors.lightGrey,
+    backgroundColor: Palette.canvasRaised,
     borderWidth: 1,
-    borderColor: Colors.lightGrey,
+    borderColor: Palette.line,
   },
   presetText: {
     fontSize: 14,
     fontWeight: '500',
-    color: Colors.darkGrey,
+    color: Palette.ink,
   },
 });

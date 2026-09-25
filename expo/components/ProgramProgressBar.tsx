@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { Calendar, Target, TrendingUp } from 'lucide-react-native';
-import { Colors } from '@/constants/colors';
+import { Palette } from '@/constants/theme';
 import type { WorkoutPlan } from '@/types/user';
 
 interface ProgramProgressBarProps {
@@ -43,7 +43,7 @@ export default function ProgramProgressBar({
     >
       <View style={styles.header}>
         <View style={styles.titleContainer}>
-          <Target color={Colors.primary} size={20} />
+          <Target color={Palette.accent} size={20} />
           <Text style={styles.title} numberOfLines={1}>
             {program.goals[0] || 'Training Program'}
           </Text>
@@ -64,14 +64,14 @@ export default function ProgramProgressBar({
 
       <View style={styles.statsRow}>
         <View style={styles.statItem}>
-          <Calendar color={Colors.mediumGrey} size={16} />
+          <Calendar color={Palette.inkMuted} size={16} />
           <Text style={styles.statText}>
             Day {completedWorkouts + 1}/{stats.totalDays}
           </Text>
         </View>
 
         <View style={styles.statItem}>
-          <TrendingUp color={Colors.success} size={16} />
+          <TrendingUp color={Palette.good} size={16} />
           <Text style={styles.statText}>
             {completedWorkouts} completed
           </Text>
@@ -79,7 +79,7 @@ export default function ProgramProgressBar({
 
         {stats.daysRemaining > 0 && (
           <View style={styles.statItem}>
-            <Target color={Colors.warning} size={16} />
+            <Target color={Palette.warn} size={16} />
             <Text style={styles.statText}>
               {stats.daysRemaining} remaining
             </Text>
@@ -98,7 +98,7 @@ export default function ProgramProgressBar({
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: Colors.white,
+    backgroundColor: Palette.canvasRaised,
     borderRadius: 16,
     padding: 16,
     shadowColor: '#000',
@@ -122,19 +122,21 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 16,
     fontWeight: '600',
-    color: Colors.darkGrey,
+    color: Palette.ink,
     flex: 1,
   },
   weekBadge: {
-    backgroundColor: Colors.lightGrey,
+    backgroundColor: Palette.canvasRaised,
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 12,
+    borderWidth: 1,
+    borderColor: Palette.line,
   },
   weekText: {
     fontSize: 12,
     fontWeight: '600',
-    color: Colors.primary,
+    color: Palette.accent,
   },
   progressContainer: {
     flexDirection: 'row',
@@ -145,19 +147,21 @@ const styles = StyleSheet.create({
   progressBarBackground: {
     flex: 1,
     height: 8,
-    backgroundColor: Colors.lightGrey,
+    backgroundColor: Palette.canvasRaised,
     borderRadius: 4,
     overflow: 'hidden',
+    borderWidth: 1,
+    borderColor: Palette.line,
   },
   progressBarFill: {
     height: '100%',
-    backgroundColor: Colors.primary,
+    backgroundColor: Palette.accent,
     borderRadius: 4,
   },
   progressText: {
     fontSize: 14,
     fontWeight: '600',
-    color: Colors.primary,
+    color: Palette.accent,
     minWidth: 40,
     textAlign: 'right',
   },
@@ -173,18 +177,18 @@ const styles = StyleSheet.create({
   },
   statText: {
     fontSize: 13,
-    color: Colors.mediumGrey,
+    color: Palette.inkMuted,
   },
   completeBadge: {
     marginTop: 12,
     padding: 12,
-    backgroundColor: '#E8F5E9',
+    backgroundColor: Palette.accentGlow,
     borderRadius: 8,
     alignItems: 'center',
   },
   completeText: {
     fontSize: 14,
     fontWeight: '600',
-    color: Colors.success,
+    color: Palette.good,
   },
 });

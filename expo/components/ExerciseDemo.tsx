@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Animated, Easing, Image, StyleSheet, Text, View } from 'react-native';
-import { Colors } from '@/constants/colors';
+import { Palette } from '@/constants/theme';
 
 interface ExerciseDemoProps {
   /** Ordered frames of the movement (free-exercise-db ships two: start + end). */
@@ -90,11 +90,15 @@ const styles = StyleSheet.create({
   container: {
     borderRadius: 12,
     overflow: 'hidden',
-    backgroundColor: Colors.white,
+    backgroundColor: Palette.canvasRaised,
+    borderWidth: 1,
+    borderColor: Palette.line,
   },
   frame: {
     borderRadius: 12,
-    backgroundColor: Colors.white,
+    backgroundColor: Palette.canvasRaised,
+    borderWidth: 1,
+    borderColor: Palette.line,
   },
   layer: {
     position: 'absolute',
@@ -111,7 +115,7 @@ const styles = StyleSheet.create({
   badge: {
     fontSize: 11,
     fontWeight: '700',
-    color: Colors.white,
+    color: Palette.ink,
     backgroundColor: 'rgba(0,0,0,0.55)',
     paddingHorizontal: 8,
     paddingVertical: 3,
@@ -123,6 +127,6 @@ const styles = StyleSheet.create({
     bottom: 6,
     right: 10,
     fontSize: 10,
-    color: Colors.mediumGrey,
+    color: Palette.inkMuted,
   },
 });

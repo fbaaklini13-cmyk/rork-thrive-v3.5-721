@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react';
 import { View, Text, StyleSheet, Modal, TouchableOpacity } from 'react-native';
 import { X } from 'lucide-react-native';
-import { Colors } from '@/constants/colors';
+import { Palette } from '@/constants/theme';
 
 interface PlateCalculatorProps {
   visible: boolean;
@@ -45,7 +45,7 @@ export default function PlateCalculator({
       if (count > 0) {
         plates.push({
           weight: plateWeight,
-          color: plateColors[plateWeight] || Colors.mediumGrey,
+          color: plateColors[plateWeight] || Palette.inkMuted,
           count,
         });
         remaining -= count * plateWeight;
@@ -62,7 +62,7 @@ export default function PlateCalculator({
           <View style={styles.header}>
             <Text style={styles.title}>Plate Calculator</Text>
             <TouchableOpacity onPress={onClose} style={styles.closeButton}>
-              <X color={Colors.darkGrey} size={24} />
+              <X color={Palette.ink} size={24} />
             </TouchableOpacity>
           </View>
 
@@ -146,7 +146,7 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-end',
   },
   container: {
-    backgroundColor: Colors.white,
+    backgroundColor: Palette.canvasRaised,
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
     maxHeight: '85%',
@@ -157,12 +157,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     padding: 20,
     borderBottomWidth: 1,
-    borderBottomColor: Colors.lightGrey,
+    borderBottomColor: Palette.line,
   },
   title: {
     fontSize: 20,
     fontWeight: '600',
-    color: Colors.darkGrey,
+    color: Palette.ink,
   },
   closeButton: {
     padding: 4,
@@ -176,30 +176,34 @@ const styles = StyleSheet.create({
   },
   weightLabel: {
     fontSize: 14,
-    color: Colors.mediumGrey,
+    color: Palette.inkMuted,
     marginBottom: 4,
   },
   weightValue: {
     fontSize: 36,
     fontWeight: 'bold',
-    color: Colors.primary,
+    color: Palette.accent,
   },
   barDisplay: {
-    backgroundColor: Colors.lightGrey,
+    backgroundColor: Palette.canvasRaised,
     padding: 12,
     borderRadius: 8,
     marginBottom: 12,
+    borderWidth: 1,
+    borderColor: Palette.line,
   },
   perSideDisplay: {
-    backgroundColor: Colors.primary + '20',
+    backgroundColor: Palette.canvasRaised + '20',
     padding: 12,
     borderRadius: 8,
     marginBottom: 16,
+    borderWidth: 1,
+    borderColor: Palette.line,
   },
   sectionTitle: {
     fontSize: 16,
     fontWeight: '600',
-    color: Colors.darkGrey,
+    color: Palette.ink,
     marginBottom: 8,
   },
   platesContainer: {
@@ -216,11 +220,11 @@ const styles = StyleSheet.create({
     height: 20,
     borderRadius: 10,
     borderWidth: 1,
-    borderColor: Colors.mediumGrey,
+    borderColor: Palette.lineStrong,
   },
   plateText: {
     fontSize: 15,
-    color: Colors.darkGrey,
+    color: Palette.ink,
     fontWeight: '500',
   },
   emptyState: {
@@ -229,17 +233,17 @@ const styles = StyleSheet.create({
   },
   emptyText: {
     fontSize: 16,
-    color: Colors.mediumGrey,
+    color: Palette.inkMuted,
   },
   warning: {
-    backgroundColor: '#FFF3E0',
+    backgroundColor: Palette.warn + '1F',
     padding: 12,
     borderRadius: 8,
     marginBottom: 16,
   },
   warningText: {
     fontSize: 13,
-    color: Colors.warning,
+    color: Palette.warn,
   },
   visualization: {
     marginTop: 16,
@@ -248,7 +252,7 @@ const styles = StyleSheet.create({
   barLine: {
     width: '100%',
     height: 8,
-    backgroundColor: Colors.mediumGrey,
+    backgroundColor: Palette.lineStrong,
     borderRadius: 4,
     marginBottom: 12,
   },
@@ -264,6 +268,6 @@ const styles = StyleSheet.create({
     width: 12,
     borderRadius: 2,
     borderWidth: 1,
-    borderColor: Colors.mediumGrey,
+    borderColor: Palette.lineStrong,
   },
 });

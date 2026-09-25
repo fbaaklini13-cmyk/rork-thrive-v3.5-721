@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
-import { Colors } from '@/constants/colors';
+import { Palette } from '@/constants/theme';
 import { shouldShowOnFront, shouldShowOnBack, getMuscleColor } from '@/constants/muscle-mapping';
 
 interface MuscleHeatmapViewProps {
@@ -118,7 +118,7 @@ export function MuscleHeatmapView({ primaryMuscle, secondaryMuscles = [] }: Musc
         {secondaryMuscles.length > 0 && (
           <View style={styles.legendRow}>
             <View style={styles.legendItem}>
-              <View style={[styles.legendDot, { backgroundColor: Colors.mediumGrey, opacity: 0.4 }]} />
+              <View style={[styles.legendDot, { backgroundColor: Palette.inkMuted, opacity: 0.4 }]} />
               <Text style={styles.legendText}>
                 Secondary: {secondaryMuscles.join(', ')}
               </Text>
@@ -132,14 +132,16 @@ export function MuscleHeatmapView({ primaryMuscle, secondaryMuscles = [] }: Musc
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: Colors.white,
+    backgroundColor: Palette.canvasRaised,
     padding: 20,
     borderRadius: 16,
+    borderWidth: 1,
+    borderColor: Palette.line,
   },
   title: {
     fontSize: 18,
     fontWeight: '600',
-    color: Colors.darkGrey,
+    color: Palette.ink,
     marginBottom: 16,
   },
   heatmapContainer: {
@@ -157,16 +159,18 @@ const styles = StyleSheet.create({
   bodyViewLabel: {
     fontSize: 14,
     fontWeight: '600',
-    color: Colors.mediumGrey,
+    color: Palette.inkMuted,
     marginBottom: 8,
   },
   bodyImageContainer: {
     width: 140,
     height: 300,
     position: 'relative',
-    backgroundColor: Colors.lightGrey,
+    backgroundColor: Palette.canvasRaised,
     borderRadius: 12,
     overflow: 'hidden',
+    borderWidth: 1,
+    borderColor: Palette.line,
   },
   bodyOutline: {
     flex: 1,
@@ -194,7 +198,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 6,
-    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+    backgroundColor: Palette.line,
     paddingVertical: 4,
     paddingHorizontal: 8,
     borderRadius: 12,
@@ -207,7 +211,7 @@ const styles = StyleSheet.create({
   muscleLabelText: {
     fontSize: 11,
     fontWeight: '600',
-    color: Colors.darkGrey,
+    color: Palette.ink,
     textTransform: 'capitalize',
   },
   legend: {
@@ -230,7 +234,7 @@ const styles = StyleSheet.create({
   },
   legendText: {
     fontSize: 14,
-    color: Colors.darkGrey,
+    color: Palette.ink,
     textTransform: 'capitalize',
   },
 });

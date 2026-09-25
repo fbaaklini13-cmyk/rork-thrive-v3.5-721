@@ -7,6 +7,7 @@ import {
   ScrollView,
 } from 'react-native';
 import { useUserProfile } from '@/hooks/user-profile-store';
+import { Palette } from '@/constants/theme';
 import Svg, { Path, G, Defs, LinearGradient, Stop, Ellipse } from 'react-native-svg';
 
 const { width, height } = Dimensions.get('window');
@@ -765,7 +766,7 @@ function inferMuscleGroups(exerciseName: string): MuscleGroup[] {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#000',
+    backgroundColor: Palette.canvas,
   },
   scrollContent: {
     paddingTop: 20,
@@ -783,7 +784,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   viewLabel: {
-    color: '#888',
+    color: Palette.inkMuted,
     fontSize: 14,
     fontWeight: '600' as const,
     marginBottom: 10,
@@ -808,12 +809,16 @@ const styles = StyleSheet.create({
     borderRadius: 9,
   },
   legendText: {
-    color: '#888',
+    color: Palette.inkMuted,
     fontSize: 13,
     fontWeight: '500' as const,
   },
+  // 25 Sep: was pure #000, a black slab inside the dark-green canvas.
   compactContainer: {
-    backgroundColor: '#000',
+    backgroundColor: Palette.canvasRaised,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: Palette.line,
     paddingVertical: 20,
   },
   compactEmptyState: {

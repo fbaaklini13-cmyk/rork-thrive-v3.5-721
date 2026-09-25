@@ -9,7 +9,7 @@ import {
 } from 'react-native';
 import { Lock, Sparkles } from 'lucide-react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import { Colors } from '@/constants/colors';
+import { Palette } from '@/constants/theme';
 
 interface PremiumFeatureCardProps {
   title: string;
@@ -125,7 +125,7 @@ export default function PremiumFeatureCard({
         
         <View style={styles.iconContainer}>
           <LinearGradient
-            colors={isPremium ? [Colors.primary + '20', Colors.secondary + '20'] : ['#F4F6F7', '#F4F6F7']}
+            colors={isPremium ? [Palette.accent + '20', Palette.accent + '20'] : [Palette.canvasRaised, Palette.canvasRaised]}
             style={styles.iconGradient}
           >
             {icon}
@@ -138,12 +138,12 @@ export default function PremiumFeatureCard({
                   },
                 ]}
               >
-                <Lock size={20} color={Colors.white} />
+                <Lock size={20} color={Palette.canvas} />
               </Animated.View>
             )}
             {isPremium && (
               <View style={styles.sparkleIcon}>
-                <Sparkles size={12} color={Colors.primary} />
+                <Sparkles size={12} color={Palette.accent} />
               </View>
             )}
           </LinearGradient>
@@ -156,7 +156,7 @@ export default function PremiumFeatureCard({
           {!isPremium && (
             <View style={styles.premiumBadgeContainer}>
               <LinearGradient
-                colors={[Colors.warning, Colors.warning + 'DD']}
+                colors={[Palette.warn, Palette.warn + 'DD']}
                 style={styles.premiumBadgeGradient}
                 start={{ x: 0, y: 0 }}
                 end={{ x: 1, y: 0 }}
@@ -174,23 +174,23 @@ export default function PremiumFeatureCard({
 const styles = StyleSheet.create({
   card: {
     flexDirection: 'row',
-    backgroundColor: Colors.white,
+    backgroundColor: Palette.canvasRaised,
     borderRadius: 16,
     padding: 16,
     marginBottom: 12,
-    shadowColor: Colors.primary,
+    shadowColor: Palette.accent,
     shadowOffset: { width: 0, height: 3 },
     shadowOpacity: 0.12,
     shadowRadius: 8,
     elevation: 5,
     borderWidth: 1,
-    borderColor: Colors.primary + '08',
+    borderColor: Palette.accent + '08',
     overflow: 'hidden',
     position: 'relative',
   },
   lockedCard: {
     opacity: 0.85,
-    borderColor: Colors.mediumGrey + '20',
+    borderColor: Palette.lineStrong + '20',
   },
 
   shimmerEffect: {
@@ -223,9 +223,11 @@ const styles = StyleSheet.create({
     width: 52,
     height: 52,
     borderRadius: 26,
-    backgroundColor: Colors.primary + 'DD',
+    backgroundColor: Palette.canvasRaised + 'DD',
     justifyContent: 'center',
     alignItems: 'center',
+    borderWidth: 1,
+    borderColor: Palette.line,
   },
   sparkleIcon: {
     position: 'absolute',
@@ -239,13 +241,13 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 16,
     fontWeight: '600' as const,
-    color: Colors.darkGrey,
+    color: Palette.ink,
     marginBottom: 4,
     letterSpacing: -0.3,
   },
   description: {
     fontSize: 14,
-    color: Colors.mediumGrey,
+    color: Palette.inkMuted,
     letterSpacing: 0.2,
   },
   lockedText: {
@@ -263,7 +265,7 @@ const styles = StyleSheet.create({
   premiumBadge: {
     fontSize: 10,
     fontWeight: 'bold' as const,
-    color: Colors.white,
+    color: Palette.ink,
     letterSpacing: 0.5,
   },
 });

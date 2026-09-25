@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
-import { Colors } from '@/constants/colors';
+import { Palette } from '@/constants/theme';
 
 interface MuscleGroupGridProps {
   selectedMuscle: string | null;
@@ -89,7 +89,7 @@ export function MuscleGroupGrid({ selectedMuscle, onSelectMuscle }: MuscleGroupG
 const styles = StyleSheet.create({
   container: {
     paddingVertical: 8,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: Palette.canvasRaised,
   },
   grid: {
     flexDirection: 'row',
@@ -101,7 +101,7 @@ const styles = StyleSheet.create({
   gridItem: {
     width: '31%',
     aspectRatio: 1,
-    backgroundColor: '#fff',
+    backgroundColor: Palette.canvasRaised,
     borderRadius: 16,
     overflow: 'hidden',
     elevation: 1,
@@ -113,7 +113,7 @@ const styles = StyleSheet.create({
     borderColor: 'transparent',
   },
   gridItemSelected: {
-    borderColor: Colors.primary,
+    borderColor: Palette.accent,
     elevation: 3,
     shadowOpacity: 0.15,
     transform: [{ scale: 0.98 }],
@@ -137,9 +137,9 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     fontSize: 12,
     fontWeight: '700',
-    color: '#333',
+    color: Palette.ink,
   },
   muscleNameSelected: {
-    color: Colors.primary,
+    color: Palette.accent,
   },
 });

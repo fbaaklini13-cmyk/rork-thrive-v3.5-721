@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, Text, StyleSheet, ScrollView } from 'react-native';
-import { Colors } from '@/constants/colors';
+import { Palette } from '@/constants/theme';
 import { shouldShowOnFront, shouldShowOnBack, getMuscleColor } from '@/constants/muscle-mapping';
 
 interface MuscleHeatmapDetailProps {
@@ -391,7 +391,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 18,
     fontWeight: '600',
-    color: Colors.darkGrey,
+    color: Palette.ink,
     marginBottom: 24,
   },
   diagramsScrollContainer: {
@@ -409,18 +409,18 @@ const styles = StyleSheet.create({
   viewLabel: {
     fontSize: 16,
     fontWeight: '600',
-    color: Colors.darkGrey,
+    color: Palette.ink,
     marginBottom: 16,
   },
   bodyDiagram: {
     width: 160,
     height: 380,
-    backgroundColor: '#F5F5F5',
+    backgroundColor: Palette.canvasRaised,
     borderRadius: 80,
     position: 'relative',
     overflow: 'hidden',
     borderWidth: 2,
-    borderColor: '#E0E0E0',
+    borderColor: Palette.line,
   },
   bodyPart: {
     position: 'absolute',
@@ -434,7 +434,7 @@ const styles = StyleSheet.create({
     width: 44,
     height: 44,
     borderRadius: 22,
-    backgroundColor: '#E8E8E8',
+    backgroundColor: Palette.line,
   },
   
   // Neck
@@ -684,10 +684,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 10,
     padding: 12,
-    backgroundColor: '#FAFAFA',
+    backgroundColor: Palette.canvasRaised,
     borderRadius: 10,
     borderWidth: 1,
-    borderColor: '#ECECEC',
+    borderColor: Palette.line,
   },
   muscleDot: {
     width: 14,
@@ -698,25 +698,27 @@ const styles = StyleSheet.create({
     flex: 1,
     fontSize: 13,
     fontWeight: '500',
-    color: Colors.darkGrey,
+    color: Palette.ink,
     textTransform: 'capitalize',
   },
   primaryBadge: {
     fontSize: 10,
     fontWeight: '700',
-    color: Colors.primary,
-    backgroundColor: Colors.primary + '15',
+    color: Palette.accent,
+    backgroundColor: Palette.canvasRaised + '15',
     paddingHorizontal: 8,
     paddingVertical: 3,
     borderRadius: 6,
     overflow: 'hidden',
+    borderWidth: 1,
+    borderColor: Palette.line,
   },
   
   // Summary
   summary: {
     marginTop: 24,
     padding: 16,
-    backgroundColor: '#FAFAFA',
+    backgroundColor: Palette.canvasRaised,
     borderRadius: 12,
     gap: 12,
   },
@@ -728,13 +730,13 @@ const styles = StyleSheet.create({
   summaryLabel: {
     fontSize: 15,
     fontWeight: '700',
-    color: Colors.darkGrey,
+    color: Palette.ink,
     minWidth: 90,
   },
   summaryValue: {
     flex: 1,
     fontSize: 15,
-    color: Colors.mediumGrey,
+    color: Palette.inkMuted,
     textTransform: 'capitalize',
   },
 });

@@ -10,7 +10,7 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import { X, Download, FileText, Database } from 'lucide-react-native';
-import { Colors } from '@/constants/colors';
+import { Palette } from '@/constants/theme';
 import { useUserProfile } from '@/hooks/user-profile-store';
 import { DataExportService } from '@/services/data-export-service';
 
@@ -87,7 +87,7 @@ export default function DataExportModal({ visible, onClose }: DataExportModalPro
           <View style={styles.header}>
             <Text style={styles.title}>Export Data</Text>
             <TouchableOpacity onPress={onClose} style={styles.closeButton}>
-              <X color={Colors.darkGrey} size={24} />
+              <X color={Palette.ink} size={24} />
             </TouchableOpacity>
           </View>
 
@@ -104,7 +104,7 @@ export default function DataExportModal({ visible, onClose }: DataExportModalPro
                 disabled={isExporting}
               >
                 <View style={styles.exportIcon}>
-                  <Download color={Colors.primary} size={24} />
+                  <Download color={Palette.accent} size={24} />
                 </View>
                 <View style={styles.exportInfo}>
                   <Text style={styles.exportTitle}>Workout Logs</Text>
@@ -120,7 +120,7 @@ export default function DataExportModal({ visible, onClose }: DataExportModalPro
                 disabled={isExporting}
               >
                 <View style={styles.exportIcon}>
-                  <FileText color={Colors.secondary} size={24} />
+                  <FileText color={Palette.accent} size={24} />
                 </View>
                 <View style={styles.exportInfo}>
                   <Text style={styles.exportTitle}>Body Measurements</Text>
@@ -136,7 +136,7 @@ export default function DataExportModal({ visible, onClose }: DataExportModalPro
                 disabled={isExporting}
               >
                 <View style={styles.exportIcon}>
-                  <FileText color={Colors.success} size={24} />
+                  <FileText color={Palette.good} size={24} />
                 </View>
                 <View style={styles.exportInfo}>
                   <Text style={styles.exportTitle}>Weekly Check-ins</Text>
@@ -152,7 +152,7 @@ export default function DataExportModal({ visible, onClose }: DataExportModalPro
                 disabled={isExporting}
               >
                 <View style={styles.exportIcon}>
-                  <Database color={Colors.white} size={24} />
+                  <Database color={Palette.canvas} size={24} />
                 </View>
                 <View style={styles.exportInfo}>
                   <Text style={[styles.exportTitle, styles.exportTitleWhite]}>
@@ -167,7 +167,7 @@ export default function DataExportModal({ visible, onClose }: DataExportModalPro
 
             {isExporting && (
               <View style={styles.loadingContainer}>
-                <ActivityIndicator size="large" color={Colors.primary} />
+                <ActivityIndicator size="large" color={Palette.accent} />
                 <Text style={styles.loadingText}>Exporting data...</Text>
               </View>
             )}
@@ -185,7 +185,7 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-end',
   },
   container: {
-    backgroundColor: Colors.white,
+    backgroundColor: Palette.canvasRaised,
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
     maxHeight: '80%',
@@ -196,12 +196,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     padding: 20,
     borderBottomWidth: 1,
-    borderBottomColor: Colors.lightGrey,
+    borderBottomColor: Palette.line,
   },
   title: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: Colors.darkGrey,
+    color: Palette.ink,
   },
   closeButton: {
     padding: 4,
@@ -211,7 +211,7 @@ const styles = StyleSheet.create({
   },
   description: {
     fontSize: 14,
-    color: Colors.mediumGrey,
+    color: Palette.inkMuted,
     lineHeight: 20,
     marginBottom: 24,
   },
@@ -222,20 +222,24 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     padding: 16,
-    backgroundColor: Colors.lightGrey,
+    backgroundColor: Palette.canvasRaised,
     borderRadius: 12,
     gap: 16,
+    borderWidth: 1,
+    borderColor: Palette.line,
   },
   exportCardPrimary: {
-    backgroundColor: Colors.primary,
+    backgroundColor: Palette.canvasRaised,
   },
   exportIcon: {
     width: 48,
     height: 48,
     borderRadius: 24,
-    backgroundColor: Colors.white,
+    backgroundColor: Palette.canvasRaised,
     justifyContent: 'center',
     alignItems: 'center',
+    borderWidth: 1,
+    borderColor: Palette.line,
   },
   exportInfo: {
     flex: 1,
@@ -243,15 +247,15 @@ const styles = StyleSheet.create({
   exportTitle: {
     fontSize: 16,
     fontWeight: '600',
-    color: Colors.darkGrey,
+    color: Palette.ink,
     marginBottom: 4,
   },
   exportTitleWhite: {
-    color: Colors.white,
+    color: Palette.ink,
   },
   exportSubtitle: {
     fontSize: 13,
-    color: Colors.mediumGrey,
+    color: Palette.inkMuted,
   },
   exportSubtitleWhite: {
     color: 'rgba(255, 255, 255, 0.8)',
@@ -263,6 +267,6 @@ const styles = StyleSheet.create({
   },
   loadingText: {
     fontSize: 14,
-    color: Colors.mediumGrey,
+    color: Palette.inkMuted,
   },
 });

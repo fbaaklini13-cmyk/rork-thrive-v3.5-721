@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import Svg, { Path, G } from 'react-native-svg';
-import { Colors } from '@/constants/colors';
+import { Palette } from '@/constants/theme';
 
 interface AnatomicalMuscleMapProps {
   primaryMuscle: string;
@@ -25,7 +25,7 @@ export function AnatomicalMuscleMap({ primaryMuscle, secondaryMuscles = [] }: An
   };
 
   const getMuscleStyle = (muscleKeywords: string[]) => {
-    if (!isActive(muscleKeywords)) return { fill: '#E8E8E8', opacity: 1 };
+    if (!isActive(muscleKeywords)) return { fill: Palette.lineStrong, opacity: 1 };
     return {
       fill: '#FF4444',
       opacity: isPrimary(muscleKeywords) ? 1 : 0.6
@@ -241,7 +241,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 20,
     fontWeight: '700',
-    color: Colors.darkGrey,
+    color: Palette.ink,
     marginBottom: 24,
   },
   bodyViews: {
@@ -256,15 +256,15 @@ const styles = StyleSheet.create({
   viewLabel: {
     fontSize: 16,
     fontWeight: '600',
-    color: Colors.darkGrey,
+    color: Palette.ink,
     marginBottom: 12,
   },
   svgContainer: {
-    backgroundColor: '#F8F8F8',
+    backgroundColor: Palette.canvasRaised,
     borderRadius: 12,
     padding: 10,
     borderWidth: 1,
-    borderColor: '#E0E0E0',
+    borderColor: Palette.line,
   },
   legend: {
     gap: 12,
@@ -274,7 +274,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 10,
-    backgroundColor: '#F8F8F8',
+    backgroundColor: Palette.canvasRaised,
     padding: 12,
     borderRadius: 10,
   },
@@ -286,14 +286,14 @@ const styles = StyleSheet.create({
   legendLabel: {
     fontSize: 13,
     fontWeight: '700',
-    color: Colors.darkGrey,
+    color: Palette.ink,
     minWidth: 75,
   },
   legendText: {
     flex: 1,
     fontSize: 13,
     fontWeight: '500',
-    color: Colors.mediumGrey,
+    color: Palette.inkMuted,
     textTransform: 'capitalize',
   },
 });

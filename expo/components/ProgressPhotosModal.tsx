@@ -11,7 +11,7 @@ import {
 } from 'react-native';
 import { X, Camera, Save } from 'lucide-react-native';
 import * as ImagePicker from 'expo-image-picker';
-import { Colors } from '@/constants/colors';
+import { Palette } from '@/constants/theme';
 import type { ProgressPhoto } from '@/types/user';
 
 interface ProgressPhotosModalProps {
@@ -168,7 +168,7 @@ export default function ProgressPhotosModal({
             <Text style={styles.subtitle}>Track your transformation</Text>
           </View>
           <TouchableOpacity style={styles.closeButton} onPress={onClose}>
-            <X color={Colors.darkGrey} size={24} />
+            <X color={Palette.ink} size={24} />
           </TouchableOpacity>
         </View>
 
@@ -184,7 +184,7 @@ export default function ProgressPhotosModal({
                   <Image source={{ uri: frontUri }} style={styles.photoImage} />
                 ) : (
                   <>
-                    <Camera color={Colors.mediumGrey} size={32} />
+                    <Camera color={Palette.inkMuted} size={32} />
                     <Text style={styles.photoButtonText}>Add Photo</Text>
                   </>
                 )}
@@ -201,7 +201,7 @@ export default function ProgressPhotosModal({
                   <Image source={{ uri: sideUri }} style={styles.photoImage} />
                 ) : (
                   <>
-                    <Camera color={Colors.mediumGrey} size={32} />
+                    <Camera color={Palette.inkMuted} size={32} />
                     <Text style={styles.photoButtonText}>Add Photo</Text>
                   </>
                 )}
@@ -218,7 +218,7 @@ export default function ProgressPhotosModal({
                   <Image source={{ uri: backUri }} style={styles.photoImage} />
                 ) : (
                   <>
-                    <Camera color={Colors.mediumGrey} size={32} />
+                    <Camera color={Palette.inkMuted} size={32} />
                     <Text style={styles.photoButtonText}>Add Photo</Text>
                   </>
                 )}
@@ -241,7 +241,7 @@ export default function ProgressPhotosModal({
             onPress={handleSave}
             disabled={isSaving}
           >
-            <Save color={Colors.white} size={20} />
+            <Save color={Palette.canvas} size={20} />
             <Text style={styles.saveButtonText}>
               {isSaving ? 'Saving...' : 'Save Photos'}
             </Text>
@@ -255,7 +255,7 @@ export default function ProgressPhotosModal({
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.white,
+    backgroundColor: Palette.canvasRaised,
   },
   header: {
     flexDirection: 'row',
@@ -264,7 +264,7 @@ const styles = StyleSheet.create({
     padding: 20,
     paddingTop: 60,
     borderBottomWidth: 1,
-    borderBottomColor: Colors.lightGrey,
+    borderBottomColor: Palette.line,
   },
   headerContent: {
     flex: 1,
@@ -272,12 +272,12 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: Colors.darkGrey,
+    color: Palette.ink,
     marginBottom: 4,
   },
   subtitle: {
     fontSize: 14,
-    color: Colors.mediumGrey,
+    color: Palette.inkMuted,
   },
   closeButton: {
     padding: 8,
@@ -295,16 +295,18 @@ const styles = StyleSheet.create({
   photoLabel: {
     fontSize: 16,
     fontWeight: '600',
-    color: Colors.darkGrey,
+    color: Palette.ink,
   },
   photoButton: {
     height: 240,
-    backgroundColor: Colors.lightGrey,
+    backgroundColor: Palette.canvasRaised,
     borderRadius: 12,
     justifyContent: 'center',
     alignItems: 'center',
     gap: 8,
     overflow: 'hidden',
+    borderWidth: 1,
+    borderColor: Palette.line,
   },
   photoImage: {
     width: '100%',
@@ -313,44 +315,46 @@ const styles = StyleSheet.create({
   },
   photoButtonText: {
     fontSize: 14,
-    color: Colors.mediumGrey,
+    color: Palette.inkMuted,
     fontWeight: '500',
   },
   tipsCard: {
     marginTop: 24,
     padding: 16,
-    backgroundColor: Colors.lightGrey,
+    backgroundColor: Palette.canvasRaised,
     borderRadius: 12,
     gap: 8,
+    borderWidth: 1,
+    borderColor: Palette.line,
   },
   tipsTitle: {
     fontSize: 16,
     fontWeight: '600',
-    color: Colors.darkGrey,
+    color: Palette.ink,
     marginBottom: 4,
   },
   tipText: {
     fontSize: 14,
-    color: Colors.mediumGrey,
+    color: Palette.inkMuted,
     lineHeight: 20,
   },
   footer: {
     padding: 20,
     borderTopWidth: 1,
-    borderTopColor: Colors.lightGrey,
+    borderTopColor: Palette.line,
   },
   saveButton: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     gap: 8,
-    backgroundColor: Colors.primary,
+    backgroundColor: Palette.accent,
     padding: 16,
     borderRadius: 12,
   },
   saveButtonText: {
     fontSize: 16,
     fontWeight: '600',
-    color: Colors.white,
+    color: Palette.canvas,
   },
 });
