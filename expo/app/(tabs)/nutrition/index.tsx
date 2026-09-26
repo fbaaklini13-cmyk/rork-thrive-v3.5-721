@@ -34,6 +34,10 @@ export default function NutritionScreen() {
   const [showAddMeal, setShowAddMeal] = useState<boolean>(false);
   const [selectedMeal, setSelectedMeal] = useState<NutritionEntry['meal']>('breakfast');
   const [mealDescription, setMealDescription] = useState<string>('');
+  // 26 Sep: with AI off (the default since consent), meals had no way to carry calories,
+  // so 'consumed' stayed at 0. A typed number works with or without AI; AI fills it
+  // only when the field is left empty.
+  const [mealCalories, setMealCalories] = useState<string>('');
   const [isAnalyzing, setIsAnalyzing] = useState<boolean>(false);
   const [pickedPhotoUri, setPickedPhotoUri] = useState<string | undefined>(undefined);
   const [pickedPhotoBase64, setPickedPhotoBase64] = useState<string | undefined>(undefined);
@@ -120,6 +124,12 @@ export default function NutritionScreen() {
       description: mealDescription,
       photoUri: pickedPhotoUri,
     };
+    const typed = parseInt(mealCalories, 10);
+    if (mealCalories.trim() && (Number.isNaN(typed) || typed < 0 || typed > 5000)) {
+      Alert.alert('Calories', 'Enter a number between 0 and 5,000, or leave it empty.');
+      return;
+    }
+    if (!Number.isNaN(typed)) entry.calories = typed;
 
     // aiEnabled alone predates any disclosure; analysis also needs recorded consent.
     if (profile.aiEnabled && (await requestAIConsent())) {
@@ -140,7 +150,7 @@ export default function NutritionScreen() {
         entry.aiAnalysis = analysis;
 
         // Use structured data from AI analysis
-        if (analysis.calories) {
+        if (analysis.calories && entry.calories === undefined) {
           entry.calories = analysis.calories;
         }
 
@@ -160,10 +170,11 @@ export default function NutritionScreen() {
 
     await addNutritionEntry(entry);
     setMealDescription('');
+    setMealCalories('');
     setPickedPhotoUri(undefined);
     setPickedPhotoBase64(undefined);
     setShowAddMeal(false);
-  }, [mealDescription, pickedPhotoUri, pickedPhotoBase64, profile.aiEnabled, selectedMeal, today, addNutritionEntry, profile, calculateDailyCalories, requestAIConsent]);
+  }, [mealDescription, mealCalories, pickedPhotoUri, pickedPhotoBase64, profile.aiEnabled, selectedMeal, today, addNutritionEntry, profile, calculateDailyCalories, requestAIConsent]);
 
   return (
     <SafeAreaView edges={['top']} style={styles.safe}>
@@ -292,6 +303,18 @@ export default function NutritionScreen() {
             multiline
             numberOfLines={3}
             testID="mealDescriptionInput"
+          />
+
+          <TextInput
+            style={[styles.mealInput, styles.caloriesInput]}
+            placeholder={profile.aiEnabled ? 'Calories (optional; AI estimates if empty)' : 'Calories (optional)'}
+            placeholderTextColor={Palette.inkMuted}
+            value={mealCalories}
+            onChangeText={(t) => setMealCalories(t.replace(/[^0-9]/g, ''))}
+            keyboardType="number-pad"
+            maxLength={4}
+            accessibilityLabel="Calories"
+            testID="mealCaloriesInput"
           />
 
           <View style={styles.addMealActions}>
@@ -506,6 +529,7 @@ const styles = StyleSheet.create({
     textAlignVertical: 'top',
     marginBottom: Space.lg,
   },
+  caloriesInput: { minHeight: 0, marginTop: -Space.sm },
 
   addMealActions: { flexDirection: 'row', gap: Space.md },
   cancelButton: {
