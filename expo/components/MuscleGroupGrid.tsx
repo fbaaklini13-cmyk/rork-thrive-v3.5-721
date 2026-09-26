@@ -11,47 +11,47 @@ const MUSCLE_GROUPS = [
   {
     name: 'Triceps',
     key: 'triceps',
-    image: 'https://r2-pub.rork.com/generated-images/45e30bb1-7c7c-4046-9181-ccd08b923bfe.png',
+    image: require('../assets/images/muscles/triceps.jpg'),
   },
   {
     name: 'Chest',
     key: 'chest',
-    image: 'https://r2-pub.rork.com/generated-images/d37f3d8a-04c1-4172-9d6b-c949e50e07b9.png',
+    image: require('../assets/images/muscles/chest.jpg'),
   },
   {
     name: 'Shoulders',
     key: 'shoulders',
-    image: 'https://r2-pub.rork.com/generated-images/7510ae71-9074-4d20-97ec-0368514a4949.png',
+    image: require('../assets/images/muscles/shoulders.jpg'),
   },
   {
     name: 'Biceps',
     key: 'biceps',
-    image: 'https://r2-pub.rork.com/generated-images/c56060be-a75e-4188-9c64-4627eac05a53.png',
+    image: require('../assets/images/muscles/biceps.jpg'),
   },
   {
     name: 'Back',
     key: 'back',
-    image: 'https://r2-pub.rork.com/generated-images/748cd2f6-2dbf-4de7-a849-a8c4eb2c811c.png',
+    image: require('../assets/images/muscles/back.jpg'),
   },
   {
     name: 'Abs',
     key: 'abdominals',
-    image: 'https://r2-pub.rork.com/generated-images/e61d4def-c5a0-4695-82b7-c5702b2770de.png',
+    image: require('../assets/images/muscles/abs.jpg'),
   },
   {
     name: 'Quadriceps',
     key: 'quadriceps',
-    image: 'https://r2-pub.rork.com/generated-images/ab6edc43-df94-43c1-aff3-9e0795b7f02f.png',
+    image: require('../assets/images/muscles/quadriceps.jpg'),
   },
   {
     name: 'Hamstrings',
     key: 'hamstrings',
-    image: 'https://r2-pub.rork.com/generated-images/45cdc2df-c2c4-498d-afc8-1ffa73f32b19.png',
+    image: require('../assets/images/muscles/hamstrings.jpg'),
   },
   {
     name: 'Glutes',
     key: 'glutes',
-    image: 'https://r2-pub.rork.com/generated-images/51720828-e1a9-460f-a79d-0db439089493.png',
+    image: require('../assets/images/muscles/glutes.jpg'),
   },
 ];
 
@@ -70,7 +70,7 @@ export function MuscleGroupGrid({ selectedMuscle, onSelectMuscle }: MuscleGroupG
             >
               <View style={styles.imageContainer}>
                 <Image
-                  source={{ uri: group.image }}
+                  source={group.image}
                   style={styles.muscleImage}
                   resizeMode="contain"
                 />
