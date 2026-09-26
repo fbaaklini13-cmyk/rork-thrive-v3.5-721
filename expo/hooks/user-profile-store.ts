@@ -6,6 +6,7 @@ import * as Linking from 'expo-linking';
 import type { UserProfile, NutritionEntry, WorkoutPlan, ChatMessage, WorkoutLog, WeeklyCheckIn, BodyScan, Recipe, BodyMeasurement, ProgressPhoto, Achievement } from '@/types/user';
 import type { AuthChangeEvent, Session } from '@supabase/supabase-js';
 import { supabase } from '@/lib/supabase';
+import { computeCalorieTarget } from '@/lib/calorie-target';
 import { deleteAccount as runDeleteAccount, type DeleteAccountResult } from '@/lib/delete-account';
 import { signInWithAppleNative, type AppleSignInResult } from '@/lib/apple-sign-in';
 import { consentRevoke } from '@/lib/ai-consent';
@@ -265,49 +266,11 @@ export const [UserProfileProvider, useUserProfile] = createContextHook(() => {
     return profile.weight / (heightInM * heightInM);
   };
 
-  // Calculate daily calorie needs with weight goals
+  // Daily calorie target, with the pace cap and safe floor (lib/calorie-target.ts).
+  const calculateCalorieTarget = () => computeCalorieTarget(profile);
   const calculateDailyCalories = () => {
-    if (!profile.age || !profile.weight || !profile.height || !profile.gender) return null;
-
-    // Mifflin-St Jeor Equation
-    let bmr: number;
-    if (profile.gender === 'male') {
-      bmr = 10 * profile.weight + 6.25 * profile.height - 5 * profile.age + 5;
-    } else {
-      bmr = 10 * profile.weight + 6.25 * profile.height - 5 * profile.age - 161;
-    }
-
-    // Activity multiplier
-    const activityMultipliers = {
-      sedentary: 1.2,
-      light: 1.375,
-      moderate: 1.55,
-      active: 1.725,
-      'very-active': 1.9,
-    };
-
-    const multiplier = activityMultipliers[profile.activityLevel || 'sedentary'];
-    let maintenanceCalories = Math.round(bmr * multiplier);
-
-    // Adjust for weight goals
-    if (profile.fitnessGoal && profile.targetWeight && profile.weeklyWeightGoal) {
-      const isWeightLoss = profile.fitnessGoal.toLowerCase().includes('weight loss') || profile.fitnessGoal.toLowerCase().includes('fat loss');
-      const isWeightGain = profile.fitnessGoal.toLowerCase().includes('muscle gain') || profile.fitnessGoal.toLowerCase().includes('bulking');
-      
-      if (isWeightLoss || isWeightGain) {
-        // 1 kg = ~7700 calories
-        const weeklyCalorieAdjustment = profile.weeklyWeightGoal * 7700;
-        const dailyCalorieAdjustment = weeklyCalorieAdjustment / 7;
-        
-        if (isWeightLoss) {
-          maintenanceCalories -= dailyCalorieAdjustment;
-        } else if (isWeightGain) {
-          maintenanceCalories += dailyCalorieAdjustment;
-        }
-      }
-    }
-
-    return Math.round(maintenanceCalories);
+    const t = computeCalorieTarget(profile);
+    return t ? t.target : null;
   };
 
   // Calculate weeks to reach target weight
@@ -824,6 +787,7 @@ export const [UserProfileProvider, useUserProfile] = createContextHook(() => {
     needsWeeklyCheckIn,
     calculateBMI,
     calculateDailyCalories,
+    calculateCalorieTarget,
     calculateWeeksToTarget,
     subscribeToPremium,
     cancelPremium,

@@ -11,6 +11,7 @@
  * level would fail tsc instead of silently writing a string the calorie
  * multiplier table does not know; haptics on every choice.
  */
+import { targetWeightProblem } from '@/lib/calorie-target';
 import React, { useState } from 'react';
 import {
   View,
@@ -91,6 +92,11 @@ export default function EditGoalsModal({ visible, onClose }: EditGoalsModalProps
       const pace = parseFloat(weeklyWeightGoal);
       if (!targetWeight || !weeklyWeightGoal || Number.isNaN(target) || Number.isNaN(pace) || target <= 0 || pace <= 0) {
         Alert.alert('Two more numbers', 'A target weight and a weekly pace are needed for that goal.');
+        return;
+      }
+      const tooLow = targetWeightProblem(profile.height, target);
+      if (tooLow) {
+        Alert.alert('Target weight', tooLow);
         return;
       }
       updates.targetWeight = target;

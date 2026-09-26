@@ -20,6 +20,7 @@
  * days. It now stores a representative day count (2, 4, 6, 7). Existing
  * profiles are untouched; only new onboardings write the corrected value.
  */
+import { ageProblem, targetWeightProblem } from '@/lib/calorie-target';
 import React, { useState } from 'react';
 import {
   Modal,
@@ -136,6 +137,15 @@ export default function OnboardingModal({ visible, onComplete }: OnboardingModal
   const handleNext = () => {
     if (!isStepValid()) {
       Alert.alert('A few more answers', 'Every question on this step is needed to set your targets.');
+      return;
+    }
+    const problem = step.id === 'personal'
+      ? ageProblem(Number(formData.age))
+      : step.id === 'physical' && hasWeightGoal(formData.fitnessGoal)
+        ? targetWeightProblem(Number(formData.height), Number(formData.targetWeight))
+        : null;
+    if (problem) {
+      Alert.alert('Please check', problem);
       return;
     }
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(() => {});

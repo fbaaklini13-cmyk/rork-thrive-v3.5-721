@@ -58,6 +58,7 @@ import OnboardingModal from '@/components/OnboardingModal';
 import WeeklyCheckInModal from '@/components/WeeklyCheckInModal';
 import PremiumModal from '@/components/PremiumModal';
 import { Motion, Palette, Radius, Space, Type } from '@/constants/theme';
+import { limitNote, TARGET_DISCLAIMER } from '@/lib/calorie-target';
 import Enter from '@/components/Enter';
 import type { NutritionEntry, WorkoutLog } from '@/types/user';
 
@@ -162,6 +163,7 @@ export default function HomeScreen() {
     completeOnboarding,
     calculateBMI,
     calculateDailyCalories,
+    calculateCalorieTarget,
     nutritionEntries,
     workoutLogs,
     needsWeeklyCheckIn,
@@ -184,6 +186,7 @@ export default function HomeScreen() {
   const now = new Date();
   const bmi = calculateBMI();
   const dailyCalories = calculateDailyCalories();
+  const targetNote = limitNote(calculateCalorieTarget());
   const today = isoDay(now);
   const todayCalories = nutritionEntries
     .filter((e) => e.date === today)
@@ -252,6 +255,8 @@ export default function HomeScreen() {
                 : `${(target - todayCalories).toLocaleString()} left of ${target.toLocaleString()}`
               : 'Set a goal in Profile to get a daily target'}
           </Text>
+          {target && targetNote ? <Text style={styles.caption}>{targetNote}</Text> : null}
+          {target ? <Text style={styles.disclaimer}>{TARGET_DISCLAIMER}</Text> : null}
         </Enter>
 
         {/* This week: three numbers from real logs */}
@@ -353,6 +358,7 @@ const styles = StyleSheet.create({
   eyebrowMuted: { ...Type.eyebrow, color: Palette.inkMuted },
   title: { ...Type.title, color: Palette.ink, marginTop: Space.xs },
   caption: { ...Type.caption, color: Palette.inkMuted, marginTop: Space.sm },
+  disclaimer: { ...Type.caption, fontSize: 11, color: Palette.inkFaint, marginTop: Space.xs },
 
   hero: { marginTop: Space.xxl },
   numeralRow: { flexDirection: 'row', alignItems: 'baseline', marginTop: Space.xs },
