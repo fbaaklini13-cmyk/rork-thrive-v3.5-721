@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   Switch,
   Alert,
+  Linking,
 } from 'react-native';
 import { 
   User, 
@@ -27,6 +28,8 @@ import { Palette, Radius, Space, Type } from '@/constants/theme';
 import Enter from '@/components/Enter';
 import EditGoalsModal from '@/components/EditGoalsModal';
 import PremiumModal from '@/components/PremiumModal';
+import { PREMIUM_PURCHASES } from '@/constants/features';
+import { PRIVACY_POLICY_URL } from '@/constants/links';
 import { useAIConsent } from '@/components/AIConsentProvider';
 import { AI_SERVICE, hasAIConsent } from '@/lib/ai-consent';
 import { SHOW_DEVICES } from '@/constants/features';
@@ -150,7 +153,8 @@ export default function ProfileScreen() {
       </View>
       </Enter>
 
-      {/* Premium Section */}
+      {/* Premium Section: hidden unless Premium can really be bought (constants/features) */}
+      {(PREMIUM_PURCHASES || profile.isPremium || __DEV__) && (
       <Enter order={1}>
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Subscription</Text>
@@ -228,6 +232,7 @@ export default function ProfileScreen() {
         )}
       </View>
       </Enter>
+      )}
 
       <Enter order={2}>
       <View style={styles.section}>
@@ -396,6 +401,16 @@ export default function ProfileScreen() {
           <LogOut color={Palette.bad} size={20} />
           <Text style={styles.signOutText}>Sign Out</Text>
         </TouchableOpacity>
+        {PRIVACY_POLICY_URL ? (
+          <TouchableOpacity
+            style={styles.deleteAccountButton}
+            onPress={() => Linking.openURL(PRIVACY_POLICY_URL)}
+            accessibilityRole="link"
+            accessibilityLabel="Privacy policy"
+          >
+            <Text style={styles.deleteAccountText}>Privacy policy</Text>
+          </TouchableOpacity>
+        ) : null}
         <TouchableOpacity
           style={styles.deleteAccountButton}
           onPress={handleDeleteAccount}

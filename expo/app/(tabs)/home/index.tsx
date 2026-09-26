@@ -57,6 +57,7 @@ import { useUserProfile } from '@/hooks/user-profile-store';
 import OnboardingModal from '@/components/OnboardingModal';
 import WeeklyCheckInModal from '@/components/WeeklyCheckInModal';
 import PremiumModal from '@/components/PremiumModal';
+import { PREMIUM_PURCHASES } from '@/constants/features';
 import { Motion, Palette, Radius, Space, Type } from '@/constants/theme';
 import { limitNote, TARGET_DISCLAIMER } from '@/lib/calorie-target';
 import Enter from '@/components/Enter';
@@ -321,7 +322,8 @@ export default function HomeScreen() {
           </Enter>
         )}
 
-        {/* More */}
+        {/* More: the Premium rows, shown only when Premium can be bought or is owned */}
+        {(PREMIUM_PURCHASES || profile.isPremium) && (
         <Enter order={5} style={styles.card}>
           <View style={styles.cardHeader}>
             <Text style={[styles.eyebrowMuted, styles.cardLabel]}>More</Text>
@@ -336,6 +338,7 @@ export default function HomeScreen() {
           <FeatureRow icon={ChefHat} title="Recipes" description="Meals built around your targets" locked={!profile.isPremium} onPress={premium('/premium/recipes')} />
           <FeatureRow icon={Pill} title="Supplements" description="What is worth taking, and what is not" locked={!profile.isPremium} onPress={premium('/premium/supplements')} last />
         </Enter>
+        )}
 
         <View style={styles.footerSpace} />
       </ScrollView>
