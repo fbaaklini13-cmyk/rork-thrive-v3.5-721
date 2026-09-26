@@ -27,7 +27,7 @@ const wp = (goals: string[], equipment: string[], days: number, plan: any[]) => 
 const additionalStrengthPrograms: ExtendedProgram[] = [
   {
     id: 'strength-5day-advanced-conjugate',
-    name: '5-Day Westside Conjugate Method',
+    name: '5-Day Conjugate Strength',
     description: 'Advanced powerlifting method rotating max effort and dynamic effort days for squat and bench. Used by elite powerlifters.',
     duration: '12+ weeks',
     daysPerWeek: 5,
@@ -39,12 +39,11 @@ const additionalStrengthPrograms: ExtendedProgram[] = [
       'Max Effort Upper/Lower, Dynamic Effort Upper/Lower, Repetition Day',
       'Rotate max effort exercises every 1-3 weeks',
       'Speed work with 50-60% 1RM for explosiveness',
-      'High volume accessory work',
-      'Used by Westside Barbell'
+      'High volume accessory work'
     ],
     rating: 4.7,
     enrolled: 6780,
-    tags: ['Advanced', 'Powerlifting', 'Conjugate', 'Westside'],
+    tags: ['Advanced', 'Powerlifting', 'Conjugate'],
     workoutPlan: wp(['Strength', 'Power'], ['barbell', 'bands', 'chains'], 5, [
       {
         day: 'Monday - Max Effort Lower',
@@ -244,15 +243,15 @@ const hypertrophyPrograms: ExtendedProgram[] = [
 
   {
     id: 'hypertrophy-6day-advanced-arnold',
-    name: '6-Day Arnold Split (Advanced Bodybuilding)',
-    description: 'Arnold Schwarzenegger\'s famous split: Chest/Back, Shoulders/Arms, Legs, repeated twice weekly. High-volume approach for serious muscle building.',
+    name: '6-Day Classic Bodybuilding Split',
+    description: 'A classic high-volume split: Chest/Back, Shoulders/Arms, Legs, repeated twice weekly, for serious muscle building.',
     duration: '12 weeks',
     daysPerWeek: 6,
     difficulty: 'advanced',
     experienceLevel: 'Advanced',
     primaryGoal: 'Muscle Growth',
     category: 'hypertrophy',
-    splitType: 'Arnold Split',
+    splitType: 'Classic Split',
     keyFeatures: [
       'Train each muscle group twice per week',
       'Antagonist pairing (chest/back together)',
@@ -262,7 +261,7 @@ const hypertrophyPrograms: ExtendedProgram[] = [
     ],
     rating: 4.9,
     enrolled: 19870,
-    tags: ['Advanced', 'Arnold Split', 'Bodybuilding', 'High Volume'],
+    tags: ['Advanced', 'Classic Split', 'Bodybuilding', 'High Volume'],
     workoutPlan: wp(['Muscle Growth', 'Hypertrophy'], ['barbell', 'dumbbells', 'cable', 'machine'], 6, [
       {
         day: 'Monday - Chest & Back',

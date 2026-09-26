@@ -24,7 +24,7 @@ import {
   Alert,
 } from 'react-native';
 import * as Haptics from 'expo-haptics';
-import { Crown, Camera, ChefHat, Pill, BarChart3, X, Sparkles } from 'lucide-react-native';
+import { Crown, Camera, ChefHat, Pill, BarChart3, X } from 'lucide-react-native';
 import Enter from '@/components/Enter';
 import { Palette, Radius, Space, Type } from '@/constants/theme';
 import { useUserProfile } from '@/hooks/user-profile-store';
@@ -36,11 +36,10 @@ interface PremiumModalProps {
 }
 
 const FEATURES = [
-  { icon: Camera, title: 'AI body scanner', description: 'Analyse your physique and track changes with precision' },
+  { icon: Camera, title: 'AI body scanner', description: 'A visual AI estimate from a photo, to compare over time' },
   { icon: BarChart3, title: 'Macros breakdown', description: 'Protein, carbs and fats alongside calories' },
   { icon: ChefHat, title: 'Recipe generator', description: 'Meal ideas that fit your goals' },
-  { icon: Pill, title: 'Supplement generator', description: 'Science-based recommendations with exact dosages' },
-  { icon: Sparkles, title: 'No ads', description: 'Focus fully on your progress, distraction-free' },
+  { icon: Pill, title: 'Supplement generator', description: 'General guidance on common supplements, with typical ranges' },
 ] as const;
 
 export default function PremiumModal({ visible, onClose, onSubscribe }: PremiumModalProps) {

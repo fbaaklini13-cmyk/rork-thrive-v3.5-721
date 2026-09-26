@@ -11,14 +11,14 @@
     "splash": {
       "image": "./assets/images/splash-icon.png",
       "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
+      "backgroundColor": "#0B1512"
     },
     "ios": {
-      "supportsTablet": true,
+      "supportsTablet": false,
       "bundleIdentifier": "app.rork.ai-personal-assistant-suite-iqrof76t-9bs2scax-m9xkyh13-kc78crp0",
       "infoPlist": {
-        "NSPhotoLibraryUsageDescription": "Thrive uses your photo library so you can choose progress photos and meal photos to log.",
-        "NSCameraUsageDescription": "Thrive uses the camera to take progress photos and to photograph meals for nutrition logging."
+        "NSPhotoLibraryUsageDescription": "Thrive uses your photo library so you can choose meal photos, progress photos, or the photo for the optional AI body scan. Meal and body-scan photos are sent to an AI service only after you allow AI features.",
+        "NSCameraUsageDescription": "Thrive uses the camera to photograph meals for nutrition logging, take progress photos, and take the photo for the optional AI body scan. Meal and body-scan photos are sent to an AI service only after you allow AI features."
       },
       "config": {
         "usesNonExemptEncryption": false
@@ -49,8 +49,8 @@
       [
         "expo-image-picker",
         {
-          "photosPermission": "Thrive uses your photo library so you can choose progress photos and meal photos to log.",
-          "cameraPermission": "Thrive uses the camera to take progress photos and to photograph meals for nutrition logging.",
+          "photosPermission": "Thrive uses your photo library so you can choose meal photos, progress photos, or the photo for the optional AI body scan. Meal and body-scan photos are sent to an AI service only after you allow AI features.",
+          "cameraPermission": "Thrive uses the camera to photograph meals for nutrition logging, take progress photos, and take the photo for the optional AI body scan. Meal and body-scan photos are sent to an AI service only after you allow AI features.",
           "microphonePermission": false
         }
       ],
@@ -59,12 +59,6 @@
         {
           "configureAndroidBackup": true,
           "faceIDPermission": false
-        }
-      ],
-      [
-        "expo-av",
-        {
-          "microphonePermission": false
         }
       ],
       [

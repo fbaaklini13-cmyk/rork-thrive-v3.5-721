@@ -47,38 +47,9 @@ For each alternative, provide exercises that:
       return result.alternatives || [];
     } catch (error) {
       console.error('Exercise alternatives generation error:', error);
-      return [
-        {
-          name: "Dumbbell Alternative",
-          sets: 3,
-          reps: "8-12",
-          restPeriod: "60-90 seconds",
-          notes: "Use dumbbells as an alternative",
-          muscleGroups: muscleGroups || ["General"],
-          difficulty: "Intermediate",
-          equipment: "Dumbbells"
-        },
-        {
-          name: "Bodyweight Alternative",
-          sets: 3,
-          reps: "10-15",
-          restPeriod: "45-60 seconds",
-          notes: "No equipment needed",
-          muscleGroups: muscleGroups || ["General"],
-          difficulty: "Beginner",
-          equipment: "None"
-        },
-        {
-          name: "Resistance Band Alternative",
-          sets: 3,
-          reps: "12-15",
-          restPeriod: "45-60 seconds",
-          notes: "Use resistance bands",
-          muscleGroups: muscleGroups || ["General"],
-          difficulty: "Beginner",
-          equipment: "Resistance Bands"
-        }
-      ];
+      // 26 Sep: used to return three generic 'Dumbbell/Bodyweight/Band Alternative'
+      // rows shown as if the AI had suggested them. The modal handles an empty list.
+      return [];
     }
   }
 
@@ -382,14 +353,9 @@ For body fat estimation:
     return result;
   } catch (error) {
     console.error('Body image analysis error:', error);
-    return {
-      bodyFat: 15,
-      muscleMass: 'Moderate',
-      bodyType: 'Mesomorph',
-      muscleDefinition: 'Fair',
-      recommendations: 'Unable to analyze image accurately. Please ensure good lighting and clear visibility of your physique.',
-      confidence: 'Low'
-    };
+    // 26 Sep: used to return a made-up 'Body Fat 15%, Mesomorph' that the screen showed
+    // as analysis results (App Review 1.4.1 / 2.3.1). The screen shows an error instead.
+    return null;
   }
 }
 

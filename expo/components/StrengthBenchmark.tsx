@@ -190,12 +190,8 @@ export default function StrengthBenchmark() {
                 </Text>
               </View>
 
-              <View style={styles.statDivider} />
-
-              <View style={styles.statItem}>
-                <Text style={styles.statLabel}>Percentile</Text>
-                <Text style={styles.statValue}>{benchmark.percentile}th</Text>
-              </View>
+              {/* 26 Sep: a "Percentile" stat was here, taken from a fixed ratio table rather
+                  than any population. The level badge above says what the table can. */}
 
               <View style={styles.statDivider} />
 

@@ -2,7 +2,6 @@ import React, { useState, useEffect, useRef } from 'react';
 import { View, Text, StyleSheet, Modal, TouchableOpacity, Platform, Vibration } from 'react-native';
 import { X, Play, Pause, RotateCcw, Plus, Minus } from 'lucide-react-native';
 import { Palette } from '@/constants/theme';
-import { Audio } from 'expo-av';
 
 interface RestTimerProps {
   visible: boolean;
@@ -19,7 +18,6 @@ export default function RestTimer({
   const [isRunning, setIsRunning] = useState(false);
   const [totalSeconds] = useState(initialSeconds);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
-  const soundRef = useRef<Audio.Sound | null>(null);
 
   useEffect(() => {
     if (isRunning && seconds > 0) {
@@ -66,14 +64,6 @@ export default function RestTimer({
 
     console.log('Timer complete! Rest time is over.');
   };
-
-  useEffect(() => {
-    return () => {
-      if (soundRef.current) {
-        soundRef.current.unloadAsync();
-      }
-    };
-  }, []);
 
   const toggleTimer = () => {
     setIsRunning(!isRunning);

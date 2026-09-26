@@ -25,7 +25,17 @@ export default function BodyScannerScreen() {
   const pickImage = async (useCamera: boolean) => {
     // Ask before a body photo is even taken: it is the most sensitive thing the app sends.
     if (!(await requestAIConsent())) return;
-    const result = await (useCamera
+    if (useCamera) {
+      // 26 Sep: the camera was launched without asking, which fails on a fresh install.
+      const cam = await ImagePicker.requestCameraPermissionsAsync();
+      if (!cam.granted) {
+        Alert.alert('Camera access needed', 'Allow camera access in Settings to take a photo, or choose one from your library.');
+        return;
+      }
+    }
+    let result: ImagePicker.ImagePickerResult;
+    try {
+      result = await (useCamera
       ? ImagePicker.launchCameraAsync({
           mediaTypes: ImagePicker.MediaTypeOptions.Images,
           allowsEditing: true,
@@ -38,6 +48,11 @@ export default function BodyScannerScreen() {
           aspect: [3, 4],
           quality: 1,
         }));
+    } catch (e) {
+      console.error('Body scanner picker error:', e);
+      Alert.alert('Could not open the camera', 'Please try again, or choose a photo from your library.');
+      return;
+    }
 
     if (!result.canceled) {
       setSelectedImage(result.assets[0].uri);
@@ -111,7 +126,8 @@ export default function BodyScannerScreen() {
               </View>
             ) : analysis ? (
               <View style={styles.analysisContainer}>
-                <Text style={styles.analysisTitle}>Analysis Results</Text>
+                <Text style={styles.analysisTitle}>AI estimate</Text>
+                <Text style={styles.estimateNote}>A visual estimate from one photo, not a measurement. Lighting, clothing and pose change it. Not medical advice.</Text>
                 
                 {analysis.confidence && (
                   <View style={[styles.confidenceCard, 
@@ -293,6 +309,7 @@ const styles = StyleSheet.create({
     color: Palette.inkMuted,
     lineHeight: 20,
   },
+  estimateNote: { fontSize: 13, lineHeight: 18, color: Palette.inkMuted, marginBottom: 12 },
   confidenceCard: {
     padding: 10,
     borderRadius: 8,

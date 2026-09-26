@@ -24,6 +24,7 @@ export default function SupplementsScreen() {
   const loadSupplementPlan = async () => {
     if (!(await requestAIConsent())) {
       setError('AI features are off. Allow them to get a supplement plan (Profile → AI Assistant).');
+      setLoading(false);
       return;
     }
     setLoading(true);
@@ -61,7 +62,7 @@ export default function SupplementsScreen() {
           <Pill size={60} color={Palette.accent} />
           <Text style={styles.title}>Personalized Supplements</Text>
           <Text style={styles.subtitle}>
-            Science-based recommendations with exact dosages
+            General guidance on common supplements, with typical ranges
           </Text>
         </View>
 

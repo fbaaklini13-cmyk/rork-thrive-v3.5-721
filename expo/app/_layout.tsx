@@ -8,6 +8,7 @@ import { UserProfileProvider } from "@/hooks/user-profile-store";
 import { HealthDevicesProvider } from "@/hooks/use-health-devices";
 import { AIConsentProvider } from "@/components/AIConsentProvider";
 import { Palette } from "@/constants/theme";
+import { SHOW_DEVICES } from "@/constants/features";
 import { trpc, trpcClient } from "@/lib/trpc";
 import { whoopService } from "@/services/whoop-service";
 import { garminService } from "@/services/garmin-service";
@@ -49,8 +50,10 @@ export default function RootLayout() {
 
   useEffect(() => {
     const onUrl = async ({ url }: { url: string }) => {
+      // 26 Sep: the Devices screen is hidden (SHOW_DEVICES), but these callbacks still
+      // routed to it, and logged the OAuth codes they carried. Off with the screen.
+      if (!SHOW_DEVICES) return;
       try {
-        console.log("[Linking] URL received:", url);
         const parsed = Linking.parse(url);
         const path = parsed.path ?? "";
         const qp = parsed.queryParams ?? {} as Record<string, unknown>;
@@ -58,7 +61,6 @@ export default function RootLayout() {
         if (path?.includes("strava-callback")) {
           const code = (qp.code as string) ?? "";
           if (code) {
-            console.log("Strava auth code received", code);
             router.replace("/(tabs)/profile/devices");
           }
           return;
@@ -66,7 +68,6 @@ export default function RootLayout() {
         if (path?.includes("oura-callback")) {
           const code = (qp.code as string) ?? "";
           if (code) {
-            console.log("Oura auth code received", code);
             router.replace("/(tabs)/profile/devices");
           }
           return;
@@ -74,7 +75,6 @@ export default function RootLayout() {
         if (path?.includes("fitbit-callback")) {
           const code = (qp.code as string) ?? "";
           if (code) {
-            console.log("Fitbit auth code received", code);
             router.replace("/(tabs)/profile/devices");
           }
           return;
