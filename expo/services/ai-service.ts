@@ -247,6 +247,11 @@ Create ${daysPerWeek} days with 4-6 exercises each. Include proper form cues in 
 
 export async function generateSupplementPlan(profile: UserProfile): Promise<any> {
   requireAIConsent(); // before anything leaves the phone -- see lib/ai-consent.ts
+  // 26 Sep (App Review 1.4.1/1.4.2 self-audit #9): no supplement plan for under-18s, and
+  // the model gives typical ranges and says to check with a doctor, not "exact dosages".
+  if (!profile.age || profile.age < 18) {
+    throw new Error('Supplement plans are only for adults (18+). Please talk to a doctor or pharmacist.');
+  }
   try {
 
     const prompt = `Generate a personalized supplement plan for:
@@ -257,7 +262,10 @@ export async function generateSupplementPlan(profile: UserProfile): Promise<any>
     - Activity: ${profile.activityLevel}
     - Dietary preferences: ${profile.dietaryPreferences?.join(', ') || 'None'}
     
-    Provide specific supplement recommendations with dosages in mg/g.`;
+    Only suggest common, over-the-counter supplements. Give typical daily ranges as
+    printed on labels (for example "3-5 g"), not exact prescriptions. Do not suggest
+    anything that needs a prescription. In notes, say to check with a doctor or
+    pharmacist first, especially if pregnant, breastfeeding or taking medication.`;
 
     const supplementPlanSchema = z.object({
       supplements: z.array(z.object({

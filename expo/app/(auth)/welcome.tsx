@@ -40,14 +40,15 @@ import { Motion, Palette, Radius, Space, Type } from '@/constants/theme';
 const { width: W, height: H } = Dimensions.get('window');
 export const INTRO_SEEN_KEY = 'thrive.intro_seen.v1';
 
-const IMG = 'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises';
+// Slide photos: free-exercise-db (Unlicense), bundled 26 Sep so first launch doesn't
+// depend on raw.githubusercontent.com (App Review 2.1, audit finding 16).
 
-type Slide = { key: string; eyebrow: string; title: string; body: string; image: string };
+type Slide = { key: string; eyebrow: string; title: string; body: string; image: number };
 const SLIDES: Slide[] = [
-  { key: 'log', eyebrow: 'Thrive', title: 'Every rep,\ncounted.', body: 'Log each session as you train. Sets, weight and rest, without slowing you down.', image: `${IMG}/Barbell_Squat/0.jpg` },
-  { key: 'library', eyebrow: '873 exercises', title: 'Shown,\nnot described.', body: 'Every movement in the library comes with a demonstration and step-by-step form cues.', image: `${IMG}/Pullups/0.jpg` },
-  { key: 'progress', eyebrow: 'Progress', title: 'See what\nis changing.', body: 'A muscle heatmap and week-over-week progress, built from what you actually lifted.', image: `${IMG}/Barbell_Deadlift/0.jpg` },
-  { key: 'start', eyebrow: 'Programs', title: 'Start where\nyou are.', body: 'Programs for every level, and a nutrition log alongside. Your data stays yours.', image: `${IMG}/Plank/0.jpg` },
+  { key: 'log', eyebrow: 'Thrive', title: 'Every rep,\ncounted.', body: 'Log each session as you train. Sets, weight and rest, without slowing you down.', image: require('../../assets/images/welcome/barbell_squat.jpg') },
+  { key: 'library', eyebrow: '873 exercises', title: 'Shown,\nnot described.', body: 'Every movement in the library comes with a demonstration and step-by-step form cues.', image: require('../../assets/images/welcome/pullups.jpg') },
+  { key: 'progress', eyebrow: 'Progress', title: 'See what\nis changing.', body: 'A muscle heatmap and week-over-week progress, built from what you actually lifted.', image: require('../../assets/images/welcome/barbell_deadlift.jpg') },
+  { key: 'start', eyebrow: 'Programs', title: 'Start where\nyou are.', body: 'Programs for every level, and a nutrition log alongside. Your data stays yours.', image: require('../../assets/images/welcome/plank.jpg') },
 ];
 
 export default function WelcomeScreen() {
@@ -178,7 +179,7 @@ function SlideView({ slide, i, scrollX, active }: { slide: Slide; i: number; scr
     <View style={styles.slide}>
       <Animated.View style={[StyleSheet.absoluteFill, { transform: [{ translateX: imgTranslate }, { scale: imgScale }] }]}>
         <Image
-          source={{ uri: slide.image }}
+          source={slide.image}
           style={StyleSheet.absoluteFill}
           contentFit="cover"
           contentPosition="center"
